@@ -1,0 +1,220 @@
+/* ============================================
+   LabFix - Report Issue Page Layout
+   File: css/layouts/report-issue.css
+   ============================================ */
+
+/* ============================================
+   PROGRESS STEPS
+   ============================================ */
+
+.progress-steps {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-2xl);
+    position: relative;
+}
+
+.progress-steps::before {
+    content: '';
+    position: absolute;
+    top: 20px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: rgba(45, 212, 191, 0.2);
+    z-index: var(--z-base);
+}
+
+.progress-line {
+    position: absolute;
+    top: 20px;
+    left: 0;
+    height: 2px;
+    background: var(--color-primary);
+    z-index: 1;
+    transition: width var(--transition-base);
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+}
+
+.step-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--border-radius-full);
+    background: rgba(45, 212, 191, 0.2);
+    border: 2px solid rgba(45, 212, 191, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--spacing-sm);
+    font-weight: var(--font-weight-bold);
+    transition: all var(--transition-base);
+}
+
+.step.active .step-circle {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-bg-primary);
+}
+
+.step.completed .step-circle {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.step-label {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    text-align: center;
+}
+
+.step.active .step-label {
+    color: var(--color-primary);
+    font-weight: var(--font-weight-semibold);
+}
+
+/* ============================================
+   LAB SELECTION GRID
+   ============================================ */
+
+.lab-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.lab-option {
+    background: var(--color-surface-raised);
+    border: var(--border-width-thick) solid var(--color-border);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-lg);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    text-align: center;
+    display: block;
+}
+
+.lab-option:hover {
+    background: var(--color-primary-light);
+    border-color: var(--color-primary);
+}
+
+.lab-option.selected {
+    background: rgba(45, 212, 191, 0.2);
+    border-color: var(--color-primary);
+}
+
+.lab-option .lab-icon {
+    font-size: var(--font-size-4xl);
+    margin-bottom: var(--spacing-sm);
+    display: block;
+    width: 100%;
+    text-align: center;
+}
+
+.lab-option .lab-name {
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    display: block;
+    text-align: center;
+}
+
+/* ============================================
+   CATEGORY GRID
+   ============================================ */
+
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.category-option {
+    background: var(--color-surface-raised);
+    border: var(--border-width-thick) solid var(--color-border);
+    border-radius: var(--border-radius-lg);
+    padding: var(--spacing-lg);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.category-option:hover {
+    background: var(--color-primary-light);
+    border-color: var(--color-primary);
+}
+
+.category-option.selected {
+    background: rgba(45, 212, 191, 0.2);
+    border-color: var(--color-primary);
+}
+
+.category-icon {
+    font-size: var(--font-size-3xl);
+}
+
+.category-info h3 {
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.category-info p {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+}
+
+/* ============================================
+   REVIEW SECTION
+   ============================================ */
+
+.review-item {
+    background: var(--color-surface-raised);
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.review-label {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--spacing-xs);
+}
+
+.review-value {
+    color: var(--color-text-primary);
+    font-weight: var(--font-weight-medium);
+}
+
+/* ============================================
+   BUTTON GROUP SPACING
+   ============================================ */
+
+.button-group {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-2xl);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+    .category-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .lab-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+}

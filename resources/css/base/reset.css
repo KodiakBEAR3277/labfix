@@ -1,0 +1,48 @@
+/* ============================================
+   LabFix - Base Reset Styles
+   File: css/base/reset.css
+   ============================================ */
+
+/* Box sizing reset */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Remove default list styles */
+ul,
+ol {
+    list-style: none;
+}
+
+/* Remove default link styles */
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Remove default button styles */
+button {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+/* Image defaults */
+img {
+    max-width: 100%;
+    display: block;
+}
+
+/* Form element resets */
+input,
+textarea,
+select {
+    font-family: inherit;
+    font-size: inherit;
+}

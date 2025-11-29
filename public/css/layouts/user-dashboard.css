@@ -1,0 +1,49 @@
+/* ============================================
+   LabFix - User Dashboard Layout
+   File: css/layouts/user-dashboard.css
+   ============================================ */
+
+/* ============================================
+   WELCOME SECTION
+   ============================================ */
+
+.welcome-section {
+    background: linear-gradient(145deg, var(--color-bg-card) 0%, var(--color-bg-card-alt) 100%);
+    border-radius: var(--border-radius-2xl);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+    border: var(--border-width) solid var(--color-border);
+}
+
+.welcome-section h1 {
+    font-size: var(--font-size-4xl);
+    margin-bottom: var(--spacing-sm);
+    background: linear-gradient(135deg, #ffffff 0%, var(--color-primary) 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.welcome-section p {
+    color: var(--color-text-muted);
+}
+
+/* ============================================
+   REPORTS GRID
+   ============================================ */
+
+.reports-grid {
+    display: grid;
+    gap: var(--spacing-md);
+}
+
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+    .welcome-section h1 {
+        font-size: var(--font-size-3xl);
+    }
+}
