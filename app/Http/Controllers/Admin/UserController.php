@@ -20,8 +20,9 @@ class UserController extends Controller
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('first_name', 'like', "%{$search}%")
-                  ->orWhere('last_name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                ->orWhere('last_name', 'like', "%{$search}%")
+                ->orWhere('email', 'like', "%{$search}%")
+                ->orWhere('student_staff_id', 'like', "%{$search}%");
             });
         }
 
@@ -30,8 +31,14 @@ class UserController extends Controller
             $query->where('role', $request->role);
         }
 
-        // Get users with pagination
-        $users = $query->latest()->paginate(10);
+        // Status filter (optional - if you want to add it)
+        if ($request->filled('status') && $request->status !== 'all') {
+            $isActive = $request->status === 'active';
+            $query->where('is_active', $isActive);
+        }
+
+        // Sort by latest by default
+        $users = $query->latest()->paginate(10)->withQueryString(); // withQueryString preserves filters in pagination
 
         // Get stats
         $stats = [

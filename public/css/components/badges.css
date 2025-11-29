@@ -155,6 +155,12 @@
 }
 
 /* IT Support Role - Orange */
+.role-it {
+    background: var(--color-role-it-bg);
+    color: var(--color-role-it);
+    border: var(--border-width) solid var(--color-role-it-border);
+}
+
 .role-it-support {
     background: var(--color-role-it-bg);
     color: var(--color-role-it);
@@ -328,4 +334,28 @@
     background: var(--color-primary-light);
     color: var(--color-primary);
     border: var(--border-width) solid var(--color-border);
+}
+
+/* Filter Badge */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(45, 212, 191, 0.2);
+    color: var(--color-primary);
+    padding: 0.4rem 0.8rem;
+    border-radius: 12px;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+}
+
+.badge a {
+    color: inherit;
+    text-decoration: none;
+    font-weight: bold;
+    transition: transform var(--transition-fast);
+}
+
+.badge a:hover {
+    transform: scale(1.2);
 }
