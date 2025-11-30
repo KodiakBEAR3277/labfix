@@ -55,6 +55,7 @@ body > .container {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     line-height: var(--line-height-tight);
+    padding-bottom: 0.5rem;
 }
 
 .hero-text p {

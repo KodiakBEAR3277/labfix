@@ -508,3 +508,55 @@
     display: block;
     margin-top: var(--spacing-xs);
 }
+
+/* ============================================
+   Attachments Grid 
+   ============================================ */
+.attachments-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.attachment-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-md);
+    background: var(--color-surface-raised);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--border-radius-md);
+    text-decoration: none;
+    transition: all var(--transition-base);
+    cursor: pointer;
+}
+
+.attachment-item:hover {
+    background: var(--color-surface-hover);
+    border-color: var(--color-primary);
+    transform: translateY(-2px);
+}
+
+.attachment-icon {
+    font-size: var(--font-size-4xl);
+    margin-bottom: var(--spacing-sm);
+}
+
+.attachment-name {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    text-align: center;
+    word-break: break-word;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: var(--spacing-sm) 0;
+    border-bottom: var(--border-width) solid var(--color-border-light);
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}

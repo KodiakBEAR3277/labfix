@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Bulk Operations')
+@section('title', 'Knowledge Base Admin')
 
 @section('navigation')
     @include('components.nav.it')
@@ -9,196 +9,282 @@
 @section('content')
     <div class="container">
         <div class="page-header">
-            <h1>Bulk Operations</h1>
-            <p>Apply actions to multiple tickets simultaneously</p>
-        </div>
-
-        <!-- Selection Bar -->
-        <div class="selection-bar">
-            <div class="selection-info">
-                <div class="selection-count">5 Tickets Selected</div>
-                <div>Ready for bulk operations</div>
+            <div>
+                <h1>Knowledge Base Management</h1>
+                <p style="color: #9ca3af;">Create and manage troubleshooting articles</p>
             </div>
-            <div class="selection-actions">
-                <button class="btn btn-white">Clear Selection</button>
-                <a href="{{ route('it.tickets.index') }}" class="btn btn-outline">Back to Queue</a>
+            <div class="header-actions">
+                <button class="btn btn-primary">+ Create New Article</button>
             </div>
         </div>
 
-        <!-- Operations Grid -->
-        <div class="operations-grid">
-            <!-- Assign Tickets -->
-            <div class="operation-card">
-                <div class="operation-header">
-                    <div class="operation-icon">👤</div>
-                    <h3 class="operation-title">Assign Tickets</h3>
-                </div>
-                <p class="operation-description">
-                    Assign all selected tickets to a specific technician
-                </p>
-                <div class="form-group">
-                    <label>Assign To</label>
-                    <select>
-                        <option>Select Technician</option>
-                        <option>Mike Chen</option>
-                        <option>Sarah Lee</option>
-                        <option>Tom Anderson</option>
-                        <option>Assign to Me</option>
-                    </select>
-                </div>
-                <button class="btn btn-primary">Assign All</button>
+        <!-- Stats Row -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-label">Total Articles</div>
+                <div class="stat-value">89</div>
             </div>
-
-            <!-- Update Status -->
-            <div class="operation-card">
-                <div class="operation-header">
-                    <div class="operation-icon">🔄</div>
-                    <h3 class="operation-title">Update Status</h3>
-                </div>
-                <p class="operation-description">
-                    Change the status of all selected tickets
-                </p>
-                <div class="form-group">
-                    <label>New Status</label>
-                    <select>
-                        <option>Select Status</option>
-                        <option>Assigned</option>
-                        <option>In Progress</option>
-                        <option>Waiting for Parts</option>
-                        <option>Resolved</option>
-                    </select>
-                </div>
-                <button class="btn btn-primary">Update All</button>
+            <div class="stat-card">
+                <div class="stat-label">Published</div>
+                <div class="stat-value">72</div>
             </div>
-
-            <!-- Change Priority -->
-            <div class="operation-card">
-                <div class="operation-header">
-                    <div class="operation-icon">⚠️</div>
-                    <h3 class="operation-title">Change Priority</h3>
-                </div>
-                <p class="operation-description">
-                    Adjust priority level for all selected tickets
-                </p>
-                <div class="form-group">
-                    <label>Priority Level</label>
-                    <select>
-                        <option>Select Priority</option>
-                        <option>Low</option>
-                        <option>Medium</option>
-                        <option>High</option>
-                        <option>Critical</option>
-                    </select>
-                </div>
-                <button class="btn btn-primary">Update Priority</button>
+            <div class="stat-card">
+                <div class="stat-label">Drafts</div>
+                <div class="stat-value">17</div>
             </div>
-
-            <!-- Add Note -->
-            <div class="operation-card">
-                <div class="operation-header">
-                    <div class="operation-icon">📝</div>
-                    <h3 class="operation-title">Add Bulk Note</h3>
-                </div>
-                <p class="operation-description">
-                    Add an internal note to all selected tickets
-                </p>
-                <div class="form-group">
-                    <label>Note</label>
-                    <textarea placeholder="Enter note to add to all tickets..."></textarea>
-                </div>
-                <button class="btn btn-primary">Add to All</button>
-            </div>
-
-            <!-- Close Tickets -->
-            <div class="operation-card">
-                <div class="operation-header">
-                    <div class="operation-icon">✅</div>
-                    <h3 class="operation-title">Close Tickets</h3>
-                </div>
-                <p class="operation-description">
-                    Mark all selected tickets as closed
-                </p>
-                <div class="form-group">
-                    <label>Resolution Note</label>
-                    <textarea placeholder="Optional: Add resolution note..."></textarea>
-                </div>
-                <button class="btn btn-primary">Close All</button>
-            </div>
-
-            <!-- Send Notification -->
-            <div class="operation-card">
-                <div class="operation-header">
-                    <div class="operation-icon">📧</div>
-                    <h3 class="operation-title">Send Notification</h3>
-                </div>
-                <p class="operation-description">
-                    Send a custom message to all ticket reporters
-                </p>
-                <div class="form-group">
-                    <label>Message</label>
-                    <textarea placeholder="Enter message to send to reporters..."></textarea>
-                </div>
-                <button class="btn btn-primary">Send to All</button>
+            <div class="stat-card">
+                <div class="stat-label">Total Views</div>
+                <div class="stat-value">12.5K</div>
             </div>
         </div>
 
-        <!-- Selected Tickets Preview -->
-        <div class="preview-section">
-            <h2 class="preview-title">Selected Tickets (5)</h2>
-            <div class="tickets-list">
-                <div class="ticket-preview">
-                    <div class="ticket-info">
-                        <h4>#092 - Mouse not responding</h4>
-                        <p>Lab B, PC-15 • High Priority</p>
-                    </div>
-                    <button class="remove-btn">Remove</button>
-                </div>
-
-                <div class="ticket-preview">
-                    <div class="ticket-info">
-                        <h4>#091 - Software installation fails</h4>
-                        <p>Lab C, PC-20 • Medium Priority</p>
-                    </div>
-                    <button class="remove-btn">Remove</button>
-                </div>
-
-                <div class="ticket-preview">
-                    <div class="ticket-info">
-                        <h4>#090 - Monitor flickering</h4>
-                        <p>Lab A, PC-08 • Medium Priority</p>
-                    </div>
-                    <button class="remove-btn">Remove</button>
-                </div>
-
-                <div class="ticket-preview">
-                    <div class="ticket-info">
-                        <h4>#088 - Keyboard keys stuck</h4>
-                        <p>Lab A, PC-12 • Low Priority</p>
-                    </div>
-                    <button class="remove-btn">Remove</button>
-                </div>
-
-                <div class="ticket-preview">
-                    <div class="ticket-info">
-                        <h4>#086 - Slow system performance</h4>
-                        <p>Lab C, PC-10 • Low Priority</p>
-                    </div>
-                    <button class="remove-btn">Remove</button>
-                </div>
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" placeholder="Search articles...">
+            </div>
+            <div class="filter-tabs">
+                <button class="tab active">All</button>
+                <button class="tab">Published</button>
+                <button class="tab">Drafts</button>
+                <button class="tab">Hardware</button>
+                <button class="tab">Software</button>
+                <button class="tab">Network</button>
             </div>
         </div>
-    </div>
 
-    <!-- Confirmation Modal -->
-    <div class="modal-overlay">
-        <div class="modal">
-            <h2 class="modal-header">Confirm Bulk Operation</h2>
-            <div class="modal-body">
-                Are you sure you want to apply this action to 5 selected tickets? This action cannot be undone.
+        <!-- Articles Grid -->
+        <div class="articles-grid">
+            <div class="article-card">
+                <div class="article-content">
+                    <div class="article-header">
+                        <div>
+                            <h3 class="article-title">Computer won't turn on - Troubleshooting steps</h3>
+                            <span class="status-badge status-published">Published</span>
+                        </div>
+                    </div>
+                    <div class="article-meta">
+                        <div class="meta-item">
+                            <span>📁</span> Hardware
+                        </div>
+                        <div class="meta-item">
+                            <span>👁️</span> 1,245 views
+                        </div>
+                        <div class="meta-item">
+                            <span>👍</span> 95% helpful
+                        </div>
+                        <div class="meta-item">
+                            <span>✏️</span> Mike Chen
+                        </div>
+                        <div class="meta-item">
+                            <span>📅</span> Updated 2 days ago
+                        </div>
+                    </div>
+                </div>
+                <div class="article-actions">
+                    <button class="action-btn">Edit</button>
+                    <button class="action-btn">View</button>
+                    <button class="action-btn btn-danger">Delete</button>
+                </div>
             </div>
-            <div class="modal-actions">
-                <button class="btn btn-cancel">Cancel</button>
-                <button class="btn btn-confirm">Confirm</button>
+
+            <div class="article-card">
+                <div class="article-content">
+                    <div class="article-header">
+                        <div>
+                            <h3 class="article-title">How to fix "No Internet Connection" error</h3>
+                            <span class="status-badge status-published">Published</span>
+                        </div>
+                    </div>
+                    <div class="article-meta">
+                        <div class="meta-item">
+                            <span>📁</span> Network
+                        </div>
+                        <div class="meta-item">
+                            <span>👁️</span> 987 views
+                        </div>
+                        <div class="meta-item">
+                            <span>👍</span> 92% helpful
+                        </div>
+                        <div class="meta-item">
+                            <span>✏️</span> Sarah Lee
+                        </div>
+                        <div class="meta-item">
+                            <span>📅</span> Updated 5 days ago
+                        </div>
+                    </div>
+                </div>
+                <div class="article-actions">
+                    <button class="action-btn">Edit</button>
+                    <button class="action-btn">View</button>
+                    <button class="action-btn btn-danger">Delete</button>
+                </div>
+            </div>
+
+            <div class="article-card">
+                <div class="article-content">
+                    <div class="article-header">
+                        <div>
+                            <h3 class="article-title">Software installation fails - Common solutions</h3>
+                            <span class="status-badge status-published">Published</span>
+                        </div>
+                    </div>
+                    <div class="article-meta">
+                        <div class="meta-item">
+                            <span>📁</span> Software
+                        </div>
+                        <div class="meta-item">
+                            <span>👁️</span> 856 views
+                        </div>
+                        <div class="meta-item">
+                            <span>👍</span> 88% helpful
+                        </div>
+                        <div class="meta-item">
+                            <span>✏️</span> Tom Anderson
+                        </div>
+                        <div class="meta-item">
+                            <span>📅</span> Updated 1 week ago
+                        </div>
+                    </div>
+                </div>
+                <div class="article-actions">
+                    <button class="action-btn">Edit</button>
+                    <button class="action-btn">View</button>
+                    <button class="action-btn btn-danger">Delete</button>
+                </div>
+            </div>
+
+            <div class="article-card">
+                <div class="article-content">
+                    <div class="article-header">
+                        <div>
+                            <h3 class="article-title">Printer troubleshooting guide</h3>
+                            <span class="status-badge status-draft">Draft</span>
+                        </div>
+                    </div>
+                    <div class="article-meta">
+                        <div class="meta-item">
+                            <span>📁</span> Hardware
+                        </div>
+                        <div class="meta-item">
+                            <span>👁️</span> 0 views
+                        </div>
+                        <div class="meta-item">
+                            <span>👍</span> N/A
+                        </div>
+                        <div class="meta-item">
+                            <span>✏️</span> Mike Chen
+                        </div>
+                        <div class="meta-item">
+                            <span>📅</span> Created today
+                        </div>
+                    </div>
+                </div>
+                <div class="article-actions">
+                    <button class="action-btn">Edit</button>
+                    <button class="action-btn">Preview</button>
+                    <button class="action-btn btn-danger">Delete</button>
+                </div>
+            </div>
+
+            <div class="article-card">
+                <div class="article-content">
+                    <div class="article-header">
+                        <div>
+                            <h3 class="article-title">Keyboard and mouse not working properly</h3>
+                            <span class="status-badge status-published">Published</span>
+                        </div>
+                    </div>
+                    <div class="article-meta">
+                        <div class="meta-item">
+                            <span>📁</span> Peripherals
+                        </div>
+                        <div class="meta-item">
+                            <span>👁️</span> 734 views
+                        </div>
+                        <div class="meta-item">
+                            <span>👍</span> 90% helpful
+                        </div>
+                        <div class="meta-item">
+                            <span>✏️</span> Sarah Lee
+                        </div>
+                        <div class="meta-item">
+                            <span>📅</span> Updated 2 weeks ago
+                        </div>
+                    </div>
+                </div>
+                <div class="article-actions">
+                    <button class="action-btn">Edit</button>
+                    <button class="action-btn">View</button>
+                    <button class="action-btn btn-danger">Delete</button>
+                </div>
+            </div>
+
+            <div class="article-card">
+                <div class="article-content">
+                    <div class="article-header">
+                        <div>
+                            <h3 class="article-title">Monitor display issues and black screen problems</h3>
+                            <span class="status-badge status-published">Published</span>
+                        </div>
+                    </div>
+                    <div class="article-meta">
+                        <div class="meta-item">
+                            <span>📁</span> Display
+                        </div>
+                        <div class="meta-item">
+                            <span>👁️</span> 612 views
+                        </div>
+                        <div class="meta-item">
+                            <span>👍</span> 85% helpful
+                        </div>
+                        <div class="meta-item">
+                            <span>✏️</span> Mike Chen
+                        </div>
+                        <div class="meta-item">
+                            <span>📅</span> Updated 3 weeks ago
+                        </div>
+                    </div>
+                </div>
+                <div class="article-actions">
+                    <button class="action-btn">Edit</button>
+                    <button class="action-btn">View</button>
+                    <button class="action-btn btn-danger">Delete</button>
+                </div>
+            </div>
+
+            <div class="article-card">
+                <div class="article-content">
+                    <div class="article-header">
+                        <div>
+                            <h3 class="article-title">Windows update troubleshooting</h3>
+                            <span class="status-badge status-draft">Draft</span>
+                        </div>
+                    </div>
+                    <div class="article-meta">
+                        <div class="meta-item">
+                            <span>📁</span> Software
+                        </div>
+                        <div class="meta-item">
+                            <span>👁️</span> 0 views
+                        </div>
+                        <div class="meta-item">
+                            <span>👍</span> N/A
+                        </div>
+                        <div class="meta-item">
+                            <span>✏️</span> Tom Anderson
+                        </div>
+                        <div class="meta-item">
+                            <span>📅</span> Created 3 days ago
+                        </div>
+                    </div>
+                </div>
+                <div class="article-actions">
+                    <button class="action-btn">Edit</button>
+                    <button class="action-btn">Preview</button>
+                    <button class="action-btn btn-danger">Delete</button>
+                </div>
             </div>
         </div>
     </div>

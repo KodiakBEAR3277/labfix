@@ -13,39 +13,53 @@
             <a href="{{ route('user.reports.create') }}" class="new-report-btn">+ New Report</a>
         </div>
 
+        @if(session('success'))
+            <div class="alert alert-success" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.3); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; color: #34d399;">
+                {{ session('success') }}
+            </div>
+        @endif
+
         <!-- Stats Row -->
         <div class="stats-row">
             <div class="stat-card">
                 <div class="stat-label">Total Reports</div>
-                <div class="stat-value">12</div>
+                <div class="stat-value">{{ $stats['total'] }}</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">Active</div>
-                <div class="stat-value">3</div>
+                <div class="stat-value">{{ $stats['active'] }}</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">Resolved</div>
-                <div class="stat-value">8</div>
+                <div class="stat-value">{{ $stats['resolved'] }}</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">Avg. Resolution Time</div>
-                <div class="stat-value">2.5<span style="font-size: 1rem; color: #9ca3af;"> hrs</span></div>
+                <div class="stat-value">{{ $stats['avg_resolution_time'] }}<span style="font-size: 1rem; color: #9ca3af;"> hrs</span></div>
             </div>
         </div>
 
         <!-- Filter Bar -->
-        <div class="filter-bar">
-            <div class="search-box">
-                <span class="search-icon">🔍</span>
-                <input type="text" placeholder="Search reports...">
+        <form method="GET" action="{{ route('user.reports.index') }}" id="filterForm">
+            <div class="filter-bar">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input 
+                        type="text" 
+                        name="search"
+                        placeholder="Search reports..."
+                        value="{{ request('search') }}"
+                        onchange="document.getElementById('filterForm').submit()"
+                    >
+                </div>
+                <div class="filter-group">
+                    <button type="submit" name="status" value="all" class="filter-btn {{ !request('status') || request('status') === 'all' ? 'active' : '' }}">All</button>
+                    <button type="submit" name="status" value="active" class="filter-btn {{ request('status') === 'active' ? 'active' : '' }}">Active</button>
+                    <button type="submit" name="status" value="resolved" class="filter-btn {{ request('status') === 'resolved' ? 'active' : '' }}">Resolved</button>
+                    <button type="submit" name="status" value="closed" class="filter-btn {{ request('status') === 'closed' ? 'active' : '' }}">Closed</button>
+                </div>
             </div>
-            <div class="filter-group">
-                <button class="filter-btn active">All</button>
-                <button class="filter-btn">Active</button>
-                <button class="filter-btn">Resolved</button>
-                <button class="filter-btn">Closed</button>
-            </div>
-        </div>
+        </form>
 
         <!-- Reports Table -->
         <div class="reports-container">
@@ -62,70 +76,65 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr onclick="window.location.href='{{ route('user.reports.show', 1) }}'">
-                        <td class="ticket-id">#001</td>
-                        <td>Computer won't start</td>
-                        <td>Lab A, PC-12</td>
-                        <td><span class="status-badge status-progress">In Progress</span></td>
-                        <td><span class="priority-high">🔴 High</span></td>
-                        <td>2 hours ago</td>
-                        <td><button class="action-btn" onclick="event.stopPropagation(); window.location.href='{{ route('user.reports.show', 1) }}'">View</button></td>
-                    </tr>
-                    <tr onclick="window.location.href='{{ route('user.reports.show', 2) }}'">
-                        <td class="ticket-id">#002</td>
-                        <td>Keyboard keys not working</td>
-                        <td>Lab B, PC-05</td>
-                        <td><span class="status-badge status-assigned">Assigned</span></td>
-                        <td><span class="priority-medium">🟡 Medium</span></td>
-                        <td>Yesterday</td>
-                        <td><button class="action-btn" onclick="event.stopPropagation()">View</button></td>
-                    </tr>
-                    <tr onclick="window.location.href='{{ route('user.reports.show', 3) }}'">
-                        <td class="ticket-id">#003</td>
-                        <td>Software installation error</td>
-                        <td>Lab C, PC-20</td>
-                        <td><span class="status-badge status-resolved">Resolved</span></td>
-                        <td><span class="priority-low">🟢 Low</span></td>
-                        <td>3 days ago</td>
-                        <td><button class="action-btn" onclick="event.stopPropagation()">View</button></td>
-                    </tr>
-                    <tr onclick="window.location.href='{{ route('user.reports.show', 4) }}'">
-                        <td class="ticket-id">#004</td>
-                        <td>Monitor display flickering</td>
-                        <td>Lab A, PC-08</td>
-                        <td><span class="status-badge status-progress">In Progress</span></td>
-                        <td><span class="priority-medium">🟡 Medium</span></td>
-                        <td>4 days ago</td>
-                        <td><button class="action-btn" onclick="event.stopPropagation()">View</button></td>
-                    </tr>
-                    <tr onclick="window.location.href='{{ route('user.reports.show', 5) }}'">
-                        <td class="ticket-id">#005</td>
-                        <td>Network connection problem</td>
-                        <td>Lab B, PC-15</td>
-                        <td><span class="status-badge status-resolved">Resolved</span></td>
-                        <td><span class="priority-high">🔴 High</span></td>
-                        <td>5 days ago</td>
-                        <td><button class="action-btn" onclick="event.stopPropagation()">View</button></td>
-                    </tr>
-                    <tr onclick="window.location.href='{{ route('user.reports.show', 6) }}'">
-                        <td class="ticket-id">#006</td>
-                        <td>Mouse not responding</td>
-                        <td>Lab C, PC-03</td>
-                        <td><span class="status-badge status-new">New</span></td>
-                        <td><span class="priority-low">🟢 Low</span></td>
-                        <td>1 week ago</td>
-                        <td><button class="action-btn" onclick="event.stopPropagation()">View</button></td>
-                    </tr>
+                    @forelse($reports as $report)
+                        <tr onclick="window.location.href='{{ route('user.reports.show', $report->id) }}'" style="cursor: pointer;">
+                            <td class="ticket-id">{{ $report->formatted_id }}</td>
+                            <td>{{ $report->title }}</td>
+                            <td>{{ $report->lab_location }}{{ $report->equipment_id ? ', ' . $report->equipment_id : '' }}</td>
+                            <td><span class="status-badge status-{{ $report->status_color }}">{{ ucfirst(str_replace('-', ' ', $report->status)) }}</span></td>
+                            <td><span class="priority-{{ $report->priority }}">{{ $report->priority === 'high' ? '🔴' : ($report->priority === 'medium' ? '🟡' : '🟢') }} {{ ucfirst($report->priority) }}</span></td>
+                            <td>{{ $report->created_at->diffForHumans() }}</td>
+                            <td><button class="action-btn" onclick="event.stopPropagation(); window.location.href='{{ route('user.reports.show', $report->id) }}'">View</button></td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" style="text-align: center; padding: 3rem; color: #9ca3af;">
+                                @if(request('search') || request('status'))
+                                    <div style="font-size: 2rem; margin-bottom: 1rem;">🔍</div>
+                                    <h3 style="margin-bottom: 0.5rem; color: #d1d5db;">No reports found</h3>
+                                    <p>Try adjusting your filters or search terms</p>
+                                    <a href="{{ route('user.reports.index') }}" class="btn btn-primary" style="margin-top: 1rem;">Clear Filters</a>
+                                @else
+                                    <div style="font-size: 2rem; margin-bottom: 1rem;">📋</div>
+                                    <h3 style="margin-bottom: 0.5rem; color: #d1d5db;">No reports yet</h3>
+                                    <p>Report your first issue to get started</p>
+                                    <a href="{{ route('user.reports.create') }}" class="btn btn-primary" style="margin-top: 1rem;">+ Report Issue</a>
+                                @endif
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
             
-            <div class="pagination">
-                <button class="page-btn">← Previous</button>
-                <button class="page-btn active">1</button>
-                <button class="page-btn">2</button>
-                <button class="page-btn">3</button>
-                <button class="page-btn">Next →</button>
-            </div>
+            <!-- Pagination -->
+            @if($reports->hasPages())
+                <div class="pagination">
+                    <div class="page-info">
+                        Showing {{ $reports->firstItem() ?? 0 }}-{{ $reports->lastItem() ?? 0 }} of {{ $reports->total() }} reports
+                    </div>
+                    <div class="page-controls">
+                        @if ($reports->onFirstPage())
+                            <button class="page-btn" disabled>← Previous</button>
+                        @else
+                            <a href="{{ $reports->previousPageUrl() }}" class="page-btn">← Previous</a>
+                        @endif
+
+                        @foreach ($reports->getUrlRange(1, $reports->lastPage()) as $page => $url)
+                            @if ($page == $reports->currentPage())
+                                <button class="page-btn active">{{ $page }}</button>
+                            @else
+                                <a href="{{ $url }}" class="page-btn">{{ $page }}</a>
+                            @endif
+                        @endforeach
+
+                        @if ($reports->hasMorePages())
+                            <a href="{{ $reports->nextPageUrl() }}" class="page-btn">Next →</a>
+                        @else
+                            <button class="page-btn" disabled>Next →</button>
+                        @endif
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 @endsection

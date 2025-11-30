@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\User\ReportController;
+use App\Http\Controllers\IT\TicketController;
 
 // Public routes
 Route::get('/', fn() => view('landing'))->name('landing');
@@ -29,9 +31,8 @@ Route::middleware('auth')->group(function () {
     // User routes
     Route::prefix('user')->name('user.')->group(function () {
         Route::get('/dashboard', fn() => view('user.dashboard'))->name('dashboard');
-        Route::get('/reports', fn() => view('user.reports.index'))->name('reports.index');
-        Route::get('/reports/create', fn() => view('user.reports.create'))->name('reports.create');
-        Route::get('/reports/{id}', fn($id) => view('user.reports.show', ['id' => $id]))->name('reports.show');
+        Route::resource('reports', \App\Http\Controllers\User\ReportController::class)->except(['edit', 'update', 'destroy']);
+        
         Route::get('/lab-status', fn() => view('user.lab-status'))->name('lab-status');
         Route::get('/knowledge-base', fn() => view('user.knowledge-base'))->name('knowledge-base');
     });
@@ -39,11 +40,17 @@ Route::middleware('auth')->group(function () {
     // IT routes
     Route::prefix('it')->name('it.')->group(function () {
         Route::get('/dashboard', fn() => view('it.dashboard'))->name('dashboard');
-        Route::get('/assignments', fn() => view('it.assignments'))->name('assignments');
+        
+        // FIX: Change this route to use the controller method
+        Route::get('/assignments', [TicketController::class, 'assignments'])->name('assignments');
+        
         Route::get('/knowledge-base', fn() => view('it.knowledge-base'))->name('knowledge-base');
-        Route::get('/tickets', fn() => view('it.tickets.index'))->name('tickets.index');
-        Route::get('/tickets/bulk', fn() => view('it.tickets.bulk'))->name('tickets.bulk');
-        Route::get('/tickets/{id}', fn($id) => view('it.tickets.show', ['id' => $id]))->name('tickets.show');
+        Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
+        Route::get('/tickets/bulk', [TicketController::class, 'bulk'])->name('tickets.bulk');
+        Route::post('/tickets/bulk-update', [TicketController::class, 'bulkUpdate'])->name('tickets.bulk-update');
+        Route::get('/tickets/{id}', [TicketController::class, 'show'])->name('tickets.show');
+        Route::put('/tickets/{id}', [TicketController::class, 'update'])->name('tickets.update');
+        Route::post('/tickets/{id}/assign-self', [TicketController::class, 'assignToSelf'])->name('tickets.assign-self');
     });
 
     // Admin routes
@@ -56,8 +63,6 @@ Route::middleware('auth')->group(function () {
         Route::resource('users', AdminUserController::class);
     });
 });
-
-// Add this inside the Route::middleware('auth')->group(function () { block
 
 // Profile routes (accessible to all authenticated users)
 Route::prefix('profile')->name('profile.')->group(function () {
