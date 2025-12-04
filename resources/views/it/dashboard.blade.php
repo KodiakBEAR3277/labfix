@@ -175,7 +175,7 @@
                                 <p class="activity-desc">Weekly summary</p>
                             </div>
                         </button>
-                        <a href="{{ route('it.knowledge-base') }}" class="activity-item">
+                        <a href="{{ route('it.knowledge-base.index') }}" class="activity-item">
                             <span class="activity-icon">📚</span>
                             <div class="activity-time">
                                 <h4 class="activity-title">Knowledge Base</h4>

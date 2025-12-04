@@ -12,114 +12,151 @@
         <div class="kb-hero">
             <h1>How can we help you?</h1>
             <p>Search our knowledge base for solutions to common problems</p>
-            <div class="search-container">
-                <span class="search-icon">🔍</span>
-                <input type="text" class="search-input" placeholder="Search for articles, guides, and solutions...">
-            </div>
+            <form method="GET" action="{{ route('user.knowledge-base') }}">
+                <div class="search-container">
+                    <span class="search-icon">🔍</span>
+                    <input 
+                        type="text" 
+                        name="search"
+                        class="search-input" 
+                        placeholder="Search for articles, guides, and solutions..."
+                        value="{{ request('search') }}"
+                    >
+                </div>
+            </form>
         </div>
 
         <!-- Categories -->
+        @isset($categories)
         <div class="categories-section">
             <h2 class="section-title">Browse by Category</h2>
             <div class="categories-grid">
-                <div class="category-card">
+                <a href="{{ route('user.knowledge-base', ['category' => 'hardware']) }}" class="category-card">
                     <div class="category-icon">🔧</div>
                     <div class="category-title">Hardware Issues</div>
-                    <div class="category-count">24 articles</div>
-                </div>
-                <div class="category-card">
+                    <div class="category-count">{{ $categories['hardware'] }} articles</div>
+                </a>
+                <a href="{{ route('user.knowledge-base', ['category' => 'software']) }}" class="category-card">
                     <div class="category-icon">💾</div>
                     <div class="category-title">Software Problems</div>
-                    <div class="category-count">18 articles</div>
-                </div>
-                <div class="category-card">
+                    <div class="category-count">{{ $categories['software'] }} articles</div>
+                </a>
+                <a href="{{ route('user.knowledge-base', ['category' => 'network']) }}" class="category-card">
                     <div class="category-icon">🌐</div>
                     <div class="category-title">Network & Connectivity</div>
-                    <div class="category-count">15 articles</div>
-                </div>
-                <div class="category-card">
+                    <div class="category-count">{{ $categories['network'] }} articles</div>
+                </a>
+                <a href="{{ route('user.knowledge-base', ['category' => 'display']) }}" class="category-card">
                     <div class="category-icon">🖥️</div>
                     <div class="category-title">Display Issues</div>
-                    <div class="category-count">12 articles</div>
-                </div>
-                <div class="category-card">
+                    <div class="category-count">{{ $categories['display'] }} articles</div>
+                </a>
+                <a href="{{ route('user.knowledge-base', ['category' => 'peripherals']) }}" class="category-card">
                     <div class="category-icon">⌨️</div>
                     <div class="category-title">Peripherals</div>
-                    <div class="category-count">10 articles</div>
-                </div>
-                <div class="category-card">
+                    <div class="category-count">{{ $categories['peripherals'] }} articles</div>
+                </a>
+                <a href="{{ route('user.knowledge-base', ['category' => 'general']) }}" class="category-card">
                     <div class="category-icon">❓</div>
                     <div class="category-title">General Help</div>
-                    <div class="category-count">20 articles</div>
-                </div>
+                    <div class="category-count">{{ $categories['general'] }} articles</div>
+                </a>
             </div>
         </div>
+        @endisset
 
         <!-- Popular Articles -->
-        <div class="articles-section">
-            <h2 class="section-title">Popular Articles</h2>
-            <div class="articles-grid">
-                <div class="article-card">
-                    <div class="article-content">
-                        <div class="article-title">Computer won't turn on - Troubleshooting steps</div>
-                        <div class="article-meta">
-                            <span>👁️ 1,245 views</span>
-                            <span>👍 95% helpful</span>
-                            <span>Hardware</span>
-                        </div>
-                    </div>
-                    <div class="article-icon">→</div>
-                </div>
-
-                <div class="article-card">
-                    <div class="article-content">
-                        <div class="article-title">How to fix "No Internet Connection" error</div>
-                        <div class="article-meta">
-                            <span>👁️ 987 views</span>
-                            <span>👍 92% helpful</span>
-                            <span>Network</span>
-                        </div>
-                    </div>
-                    <div class="article-icon">→</div>
-                </div>
-
-                <div class="article-card">
-                    <div class="article-content">
-                        <div class="article-title">Software installation fails - Common solutions</div>
-                        <div class="article-meta">
-                            <span>👁️ 856 views</span>
-                            <span>👍 88% helpful</span>
-                            <span>Software</span>
-                        </div>
-                    </div>
-                    <div class="article-icon">→</div>
-                </div>
-
-                <div class="article-card">
-                    <div class="article-content">
-                        <div class="article-title">Keyboard or mouse not working properly</div>
-                        <div class="article-meta">
-                            <span>👁️ 734 views</span>
-                            <span>👍 90% helpful</span>
-                            <span>Peripherals</span>
-                        </div>
-                    </div>
-                    <div class="article-icon">→</div>
-                </div>
-
-                <div class="article-card">
-                    <div class="article-content">
-                        <div class="article-title">Monitor display issues and black screen problems</div>
-                        <div class="article-meta">
-                            <span>👁️ 612 views</span>
-                            <span>👍 85% helpful</span>
-                            <span>Display</span>
-                        </div>
-                    </div>
-                    <div class="article-icon">→</div>
+        @if($popularArticles->count() > 0)
+            <div class="articles-section">
+                <h2 class="section-title">Popular Articles</h2>
+                <div class="articles-grid">
+                    @foreach($popularArticles as $article)
+                        <a href="{{ route('user.knowledge-base.show', $article->slug) }}" class="article-card">
+                            <div class="article-content">
+                                <div class="article-title">{{ $article->title }}</div>
+                                <div class="article-meta">
+                                    <span>👁️ {{ number_format($article->views) }} views</span>
+                                    <span>👍 {{ $article->helpfulness_percentage }}% helpful</span>
+                                    <span>{{ ucfirst($article->category) }}</span>
+                                </div>
+                            </div>
+                            <div class="article-icon">→</div>
+                        </a>
+                    @endforeach
                 </div>
             </div>
-        </div>
+        @endif
+
+        <!-- All Articles / Search Results -->
+        @if(request('search') || request('category'))
+            <div class="articles-section">
+                <h2 class="section-title">
+                    @if(request('search'))
+                        Search Results for "{{ request('search') }}"
+                    @elseif(request('category'))
+                        {{ ucfirst(request('category')) }} Articles
+                    @endif
+                </h2>
+
+                @if($articles->count() > 0)
+                    <div class="articles-grid">
+                        @foreach($articles as $article)
+                            <a href="{{ route('user.knowledge-base.show', $article->slug) }}" class="article-card">
+                                <div class="article-content">
+                                    <div class="article-title">{{ $article->title }}</div>
+                                    @if($article->excerpt)
+                                        <p style="color: #9ca3af; font-size: 0.9rem; margin-top: 0.5rem;">{{ Str::limit($article->excerpt, 150) }}</p>
+                                    @endif
+                                    <div class="article-meta">
+                                        <span>👁️ {{ number_format($article->views) }} views</span>
+                                        <span>👍 {{ $article->helpfulness_percentage }}% helpful</span>
+                                        <span>{{ ucfirst($article->category) }}</span>
+                                    </div>
+                                </div>
+                                <div class="article-icon">→</div>
+                            </a>
+                        @endforeach
+                    </div>
+
+                    <!-- Pagination -->
+                    @if($articles->hasPages())
+                        <div class="pagination" style="margin-top: 2rem;">
+                            <div class="page-info">
+                                Showing {{ $articles->firstItem() ?? 0 }}-{{ $articles->lastItem() ?? 0 }} of {{ $articles->total() }} articles
+                            </div>
+                            <div class="page-controls">
+                                @if ($articles->onFirstPage())
+                                    <button class="page-btn" disabled>← Previous</button>
+                                @else
+                                    <a href="{{ $articles->previousPageUrl() }}" class="page-btn">← Previous</a>
+                                @endif
+
+                                @foreach ($articles->getUrlRange(1, $articles->lastPage()) as $page => $url)
+                                    @if ($page == $articles->currentPage())
+                                        <button class="page-btn active">{{ $page }}</button>
+                                    @else
+                                        <a href="{{ $url }}" class="page-btn">{{ $page }}</a>
+                                    @endif
+                                @endforeach
+
+                                @if ($articles->hasMorePages())
+                                    <a href="{{ $articles->nextPageUrl() }}" class="page-btn">Next →</a>
+                                @else
+                                    <button class="page-btn" disabled>Next →</button>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+                @else
+                    <div class="empty-state">
+                        <div class="empty-icon">🔍</div>
+                        <h3>No articles found</h3>
+                        <p>Try adjusting your search terms or browse by category</p>
+                        <a href="{{ route('user.knowledge-base') }}" class="btn btn-primary" style="margin-top: 1rem;">View All Articles</a>
+                    </div>
+                @endif
+            </div>
+        @endif
 
         <!-- Quick Links -->
         <div class="articles-section">
@@ -138,10 +175,10 @@
                 <div class="quick-link-card">
                     <div class="quick-link-title">Common Problems</div>
                     <div class="link-list">
-                        <a href="#" class="link-item">• Computer won't start</a>
-                        <a href="#" class="link-item">• Slow performance</a>
-                        <a href="#" class="link-item">• Application crashes</a>
-                        <a href="#" class="link-item">• Login issues</a>
+                        <a href="{{ route('user.knowledge-base', ['search' => 'computer won\'t start']) }}" class="link-item">• Computer won't start</a>
+                        <a href="{{ route('user.knowledge-base', ['search' => 'slow performance']) }}" class="link-item">• Slow performance</a>
+                        <a href="{{ route('user.knowledge-base', ['search' => 'application crashes']) }}" class="link-item">• Application crashes</a>
+                        <a href="{{ route('user.knowledge-base', ['search' => 'login issues']) }}" class="link-item">• Login issues</a>
                     </div>
                 </div>
 
@@ -161,7 +198,7 @@
         <div class="help-banner">
             <h3>Can't find what you're looking for?</h3>
             <p>Our support team is here to help you with any issues</p>
-            <button class="btn-contact">Contact IT Support</button>
+            <a href="{{ route('user.reports.create') }}" class="btn-contact">Report an Issue</a>
         </div>
     </div>
 @endsection

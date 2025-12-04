@@ -34,7 +34,11 @@ Route::middleware('auth')->group(function () {
         Route::resource('reports', \App\Http\Controllers\User\ReportController::class)->except(['edit', 'update', 'destroy']);
         
         Route::get('/lab-status', fn() => view('user.lab-status'))->name('lab-status');
-        Route::get('/knowledge-base', fn() => view('user.knowledge-base'))->name('knowledge-base');
+        Route::get('/knowledge-base', [\App\Http\Controllers\User\KnowledgeBaseController::class, 'index'])->name('knowledge-base');
+        Route::get('/knowledge-base/{slug}', [\App\Http\Controllers\User\KnowledgeBaseController::class, 'show'])->name('knowledge-base.show');
+        Route::post('/knowledge-base/{slug}/helpful', [\App\Http\Controllers\User\KnowledgeBaseController::class, 'markHelpful'])->name('knowledge-base.helpful');
+        Route::post('/knowledge-base/{slug}/not-helpful', [\App\Http\Controllers\User\KnowledgeBaseController::class, 'markNotHelpful'])->name('knowledge-base.not-helpful');
+
     });
 
     // IT routes
@@ -44,7 +48,14 @@ Route::middleware('auth')->group(function () {
         // FIX: Change this route to use the controller method
         Route::get('/assignments', [TicketController::class, 'assignments'])->name('assignments');
         
-        Route::get('/knowledge-base', fn() => view('it.knowledge-base'))->name('knowledge-base');
+        Route::get('/knowledge-base', [\App\Http\Controllers\IT\ArticleController::class, 'index'])->name('knowledge-base.index');
+        Route::get('/knowledge-base/create', [\App\Http\Controllers\IT\ArticleController::class, 'create'])->name('knowledge-base.create');
+        Route::post('/knowledge-base', [\App\Http\Controllers\IT\ArticleController::class, 'store'])->name('knowledge-base.store');
+        Route::get('/knowledge-base/{id}/edit', [\App\Http\Controllers\IT\ArticleController::class, 'edit'])->name('knowledge-base.edit');
+        Route::put('/knowledge-base/{id}', [\App\Http\Controllers\IT\ArticleController::class, 'update'])->name('knowledge-base.update');
+        Route::delete('/knowledge-base/{id}', [\App\Http\Controllers\IT\ArticleController::class, 'destroy'])->name('knowledge-base.destroy');
+        Route::get('/knowledge-base/{id}/preview', [\App\Http\Controllers\IT\ArticleController::class, 'show'])->name('knowledge-base.show');
+
         Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
         Route::get('/tickets/bulk', [TicketController::class, 'bulk'])->name('tickets.bulk');
         Route::post('/tickets/bulk-update', [TicketController::class, 'bulkUpdate'])->name('tickets.bulk-update');
