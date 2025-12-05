@@ -71,13 +71,31 @@ class ReportController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'lab_location' => ['required', 'string', 'max:255'],
-            'equipment_id' => ['nullable', 'string', 'max:50'],
+            'lab_id' => ['required', 'exists:labs,id'],
+            'equipment_id' => ['nullable', 'exists:equipment,id'],
             'category' => ['required', 'in:hardware,software,network,other'],
             'title' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string', 'min:10'],
-            'attachments.*' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'], // 5MB max
+            'attachments.*' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
         ]);
+
+        // If no equipment selected, create a general equipment entry or handle differently
+        if (!$validated['equipment_id']) {
+            // Get lab
+            $lab = \App\Models\Lab::findOrFail($validated['lab_id']);
+            
+            // Create a temporary "General" equipment for this lab if it doesn't exist
+            $generalEquipment = \App\Models\Equipment::firstOrCreate([
+                'lab_id' => $lab->id,
+                'equipment_code' => 'GENERAL',
+            ], [
+                'type' => 'other',
+                'status' => 'operational',
+                'notes' => 'General lab issues without specific equipment',
+            ]);
+            
+            $validated['equipment_id'] = $generalEquipment->id;
+        }
 
         // Handle file uploads
         $attachmentPaths = [];
@@ -92,15 +110,17 @@ class ReportController extends Controller
         $report = Report::create([
             'ticket_number' => Report::generateTicketNumber(),
             'user_id' => Auth::id(),
-            'lab_location' => $validated['lab_location'],
             'equipment_id' => $validated['equipment_id'],
             'category' => $validated['category'],
             'title' => $validated['title'],
             'description' => $validated['description'],
             'attachments' => $attachmentPaths,
             'status' => 'new',
-            'priority' => $this->determinePriority($validated), // Auto-determine priority
+            'priority' => $this->determinePriority($validated),
         ]);
+
+        // Update equipment status
+        $report->equipment->updateStatusFromReports();
 
         return redirect()
             ->route('user.reports.show', $report->id)

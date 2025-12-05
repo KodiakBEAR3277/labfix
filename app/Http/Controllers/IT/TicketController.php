@@ -5,6 +5,7 @@ namespace App\Http\Controllers\IT;
 use App\Http\Controllers\Controller;
 use App\Models\Report;
 use App\Models\User;
+use App\Models\Lab;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,7 +14,7 @@ class TicketController extends Controller
     // Show all tickets (IT Queue)
     public function index(Request $request)
     {
-        $query = Report::with(['reporter', 'assignedTo']);
+        $query = Report::with(['reporter', 'assignedTo', 'equipment.lab']);
 
         // Search filter
         if ($request->filled('search')) {
@@ -21,8 +22,12 @@ class TicketController extends Controller
             $query->where(function($q) use ($search) {
                 $q->where('ticket_number', 'like', "%{$search}%")
                   ->orWhere('title', 'like', "%{$search}%")
-                  ->orWhere('lab_location', 'like', "%{$search}%")
-                  ->orWhere('equipment_id', 'like', "%{$search}%")
+                  ->orWhereHas('equipment', function($q) use ($search) {
+                      $q->where('equipment_code', 'like', "%{$search}%")
+                        ->orWhereHas('lab', function($q) use ($search) {
+                            $q->where('name', 'like', "%{$search}%");
+                        });
+                  })
                   ->orWhereHas('reporter', function($q) use ($search) {
                       $q->where('first_name', 'like', "%{$search}%")
                         ->orWhere('last_name', 'like', "%{$search}%");
@@ -40,9 +45,11 @@ class TicketController extends Controller
             $query->where('priority', $request->priority);
         }
 
-        // Lab filter
+        // Lab filter - FIXED to use relationship
         if ($request->filled('lab') && $request->lab !== 'all') {
-            $query->where('lab_location', $request->lab);
+            $query->whereHas('equipment.lab', function($q) use ($request) {
+                $q->where('name', $request->lab);
+            });
         }
 
         // Get tickets with pagination
@@ -59,8 +66,8 @@ class TicketController extends Controller
         // Get IT staff for assignment dropdown
         $itStaff = User::whereIn('role', ['it-support', 'admin'])->get();
 
-        // Get unique labs for filter
-        $labs = Report::select('lab_location')->distinct()->pluck('lab_location');
+        // Get unique labs for filter - FIXED to use Lab model
+        $labs = Lab::where('is_active', true)->pluck('name');
 
         return view('it.tickets.index', compact('tickets', 'stats', 'itStaff', 'labs'));
     }
@@ -68,7 +75,7 @@ class TicketController extends Controller
     // Show single ticket detail
     public function show($id)
     {
-        $ticket = Report::with(['reporter', 'assignedTo'])->findOrFail($id);
+        $ticket = Report::with(['reporter', 'assignedTo', 'equipment.lab'])->findOrFail($id);
         
         // Get IT staff for assignment dropdown
         $itStaff = User::whereIn('role', ['it-support', 'admin'])->get();
@@ -129,7 +136,7 @@ class TicketController extends Controller
             $selectedIds = explode(',', $selectedIds);
         }
 
-        $selectedTickets = Report::whereIn('id', $selectedIds)->get();
+        $selectedTickets = Report::with(['equipment.lab'])->whereIn('id', $selectedIds)->get();
 
         // Get IT staff for assignment
         $itStaff = User::whereIn('role', ['it-support', 'admin'])->get();
@@ -196,7 +203,7 @@ class TicketController extends Controller
     public function assignments(Request $request)
     {
         $query = Report::where('assigned_to', Auth::id())
-            ->with('reporter');
+            ->with(['reporter', 'equipment.lab']);
 
         // Status filter
         if ($request->filled('status')) {

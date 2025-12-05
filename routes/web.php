@@ -6,6 +6,9 @@ use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\User\ReportController;
 use App\Http\Controllers\IT\TicketController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\User\DashboardController as UserDashboardController;
+use App\Http\Controllers\IT\DashboardController as ITDashboardController;
 
 // Public routes
 Route::get('/', fn() => view('landing'))->name('landing');
@@ -30,8 +33,8 @@ Route::middleware('auth')->group(function () {
 
     // User routes
     Route::prefix('user')->name('user.')->group(function () {
-        Route::get('/dashboard', fn() => view('user.dashboard'))->name('dashboard');
-        Route::resource('reports', \App\Http\Controllers\User\ReportController::class)->except(['edit', 'update', 'destroy']);
+        Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
+       Route::resource('reports', \App\Http\Controllers\User\ReportController::class)->except(['edit', 'update', 'destroy']);
         
         Route::get('/lab-status', fn() => view('user.lab-status'))->name('lab-status');
         Route::get('/knowledge-base', [\App\Http\Controllers\User\KnowledgeBaseController::class, 'index'])->name('knowledge-base');
@@ -43,8 +46,8 @@ Route::middleware('auth')->group(function () {
 
     // IT routes
     Route::prefix('it')->name('it.')->group(function () {
-        Route::get('/dashboard', fn() => view('it.dashboard'))->name('dashboard');
-        
+        Route::get('/dashboard', [ITDashboardController::class, 'index'])->name('dashboard');
+      
         // FIX: Change this route to use the controller method
         Route::get('/assignments', [TicketController::class, 'assignments'])->name('assignments');
         
@@ -66,7 +69,7 @@ Route::middleware('auth')->group(function () {
 
     // Admin routes
     Route::prefix('admin')->name('admin.')->group(function () {
-        Route::get('/dashboard', fn() => view('admin.dashboard'))->name('dashboard');
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::get('/labs', fn() => view('admin.labs'))->name('labs');
         Route::get('/settings', fn() => view('admin.settings'))->name('settings');
         
@@ -82,4 +85,13 @@ Route::prefix('profile')->name('profile.')->group(function () {
     Route::put('/update', [ProfileController::class, 'update'])->name('update');
     Route::put('/password', [ProfileController::class, 'updatePassword'])->name('password.update');
     Route::put('/preferences', [ProfileController::class, 'updatePreferences'])->name('preferences.update');
+});
+
+// API route for loading equipment by lab
+Route::get('/api/labs/{lab}/equipment', function ($labId) {
+    $equipment = \App\Models\Equipment::where('lab_id', $labId)
+        ->orderBy('equipment_code')
+        ->get(['id', 'equipment_code', 'status']);
+    
+    return response()->json($equipment);
 });

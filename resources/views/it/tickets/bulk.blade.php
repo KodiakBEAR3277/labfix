@@ -142,7 +142,7 @@
                     <div class="ticket-preview">
                         <div class="ticket-info">
                             <h4>{{ $ticket->formatted_id }} - {{ $ticket->title }}</h4>
-                            <p>{{ $ticket->lab_location }}{{ $ticket->equipment_id ? ', ' . $ticket->equipment_id : '' }} • {{ ucfirst($ticket->priority) }} Priority</p>
+                            <p>{{ $ticket->equipment->lab->name }}, {{ $ticket->equipment->equipment_code }} • {{ ucfirst($ticket->priority) }} Priority</p>
                         </div>
                     </div>
                 @endforeach

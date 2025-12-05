@@ -120,7 +120,7 @@
                             <td class="ticket-id">{{ $ticket->formatted_id }}</td>
                             <td>{{ $ticket->title }}</td>
                             <td>{{ $ticket->reporter->full_name }}</td>
-                            <td>{{ $ticket->lab_location }}{{ $ticket->equipment_id ? ', ' . $ticket->equipment_id : '' }}</td>
+                            <td>{{ $ticket->equipment->lab->name }}, {{ $ticket->equipment->equipment_code }}</td>
                             <td><span class="status-badge status-{{ $ticket->status_color }}">{{ ucfirst(str_replace('-', ' ', $ticket->status)) }}</span></td>
                             <td><span class="priority-{{ $ticket->priority }}">{{ ucfirst($ticket->priority) }}</span></td>
                             <td>{{ $ticket->assignedTo ? $ticket->assignedTo->full_name : 'Unassigned' }}</td>

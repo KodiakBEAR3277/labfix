@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Edit User')
+@section('title', 'View User')
 
 @section('navigation')
     <x-nav.admin />
@@ -11,136 +11,163 @@
         <a href="{{ route('admin.users.index') }}" class="back-btn">← Back to User Management</a>
 
         <div class="page-header">
-            <h1>Edit User</h1>
-            <p>Manage user information and permissions</p>
+            <h1>View User</h1>
+            <p>User details and activity information</p>
         </div>
 
         <div class="content-layout">
             <!-- Sidebar: User Profile -->
             <div>
                 <div class="card">
-                    <div class="user-avatar-large">JD</div>
-                    <h2 class="user-name">John Doe</h2>
-                    <p class="user-email">john.doe@email.com</p>
-                    <span class="role-badge role-student">Student</span>
+                    <div class="user-avatar-large">{{ $user->initials }}</div>
+                    <h2 class="user-name">{{ $user->full_name }}</h2>
+                    <p class="user-email">{{ $user->email }}</p>
+                    <span class="role-badge role-{{ $user->role }}">
+                        {{ ucfirst(str_replace('-', ' ', $user->role)) }}
+                    </span>
 
                     <div class="info-list">
                         <div class="info-item">
                             <span class="info-label">User ID</span>
-                            <span class="info-value">#12345</span>
+                            <span class="info-value">#{{ $user->id }}</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Joined</span>
-                            <span class="info-value">Jan 15, 2025</span>
+                            <span class="info-value">{{ $user->created_at->format('M d, Y') }}</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Last Active</span>
-                            <span class="info-value">2 hours ago</span>
+                            <span class="info-value">{{ $user->updated_at->diffForHumans() }}</span>
                         </div>
                         <div class="info-item">
-                            <span class="info-label">Tickets Created</span>
-                            <span class="info-value">8</span>
+                            <span class="info-label">Account Status</span>
+                            <span class="info-value">
+                                <span class="status-badge status-{{ $user->is_active ? 'success' : 'danger' }}">
+                                    {{ $user->is_active ? 'Active' : 'Inactive' }}
+                                </span>
+                            </span>
                         </div>
                     </div>
                 </div>
 
                 <div class="card" style="margin-top: 1.5rem;">
-                    <h3 class="card-title">Recent Activity</h3>
-                    <div class="activity-log">
-                        <div class="activity-item">
-                            <div class="activity-date">Oct 2, 2025 - 2:30 PM</div>
-                            <div class="activity-text">Submitted ticket #092</div>
-                        </div>
-                        <div class="activity-item">
-                            <div class="activity-date">Oct 1, 2025 - 10:15 AM</div>
-                            <div class="activity-text">Logged in to system</div>
-                        </div>
-                        <div class="activity-item">
-                            <div class="activity-date">Sep 30, 2025 - 4:20 PM</div>
-                            <div class="activity-text">Updated profile information</div>
-                        </div>
+                    <h3 class="card-title">Quick Actions</h3>
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <a href="{{ route('admin.users.edit', $user->id) }}" class="btn btn-primary" style="text-align: center;">
+                            Edit User
+                        </a>
+                        <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" 
+                              onsubmit="return confirm('Are you sure you want to delete this user?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger" style="width: 100%;">
+                                Delete User
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
 
-            <!-- Main Content: Edit Form -->
+            <!-- Main Content: User Details -->
             <div class="card">
                 <h2 class="card-title">User Information</h2>
 
                 <!-- Personal Information -->
                 <div class="form-section">
                     <h3 class="section-title">Personal Information</h3>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>First Name</label>
-                            <input type="text" value="John">
+                    <div class="info-list">
+                        <div class="info-item">
+                            <span class="info-label">First Name</span>
+                            <span class="info-value">{{ $user->first_name }}</span>
                         </div>
-                        <div class="form-group">
-                            <label>Last Name</label>
-                            <input type="text" value="Doe">
+                        <div class="info-item">
+                            <span class="info-label">Last Name</span>
+                            <span class="info-value">{{ $user->last_name }}</span>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Email Address</label>
-                        <input type="email" value="john.doe@email.com">
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Phone Number (Optional)</label>
-                            <input type="tel" placeholder="+1 234 567 8900">
+                        <div class="info-item">
+                            <span class="info-label">Email Address</span>
+                            <span class="info-value">{{ $user->email }}</span>
                         </div>
-                        <div class="form-group">
-                            <label>Student/Staff ID</label>
-                            <input type="text" value="STU-2025-001">
+                        @if($user->phone)
+                        <div class="info-item">
+                            <span class="info-label">Phone Number</span>
+                            <span class="info-value">{{ $user->phone }}</span>
                         </div>
+                        @endif
+                        @if($user->student_staff_id)
+                        <div class="info-item">
+                            <span class="info-label">Student/Staff ID</span>
+                            <span class="info-value">{{ $user->student_staff_id }}</span>
+                        </div>
+                        @endif
                     </div>
                 </div>
 
                 <!-- Role & Permissions -->
                 <div class="form-section">
                     <h3 class="section-title">Role & Permissions</h3>
-                    <div class="form-group">
-                        <label>User Role</label>
-                        <select>
-                            <option selected>Student</option>
-                            <option>Staff</option>
-                            <option>IT Support</option>
-                            <option>Admin</option>
-                        </select>
-                    </div>
-                    <div class="toggle-group">
-                        <span class="toggle-label">Account Active</span>
-                        <div class="toggle-switch active" onclick="this.classList.toggle('active')">
-                            <div class="toggle-slider"></div>
+                    <div class="info-list">
+                        <div class="info-item">
+                            <span class="info-label">User Role</span>
+                            <span class="info-value">
+                                <span class="role-badge role-{{ $user->role }}">
+                                    {{ ucfirst(str_replace('-', ' ', $user->role)) }}
+                                </span>
+                            </span>
                         </div>
-                    </div>
-                    <div class="toggle-group">
-                        <span class="toggle-label">Email Notifications</span>
-                        <div class="toggle-switch active" onclick="this.classList.toggle('active')">
-                            <div class="toggle-slider"></div>
+                        <div class="info-item">
+                            <span class="info-label">Account Active</span>
+                            <span class="info-value">
+                                <span class="status-badge status-{{ $user->is_active ? 'success' : 'danger' }}">
+                                    {{ $user->is_active ? 'Yes' : 'No' }}
+                                </span>
+                            </span>
                         </div>
-                    </div>
-                    <div class="toggle-group">
-                        <span class="toggle-label">Can Submit Tickets</span>
-                        <div class="toggle-switch active" onclick="this.classList.toggle('active')">
-                            <div class="toggle-slider"></div>
+                        <div class="info-item">
+                            <span class="info-label">Email Notifications</span>
+                            <span class="info-value">
+                                <span class="status-badge status-{{ $user->email_notifications ? 'success' : 'secondary' }}">
+                                    {{ $user->email_notifications ? 'Enabled' : 'Disabled' }}
+                                </span>
+                            </span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Can Submit Tickets</span>
+                            <span class="info-value">
+                                <span class="status-badge status-{{ $user->can_submit_tickets ? 'success' : 'secondary' }}">
+                                    {{ $user->can_submit_tickets ? 'Yes' : 'No' }}
+                                </span>
+                            </span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Password Reset -->
+                <!-- Account Timestamps -->
                 <div class="form-section">
-                    <h3 class="section-title">Security</h3>
-                    <button class="btn btn-secondary" style="width: auto; padding: 0.8rem 1.5rem;">
-                        Send Password Reset Email
-                    </button>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="action-buttons">
-                    <button class="btn btn-primary">Save Changes</button>
-                    <button class="btn btn-secondary">Cancel</button>
-                    <button class="btn btn-danger">Delete User</button>
+                    <h3 class="section-title">Account Timeline</h3>
+                    <div class="info-list">
+                        <div class="info-item">
+                            <span class="info-label">Account Created</span>
+                            <span class="info-value">{{ $user->created_at->format('F j, Y \a\t g:i A') }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Last Updated</span>
+                            <span class="info-value">{{ $user->updated_at->format('F j, Y \a\t g:i A') }}</span>
+                        </div>
+                        @if($user->email_verified_at)
+                        <div class="info-item">
+                            <span class="info-label">Email Verified</span>
+                            <span class="info-value">{{ $user->email_verified_at->format('F j, Y \a\t g:i A') }}</span>
+                        </div>
+                        @else
+                        <div class="info-item">
+                            <span class="info-label">Email Verified</span>
+                            <span class="info-value">
+                                <span class="status-badge status-warning">Not Verified</span>
+                            </span>
+                        </div>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>

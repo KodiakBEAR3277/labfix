@@ -55,36 +55,16 @@
                 <div class="form-step active" data-step="1">
                     <h2>Select Lab Location</h2>
                     <div class="lab-grid">
-                        <label class="lab-option">
-                            <input type="radio" name="lab_location" value="Computer Lab A" style="display: none;" required {{ old('lab_location') == 'Computer Lab A' ? 'checked' : '' }}>
-                            <div class="lab-icon">💻</div>
-                            <div class="lab-name">Computer Lab A</div>
-                        </label>
-                        <label class="lab-option">
-                            <input type="radio" name="lab_location" value="Computer Lab B" style="display: none;" {{ old('lab_location') == 'Computer Lab B' ? 'checked' : '' }}>
-                            <div class="lab-icon">💻</div>
-                            <div class="lab-name">Computer Lab B</div>
-                        </label>
-                        <label class="lab-option">
-                            <input type="radio" name="lab_location" value="Computer Lab C" style="display: none;" {{ old('lab_location') == 'Computer Lab C' ? 'checked' : '' }}>
-                            <div class="lab-icon">💻</div>
-                            <div class="lab-name">Computer Lab C</div>
-                        </label>
-                        <label class="lab-option">
-                            <input type="radio" name="lab_location" value="Multimedia Lab" style="display: none;" {{ old('lab_location') == 'Multimedia Lab' ? 'checked' : '' }}>
-                            <div class="lab-icon">🎨</div>
-                            <div class="lab-name">Multimedia Lab</div>
-                        </label>
-                        <label class="lab-option">
-                            <input type="radio" name="lab_location" value="Programming Lab" style="display: none;" {{ old('lab_location') == 'Programming Lab' ? 'checked' : '' }}>
-                            <div class="lab-icon">⌨️</div>
-                            <div class="lab-name">Programming Lab</div>
-                        </label>
-                        <label class="lab-option">
-                            <input type="radio" name="lab_location" value="Library Computer Area" style="display: none;" {{ old('lab_location') == 'Library Computer Area' ? 'checked' : '' }}>
-                            <div class="lab-icon">📚</div>
-                            <div class="lab-name">Library Area</div>
-                        </label>
+                        @foreach(\App\Models\Lab::where('is_active', true)->get() as $lab)
+                            <label class="lab-option">
+                                <input type="radio" name="lab_id" value="{{ $lab->id }}" style="display: none;" required {{ old('lab_id') == $lab->id ? 'checked' : '' }} onchange="loadEquipment({{ $lab->id }})">
+                                <div class="lab-icon">💻</div>
+                                <div class="lab-name">{{ $lab->name }}</div>
+                                <div style="font-size: 0.8rem; color: #9ca3af; margin-top: 0.25rem;">
+                                    {{ $lab->operational_count }}/{{ $lab->capacity }} operational
+                                </div>
+                            </label>
+                        @endforeach
                     </div>
                     <div class="button-group">
                         <button type="button" class="btn btn-primary" onclick="nextStep()">Next Step</button>
@@ -95,16 +75,11 @@
                 <div class="form-step" data-step="2">
                     <h2>Select Equipment</h2>
                     <div class="form-group">
-                        <label for="equipment">Equipment/Computer ID (Optional)</label>
-                        <select name="equipment_id" id="equipment">
-                            <option value="">General lab issue / Don't know</option>
-                            @for($i = 1; $i <= 25; $i++)
-                                <option value="PC-{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}" {{ old('equipment_id') == 'PC-'.str_pad($i, 2, '0', STR_PAD_LEFT) ? 'selected' : '' }}>
-                                    PC-{{ str_pad($i, 2, '0', STR_PAD_LEFT) }}
-                                </option>
-                            @endfor
+                        <label for="equipment">Equipment/Computer ID</label>
+                        <select name="equipment_id" id="equipment" required>
+                            <option value="">First select a lab...</option>
                         </select>
-                        <p class="help-text">Select the specific equipment if you know it, or leave as "General lab issue"</p>
+                        <p class="help-text">Select the specific equipment, or choose "General Lab Issue" if unsure</p>
                     </div>
                     <div class="button-group">
                         <button type="button" class="btn btn-secondary" onclick="prevStep()">Back</button>
@@ -344,15 +319,41 @@
         }
     });
 
+        function loadEquipment(labId) {
+        const equipmentSelect = document.getElementById('equipment');
+        equipmentSelect.innerHTML = '<option value="">Loading...</option>';
+        
+        // Fetch equipment for this lab
+        fetch(`/api/labs/${labId}/equipment`)
+            .then(response => response.json())
+            .then(data => {
+                equipmentSelect.innerHTML = '<option value="">General lab issue / Don\'t know</option>';
+                
+                data.forEach(equipment => {
+                    const option = document.createElement('option');
+                    option.value = equipment.id;
+                    option.textContent = equipment.equipment_code + (equipment.status !== 'operational' ? ' (Currently has issues)' : '');
+                    option.disabled = equipment.status === 'retired';
+                    equipmentSelect.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Error loading equipment:', error);
+                equipmentSelect.innerHTML = '<option value="">Error loading equipment</option>';
+            });
+    }
+
     function updateReview() {
-        const lab = document.querySelector('input[name="lab_location"]:checked')?.value || '-';
-        const equipment = document.getElementById('equipment').value || 'General lab issue';
+        const labId = document.querySelector('input[name="lab_id"]:checked')?.value;
+        const labName = document.querySelector('input[name="lab_id"]:checked')?.closest('.lab-option').querySelector('.lab-name')?.textContent || '-';
+        const equipmentSelect = document.getElementById('equipment');
+        const equipment = equipmentSelect.options[equipmentSelect.selectedIndex]?.text || 'General lab issue';
         const category = document.querySelector('input[name="category"]:checked')?.value || '-';
         const title = document.getElementById('title').value || '-';
         const description = document.getElementById('description').value || '-';
         const files = document.getElementById('fileInput').files;
 
-        document.getElementById('reviewLab').textContent = lab;
+        document.getElementById('reviewLab').textContent = labName;
         document.getElementById('reviewEquipment').textContent = equipment;
         document.getElementById('reviewCategory').textContent = category.charAt(0).toUpperCase() + category.slice(1);
         document.getElementById('reviewTitle').textContent = title;

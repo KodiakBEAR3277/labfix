@@ -124,4 +124,23 @@ class Report extends Model
     {
         return $query->where('status', $status);
     }
+    // Relationship: Equipment
+    public function equipment(): BelongsTo
+    {
+        return $this->belongsTo(Equipment::class);
+    }
+
+    // Override boot to update equipment status when report changes
+    protected static function booted()
+    {
+        static::created(function ($report) {
+            $report->equipment->updateStatusFromReports();
+        });
+
+        static::updated(function ($report) {
+            if ($report->wasChanged('status')) {
+                $report->equipment->updateStatusFromReports();
+            }
+        });
+    }
 }

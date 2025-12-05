@@ -11,7 +11,7 @@
     <div class="container">
         <!-- Welcome Section -->
         <div class="welcome-section">
-            <h1>Welcome back, John!</h1>
+            <h1>Welcome back, {{ auth()->user()->first_name }}!</h1>
             <p>Here's what's happening with your lab reports</p>
         </div>
 
@@ -19,15 +19,15 @@
         <div class="stats-row">
             <div class="stat-card">
                 <div class="stat-label">Active Reports</div>
-                <div class="stat-value">3</div>
+                <div class="stat-value">{{ $stats['active'] }}</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">Resolved This Month</div>
-                <div class="stat-value">8</div>
+                <div class="stat-value">{{ $stats['resolved_this_month'] }}</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">Avg. Resolution Time</div>
-                <div class="stat-value">2.5<span style="font-size: 1rem; color: #9ca3af;"> hrs</span></div>
+                <div class="stat-value">{{ $stats['avg_resolution_time'] }}<span style="font-size: 1rem; color: #9ca3af;"> hrs</span></div>
             </div>
         </div>
 
@@ -58,72 +58,39 @@
         <!-- Recent Reports -->
         <div class="section-header">
             <h2>My Recent Reports</h2>
-            <button class="filter-btn">Filter ▼</button>
+            <a href="{{ route('user.reports.index') }}" class="view-all">View All →</a>
         </div>
 
         <div class="reports-grid">
-            <div class="report-card">
-                <div class="report-header">
-                    <div>
-                        <div class="report-title">Computer won't start</div>
-                        <div class="report-id">#001</div>
+            @forelse($reports as $report)
+                <div class="report-card">
+                    <div class="report-header">
+                        <div>
+                            <div class="report-title">{{ $report->title }}</div>
+                            <div class="report-id">{{ $report->ticket_number }}</div>
+                        </div>
+                        <div class="status-badge status-{{ $report->status_color }}">{{ ucfirst(str_replace('-', ' ', $report->status)) }}</div>
                     </div>
-                    <div class="status-badge status-progress">In Progress</div>
-                </div>
-                <div class="report-meta">
-                    <div class="report-meta-item">
-                        <span>📍</span> Computer Lab A, PC-12
+                    <div class="report-meta">
+                        <div class="report-meta-item">
+                            <span>📍</span> {{ $report->equipment->lab->name }}, {{ $report->equipment->equipment_code }}
+                        </div>
+                        <div class="report-meta-item">
+                            <span>🕒</span> {{ $report->created_at->diffForHumans() }}
+                        </div>
                     </div>
-                    <div class="report-meta-item">
-                        <span>🕒</span> 2 hours ago
-                    </div>
-                </div>
-                <div class="report-description">
-                    The computer shows a black screen when powered on. No POST beep sound detected.
-                </div>
-            </div>
-
-            <div class="report-card">
-                <div class="report-header">
-                    <div>
-                        <div class="report-title">Keyboard keys not working</div>
-                        <div class="report-id">#002</div>
-                    </div>
-                    <div class="status-badge status-progress">In Progress</div>
-                </div>
-                <div class="report-meta">
-                    <div class="report-meta-item">
-                        <span>📍</span> Computer Lab B, PC-05
-                    </div>
-                    <div class="report-meta-item">
-                        <span>🕒</span> Yesterday
+                    <div class="report-description">
+                        {{ Str::limit($report->description, 100) }}
                     </div>
                 </div>
-                <div class="report-description">
-                    Several keys on the keyboard are unresponsive (A, S, D, F keys).
+            @empty
+                <div class="empty-state">
+                    <div class="empty-icon">📋</div>
+                    <h3>No reports yet</h3>
+                    <p>Get started by reporting your first issue</p>
+                    <a href="{{ route('user.reports.create') }}" class="btn btn-primary" style="margin-top: 1rem;">+ Report Issue</a>
                 </div>
-            </div>
-
-            <div class="report-card">
-                <div class="report-header">
-                    <div>
-                        <div class="report-title">Software installation error</div>
-                        <div class="report-id">#003</div>
-                    </div>
-                    <div class="status-badge status-resolved">Resolved</div>
-                </div>
-                <div class="report-meta">
-                    <div class="report-meta-item">
-                        <span>📍</span> Computer Lab C, PC-20
-                    </div>
-                    <div class="report-meta-item">
-                        <span>🕒</span> 3 days ago
-                    </div>
-                </div>
-                <div class="report-description">
-                    Unable to install Visual Studio Code. Error message: "Installation failed."
-                </div>
-            </div>
+            @endforelse
         </div>
     </div>
 @endsection

@@ -14,7 +14,7 @@
         </div>
 
         @if(session('success'))
-            <div class="alert alert-success" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.3); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; color: #34d399;">
+            <div class="alert alert-success">
                 {{ session('success') }}
             </div>
         @endif
@@ -66,9 +66,10 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Ticket ID</th>
+                        <th>Ticket #</th>
                         <th>Issue</th>
                         <th>Location</th>
+                        <th>Equipment</th>
                         <th>Status</th>
                         <th>Priority</th>
                         <th>Date</th>
@@ -78,17 +79,27 @@
                 <tbody>
                     @forelse($reports as $report)
                         <tr onclick="window.location.href='{{ route('user.reports.show', $report->id) }}'" style="cursor: pointer;">
-                            <td class="ticket-id">{{ $report->formatted_id }}</td>
+                            <td class="ticket-id">{{ $report->ticket_number }}</td>
                             <td>{{ $report->title }}</td>
-                            <td>{{ $report->lab_location }}{{ $report->equipment_id ? ', ' . $report->equipment_id : '' }}</td>
+                            <td>{{ $report->equipment->lab->name }}</td>
+                            <td>{{ $report->equipment->equipment_code }}</td>
                             <td><span class="status-badge status-{{ $report->status_color }}">{{ ucfirst(str_replace('-', ' ', $report->status)) }}</span></td>
-                            <td><span class="priority-{{ $report->priority }}">{{ $report->priority === 'high' ? '🔴' : ($report->priority === 'medium' ? '🟡' : '🟢') }} {{ ucfirst($report->priority) }}</span></td>
-                            <td>{{ $report->created_at->diffForHumans() }}</td>
-                            <td><button class="action-btn" onclick="event.stopPropagation(); window.location.href='{{ route('user.reports.show', $report->id) }}'">View</button></td>
+                            <td>
+                                <span class="priority-badge priority-{{ $report->priority }}">
+                                    {{ $report->priority === 'high' ? '🔴' : ($report->priority === 'medium' ? '🟡' : '🟢') }} 
+                                    {{ ucfirst($report->priority) }}
+                                </span>
+                            </td>
+                            <td>{{ $report->created_at->format('M d, Y') }}</td>
+                            <td>
+                                <button class="action-btn" onclick="event.stopPropagation(); window.location.href='{{ route('user.reports.show', $report->id) }}'">
+                                    View
+                                </button>
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" style="text-align: center; padding: 3rem; color: #9ca3af;">
+                            <td colspan="8" style="text-align: center; padding: 3rem; color: #9ca3af;">
                                 @if(request('search') || request('status'))
                                     <div style="font-size: 2rem; margin-bottom: 1rem;">🔍</div>
                                     <h3 style="margin-bottom: 0.5rem; color: #d1d5db;">No reports found</h3>

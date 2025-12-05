@@ -66,7 +66,7 @@
                             <span>👤</span> {{ $ticket->reporter->full_name }}
                         </div>
                         <div class="meta-item">
-                            <span>📍</span> {{ $ticket->lab_location }}{{ $ticket->equipment_id ? ', ' . $ticket->equipment_id : '' }}
+                            <span>📍</span> {{ $ticket->equipment->lab->name }}, {{ $ticket->equipment->equipment_code }}
                         </div>
                         <div class="meta-item">
                             <span>🕒</span> {{ $ticket->created_at->diffForHumans() }}

@@ -20,8 +20,8 @@
                     <span class="stat-label">Total Users</span>
                     <span class="stat-icon">👥</span>
                 </div>
-                <div class="stat-value">150</div>
-                <div class="stat-detail">45 Students, 15 Staff, 10 IT Support</div>
+                <div class="stat-value">{{ $stats['total_users'] }}</div>
+                <div class="stat-detail">{{ $stats['students'] }} Students, {{ $stats['staff'] }} Staff, {{ $stats['it_support'] }} IT Support</div>
             </div>
 
             <div class="stat-card">
@@ -29,8 +29,8 @@
                     <span class="stat-label">Open Tickets</span>
                     <span class="stat-icon">📋</span>
                 </div>
-                <div class="stat-value">45</div>
-                <div class="stat-detail">12 High Priority, 23 Medium, 10 Low</div>
+                <div class="stat-value">{{ $stats['open_tickets'] }}</div>
+                <div class="stat-detail">{{ $stats['high_priority'] }} High Priority</div>
             </div>
 
             <div class="stat-card">
@@ -38,7 +38,7 @@
                     <span class="stat-label">System Uptime</span>
                     <span class="stat-icon">⚡</span>
                 </div>
-                <div class="stat-value">99.8%</div>
+                <div class="stat-value">{{ $stats['system_uptime'] }}%</div>
                 <div class="stat-detail">Last 30 days</div>
             </div>
 
@@ -47,8 +47,8 @@
                     <span class="stat-label">Total Labs</span>
                     <span class="stat-icon">💻</span>
                 </div>
-                <div class="stat-value">6</div>
-                <div class="stat-detail">120 total workstations</div>
+                <div class="stat-value">{{ $stats['total_labs'] }}</div>
+                <div class="stat-detail">{{ $stats['total_workstations'] }} total workstations</div>
             </div>
         </div>
 
@@ -72,11 +72,11 @@
                 <p class="action-description">Manage lab layouts and equipment IDs</p>
             </a>
 
-            <div class="action-card">
+            <a href="{{ route('it.tickets.index') }}" class="action-card">
                 <div class="action-icon">📊</div>
-                <h3 class="action-title">Generate Reports</h3>
-                <p class="action-description">View analytics on tickets and system usage</p>
-            </div>
+                <h3 class="action-title">View Reports</h3>
+                <p class="action-description">Monitor tickets and system usage</p>
+            </a>
         </div>
 
         <!-- Content Grid -->
@@ -85,48 +85,20 @@
             <div class="section-card">
                 <div class="section-header">
                     <h2 class="section-title">Recent System Activity</h2>
-                    <a href="#" class="view-all">View All</a>
+                    <a href="{{ route('admin.users.index') }}" class="view-all">View All</a>
                 </div>
                 <div class="activity-list">
-                    <div class="activity-item">
-                        <div class="activity-icon">👤</div>
-                        <div class="activity-content">
-                            <div class="activity-title">New user registered: John Smith (Student)</div>
-                            <div class="activity-time">5 minutes ago</div>
+                    @forelse($recentActivity as $activity)
+                        <div class="activity-item">
+                            <div class="activity-icon">{{ $activity['icon'] }}</div>
+                            <div class="activity-content">
+                                <div class="activity-title">{{ $activity['title'] }}</div>
+                                <div class="activity-time">{{ $activity['time'] }}</div>
+                            </div>
                         </div>
-                    </div>
-
-                    <div class="activity-item">
-                        <div class="activity-icon">⚙️</div>
-                        <div class="activity-content">
-                            <div class="activity-title">System settings updated: Notification preferences</div>
-                            <div class="activity-time">15 minutes ago</div>
-                        </div>
-                    </div>
-
-                    <div class="activity-item">
-                        <div class="activity-icon">🖥️</div>
-                        <div class="activity-content">
-                            <div class="activity-title">Lab Configuration modified: Computer Lab C</div>
-                            <div class="activity-time">1 hour ago</div>
-                        </div>
-                    </div>
-
-                    <div class="activity-item">
-                        <div class="activity-icon">✅</div>
-                        <div class="activity-content">
-                            <div class="activity-title">User role changed: Sarah Lee promoted to IT Support</div>
-                            <div class="activity-time">2 hours ago</div>
-                        </div>
-                    </div>
-
-                    <div class="activity-item">
-                        <div class="activity-icon">📋</div>
-                        <div class="activity-content">
-                            <div class="activity-title">System backup completed successfully</div>
-                            <div class="activity-time">3 hours ago</div>
-                        </div>
-                    </div>
+                    @empty
+                        <p style="text-align: center; color: #9ca3af; padding: 2rem;">No recent activity</p>
+                    @endforelse
                 </div>
             </div>
 
@@ -136,45 +108,17 @@
                     <h2 class="section-title">System Health</h2>
                 </div>
                 <div class="health-items">
-                    <div class="health-item">
-                        <div class="health-header">
-                            <span class="health-label">Database</span>
-                            <span class="health-status status-good">Operational</span>
+                    @foreach($systemHealth as $key => $health)
+                        <div class="health-item">
+                            <div class="health-header">
+                                <span class="health-label">{{ ucfirst(str_replace('_', ' ', $key)) }}</span>
+                                <span class="health-status status-{{ $health['color'] }}">{{ $health['status'] }}</span>
+                            </div>
+                            <div class="health-bar">
+                                <div class="health-bar-fill" style="width: {{ $health['percentage'] }}%"></div>
+                            </div>
                         </div>
-                        <div class="health-bar">
-                            <div class="health-bar-fill" style="width: 95%"></div>
-                        </div>
-                    </div>
-
-                    <div class="health-item">
-                        <div class="health-header">
-                            <span class="health-label">Server Load</span>
-                            <span class="health-status status-good">Normal</span>
-                        </div>
-                        <div class="health-bar">
-                            <div class="health-bar-fill" style="width: 45%"></div>
-                        </div>
-                    </div>
-
-                    <div class="health-item">
-                        <div class="health-header">
-                            <span class="health-label">Storage</span>
-                            <span class="health-status status-warning">75% Used</span>
-                        </div>
-                        <div class="health-bar">
-                            <div class="health-bar-fill" style="width: 75%"></div>
-                        </div>
-                    </div>
-
-                    <div class="health-item">
-                        <div class="health-header">
-                            <span class="health-label">Email Service</span>
-                            <span class="health-status status-good">Active</span>
-                        </div>
-                        <div class="health-bar">
-                            <div class="health-bar-fill" style="width: 98%"></div>
-                        </div>
-                    </div>
+                    @endforeach
                 </div>
             </div>
         </div>

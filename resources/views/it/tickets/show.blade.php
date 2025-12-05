@@ -43,7 +43,7 @@
                 </div>
                 <div class="meta-item">
                     <div class="meta-label">Location</div>
-                    <div class="meta-value">{{ $ticket->lab_location }}{{ $ticket->equipment_id ? ', ' . $ticket->equipment_id : '' }}</div>
+                    <div class="meta-value">{{ $ticket->equipment->lab->name }}, {{ $ticket->equipment->equipment_code }}</div>
                 </div>
                 <div class="meta-item">
                     <div class="meta-label">Category</div>
