@@ -114,9 +114,10 @@ class UserController extends Controller
             'role' => ['required', 'in:student,staff,it-support,admin'],
             'phone' => ['nullable', 'string', 'max:20'],
             'student_staff_id' => ['nullable', 'string', 'max:50'],
-            'is_active' => ['boolean'],
-            'email_notifications' => ['boolean'],
-            'can_submit_tickets' => ['boolean'],
+            // REMOVE these three lines:
+            // 'is_active' => ['boolean'],
+            // 'email_notifications' => ['boolean'],
+            // 'can_submit_tickets' => ['boolean'],
             'password' => ['nullable', 'confirmed', Password::defaults()],
         ]);
 
@@ -128,6 +129,7 @@ class UserController extends Controller
             'role' => $validated['role'],
             'phone' => $validated['phone'] ?? null,
             'student_staff_id' => $validated['student_staff_id'] ?? null,
+            // Handle checkboxes - if checkbox is sent, it's true; otherwise false
             'is_active' => $request->has('is_active'),
             'email_notifications' => $request->has('email_notifications'),
             'can_submit_tickets' => $request->has('can_submit_tickets'),
