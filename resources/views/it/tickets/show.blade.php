@@ -1,9 +1,9 @@
 @extends('layouts.app')
 
-@section('title', 'IT Ticket Management')
+@section('title', 'View Ticket')
 
 @section('navigation')
-    @include('components.nav.it')
+    <x-nav.it />
 @endsection
 
 @section('content')
@@ -16,16 +16,6 @@
             </div>
         @endif
 
-        @if($errors->any())
-            <div class="alert alert-danger" style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.3); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; color: #ef4444;">
-                <ul style="margin: 0; padding-left: 1.5rem;">
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
         <!-- Ticket Header -->
         <div class="ticket-header">
             <div class="header-top">
@@ -33,7 +23,10 @@
                     <h1 class="ticket-title">{{ $ticket->title }}</h1>
                     <div class="ticket-id">Ticket {{ $ticket->ticket_number }}</div>
                 </div>
-                <div class="priority-badge priority-{{ $ticket->priority }}">{{ ucfirst($ticket->priority) }} Priority</div>
+                <div style="display: flex; gap: 1rem; align-items: center;">
+                    <span class="priority-badge priority-{{ $ticket->priority }}">{{ ucfirst($ticket->priority) }} Priority</span>
+                    <a href="{{ route('it.tickets.edit', $ticket->id) }}" class="btn btn-primary">Edit Ticket</a>
+                </div>
             </div>
 
             <div class="ticket-meta-grid">
@@ -51,7 +44,9 @@
                 </div>
                 <div class="meta-item">
                     <div class="meta-label">Status</div>
-                    <div class="meta-value">{{ ucfirst(str_replace('-', ' ', $ticket->status)) }}</div>
+                    <div class="meta-value">
+                        <span class="status-badge status-{{ $ticket->status_color }}">{{ ucfirst(str_replace('-', ' ', $ticket->status)) }}</span>
+                    </div>
                 </div>
                 <div class="meta-item">
                     <div class="meta-label">Submitted</div>
@@ -75,52 +70,87 @@
                     </p>
                 </div>
 
+                <!-- Equipment Details -->
+                <div class="card">
+                    <h2 class="card-title">Equipment Information</h2>
+                    <div class="info-list">
+                        <div class="info-item">
+                            <div class="info-label">Equipment Code</div>
+                            <div class="info-value">{{ $ticket->equipment->equipment_code }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Equipment Type</div>
+                            <div class="info-value">{{ ucfirst($ticket->equipment->type) }}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Current Status</div>
+                            <div class="info-value">
+                                <span class="status-badge status-{{ $ticket->equipment->status === 'operational' ? 'active' : ($ticket->equipment->status === 'has-issue' ? 'new' : 'warning') }}">
+                                    {{ ucfirst(str_replace('-', ' ', $ticket->equipment->status)) }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">Lab Location</div>
+                            <div class="info-value">{{ $ticket->equipment->lab->name }}</div>
+                        </div>
+                        @if($ticket->equipment->lab->location)
+                            <div class="info-item">
+                                <div class="info-label">Building/Floor</div>
+                                <div class="info-value">{{ $ticket->equipment->lab->location }}</div>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
                 <!-- Attachments -->
                 @if($ticket->attachments && count($ticket->attachments) > 0)
                     <div class="card">
                         <h2 class="card-title">Attachments</h2>
-                        <div class="attachments-grid">
+                        <div class="attachments-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem;">
                             @foreach($ticket->attachments as $attachment)
-                                <a href="{{ Storage::url($attachment) }}" target="_blank" class="attachment-item">
-                                    <div class="attachment-icon">
+                                <a href="{{ Storage::url($attachment) }}" target="_blank" class="attachment-item" style="display: flex; flex-direction: column; align-items: center; padding: 1rem; background: rgba(45, 212, 191, 0.1); border-radius: 8px; text-decoration: none;">
+                                    <div class="attachment-icon" style="font-size: 2rem; margin-bottom: 0.5rem;">
                                         @if(str_ends_with($attachment, '.pdf'))
                                             📄
                                         @else
                                             🖼️
                                         @endif
                                     </div>
-                                    <div class="attachment-name">{{ basename($attachment) }}</div>
+                                    <div class="attachment-name" style="font-size: 0.85rem; color: #2dd4bf; text-align: center;">{{ basename($attachment) }}</div>
                                 </a>
                             @endforeach
                         </div>
                     </div>
                 @endif
 
-                <!-- Internal Notes (IT Only) -->
-                <div class="card">
-                    <h2 class="card-title">Internal Notes (IT Team Only)</h2>
-                    <div class="notes-list">
-                        <!-- TODO: Add notes system in next phase -->
-                        <p style="color: #9ca3af; text-align: center; padding: 2rem;">
-                            Internal notes feature coming soon
-                        </p>
-                    </div>
-                </div>
-
                 <!-- Activity Timeline -->
                 <div class="card">
                     <h2 class="card-title">Activity Timeline</h2>
                     <div class="timeline">
+                        @if($ticket->closed_at)
+                            <div class="timeline-item">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-content">
+                                    <div class="timeline-header">
+                                        <span class="timeline-title">Ticket Closed</span>
+                                        <span class="timeline-time">{{ $ticket->closed_at->format('M d, Y g:i A') }}</span>
+                                    </div>
+                                    <p class="timeline-text">Issue marked as closed</p>
+                                </div>
+                            </div>
+                        @endif
+
                         @if($ticket->resolved_at)
                             <div class="timeline-item">
                                 <div class="timeline-dot"></div>
                                 <div class="timeline-content">
                                     <div class="timeline-header">
                                         <span class="timeline-title">Ticket Resolved</span>
-                                        <span class="timeline-time">{{ $ticket->resolved_at->diffForHumans() }}</span>
+                                        <span class="timeline-time">{{ $ticket->resolved_at->format('M d, Y g:i A') }}</span>
                                     </div>
                                     <p class="timeline-text">
-                                        Marked as resolved by {{ $ticket->assignedTo ? $ticket->assignedTo->full_name : 'IT Support' }}
+                                        Resolved by {{ $ticket->assignedTo ? $ticket->assignedTo->full_name : 'IT Support' }}
                                     </p>
                                 </div>
                             </div>
@@ -132,7 +162,7 @@
                                 <div class="timeline-content">
                                     <div class="timeline-header">
                                         <span class="timeline-title">Ticket Assigned</span>
-                                        <span class="timeline-time">{{ $ticket->assigned_at->diffForHumans() }}</span>
+                                        <span class="timeline-time">{{ $ticket->assigned_at->format('M d, Y g:i A') }}</span>
                                     </div>
                                     <p class="timeline-text">
                                         Assigned to {{ $ticket->assignedTo ? $ticket->assignedTo->full_name : 'IT Support' }}
@@ -146,7 +176,7 @@
                             <div class="timeline-content">
                                 <div class="timeline-header">
                                     <span class="timeline-title">Ticket Created</span>
-                                    <span class="timeline-time">{{ $ticket->created_at->diffForHumans() }}</span>
+                                    <span class="timeline-time">{{ $ticket->created_at->format('M d, Y g:i A') }}</span>
                                 </div>
                                 <p class="timeline-text">
                                     Report submitted by {{ $ticket->reporter->full_name }}
@@ -159,51 +189,37 @@
 
             <!-- Sidebar -->
             <div class="sidebar">
-                <!-- Ticket Management -->
+                <!-- Quick Info -->
                 <div class="card">
-                    <h2 class="card-title">Ticket Management</h2>
-                    
-                    <form action="{{ route('it.tickets.update', $ticket->id) }}" method="POST">
-                        @csrf
-                        @method('PUT')
-
-                        <div class="control-group">
-                            <label class="control-label">Status</label>
-                            <select name="status" required>
-                                <option value="new" {{ $ticket->status === 'new' ? 'selected' : '' }}>New</option>
-                                <option value="assigned" {{ $ticket->status === 'assigned' ? 'selected' : '' }}>Assigned</option>
-                                <option value="in-progress" {{ $ticket->status === 'in-progress' ? 'selected' : '' }}>In Progress</option>
-                                <option value="resolved" {{ $ticket->status === 'resolved' ? 'selected' : '' }}>Resolved</option>
-                                <option value="closed" {{ $ticket->status === 'closed' ? 'selected' : '' }}>Closed</option>
-                            </select>
+                    <h2 class="card-title">Quick Information</h2>
+                    <div class="info-list">
+                        <div class="info-item">
+                            <span class="info-label">Status</span>
+                            <span class="info-value">
+                                <span class="status-badge status-{{ $ticket->status_color }}">{{ ucfirst(str_replace('-', ' ', $ticket->status)) }}</span>
+                            </span>
                         </div>
-
-                        <div class="control-group">
-                            <label class="control-label">Priority</label>
-                            <select name="priority" required>
-                                <option value="low" {{ $ticket->priority === 'low' ? 'selected' : '' }}>Low</option>
-                                <option value="medium" {{ $ticket->priority === 'medium' ? 'selected' : '' }}>Medium</option>
-                                <option value="high" {{ $ticket->priority === 'high' ? 'selected' : '' }}>High</option>
-                            </select>
+                        <div class="info-item">
+                            <span class="info-label">Priority</span>
+                            <span class="info-value priority-{{ $ticket->priority }}">{{ ucfirst($ticket->priority) }}</span>
                         </div>
-
-                        <div class="control-group">
-                            <label class="control-label">Assign To</label>
-                            <select name="assigned_to">
-                                <option value="">Unassigned</option>
-                                @foreach($itStaff as $staff)
-                                    <option value="{{ $staff->id }}" {{ $ticket->assigned_to == $staff->id ? 'selected' : '' }}>
-                                        {{ $staff->full_name }}
-                                    </option>
-                                @endforeach
-                            </select>
+                        @if($ticket->assigned_at)
+                            <div class="info-item">
+                                <span class="info-label">Response Time</span>
+                                <span class="info-value">{{ $ticket->created_at->diffForHumans($ticket->assigned_at, true) }}</span>
+                            </div>
+                        @endif
+                        @if($ticket->resolved_at && $ticket->created_at)
+                            <div class="info-item">
+                                <span class="info-label">Resolution Time</span>
+                                <span class="info-value">{{ $ticket->created_at->diffForHumans($ticket->resolved_at, true) }}</span>
+                            </div>
+                        @endif
+                        <div class="info-item">
+                            <span class="info-label">Age</span>
+                            <span class="info-value">{{ $ticket->created_at->diffForHumans() }}</span>
                         </div>
-
-                        <div class="action-buttons">
-                            <button type="submit" class="btn btn-primary">Update & Notify User</button>
-                            <button type="button" class="btn btn-secondary" onclick="window.history.back()">Cancel</button>
-                        </div>
-                    </form>
+                    </div>
                 </div>
 
                 <!-- Reporter Info -->
@@ -213,34 +229,54 @@
                         <div class="reporter-avatar">{{ $ticket->reporter->initials }}</div>
                         <div class="reporter-name">{{ $ticket->reporter->full_name }}</div>
                         <div class="reporter-role">{{ ucfirst(str_replace('-', ' ', $ticket->reporter->role)) }}</div>
+                        @if($ticket->reporter->email)
+                            <p style="color: #9ca3af; margin-top: 0.5rem; font-size: 0.9rem;">{{ $ticket->reporter->email }}</p>
+                        @endif
                     </div>
-                    <button class="btn btn-secondary" style="margin-top: 1rem;">Send Message</button>
                 </div>
+
+                <!-- Assigned Technician -->
+                @if($ticket->assignedTo)
+                    <div class="card">
+                        <h2 class="card-title">Assigned Technician</h2>
+                        <div class="reporter-info">
+                            <div class="reporter-avatar">{{ $ticket->assignedTo->initials }}</div>
+                            <div class="reporter-name">{{ $ticket->assignedTo->full_name }}</div>
+                            <div class="reporter-role">{{ ucfirst(str_replace('-', ' ', $ticket->assignedTo->role)) }}</div>
+                        </div>
+                    </div>
+                @else
+                    <div class="card">
+                        <h2 class="card-title">Assignment Status</h2>
+                        <div style="text-align: center; padding: 1rem 0; color: #9ca3af;">
+                            <div style="font-size: 2rem; margin-bottom: 0.5rem;">⏳</div>
+                            <p>Not yet assigned</p>
+                            @if(!$ticket->assigned_to || $ticket->assigned_to !== auth()->id())
+                                <form action="{{ route('it.tickets.assign-self', $ticket->id) }}" method="POST" style="margin-top: 1rem;">
+                                    @csrf
+                                    <button type="submit" class="btn btn-primary">Assign to Me</button>
+                                </form>
+                            @endif
+                        </div>
+                    </div>
+                @endif
 
                 <!-- Quick Actions -->
                 <div class="card">
                     <h2 class="card-title">Quick Actions</h2>
                     <div class="action-buttons">
-                        @if($ticket->status !== 'resolved')
+                        <a href="{{ route('it.tickets.edit', $ticket->id) }}" class="btn btn-primary">Edit Ticket</a>
+                        
+                        @if($ticket->status !== 'resolved' && $ticket->status !== 'closed')
                             <form action="{{ route('it.tickets.update', $ticket->id) }}" method="POST">
                                 @csrf
                                 @method('PUT')
                                 <input type="hidden" name="status" value="resolved">
                                 <input type="hidden" name="priority" value="{{ $ticket->priority }}">
                                 <input type="hidden" name="assigned_to" value="{{ $ticket->assigned_to }}">
-                                <button type="submit" class="btn btn-primary">Mark as Resolved</button>
+                                <button type="submit" class="btn btn-secondary">Mark as Resolved</button>
                             </form>
                         @endif
-                        
-                        @if(!$ticket->assigned_to || $ticket->assigned_to !== auth()->id())
-                            <form action="{{ route('it.tickets.assign-self', $ticket->id) }}" method="POST">
-                                @csrf
-                                <button type="submit" class="btn btn-secondary">Assign to Me</button>
-                            </form>
-                        @endif
-                        
-                        <button class="btn btn-secondary">Request More Info</button>
-                        <button class="btn btn-danger">Escalate Issue</button>
                     </div>
                 </div>
             </div>

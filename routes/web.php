@@ -9,6 +9,7 @@ use App\Http\Controllers\IT\TicketController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\User\DashboardController as UserDashboardController;
 use App\Http\Controllers\IT\DashboardController as ITDashboardController;
+use Illuminate\Support\Facades\Auth;
 
 // Public routes
 Route::get('/', fn() => view('landing'))->name('landing');
@@ -28,13 +29,20 @@ Route::middleware('auth')->group(function () {
     
     // Dashboard alias
     Route::get('/dashboard', function () {
-        return view('user.dashboard');
+        $user = Auth::user();
+        
+        return match($user->role) {
+            'admin' => redirect()->route('admin.dashboard'),
+            'it-support' => redirect()->route('it.dashboard'),
+            'staff', 'student' => redirect()->route('user.dashboard'),
+            default => redirect()->route('user.dashboard'),
+        };
     })->name('dashboard');
 
     // User routes
     Route::prefix('user')->name('user.')->group(function () {
         Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
-       Route::resource('reports', \App\Http\Controllers\User\ReportController::class)->except(['edit', 'update', 'destroy']);
+        Route::resource('reports', \App\Http\Controllers\User\ReportController::class)->except(['edit', 'update', 'destroy']);
         
         Route::get('/lab-status', fn() => view('user.lab-status'))->name('lab-status');
         Route::get('/knowledge-base', [\App\Http\Controllers\User\KnowledgeBaseController::class, 'index'])->name('knowledge-base');
@@ -47,24 +55,17 @@ Route::middleware('auth')->group(function () {
     // IT routes
     Route::prefix('it')->name('it.')->group(function () {
         Route::get('/dashboard', [ITDashboardController::class, 'index'])->name('dashboard');
-      
-        // FIX: Change this route to use the controller method
+        
         Route::get('/assignments', [TicketController::class, 'assignments'])->name('assignments');
         
-        Route::get('/knowledge-base', [\App\Http\Controllers\IT\ArticleController::class, 'index'])->name('knowledge-base.index');
-        Route::get('/knowledge-base/create', [\App\Http\Controllers\IT\ArticleController::class, 'create'])->name('knowledge-base.create');
-        Route::post('/knowledge-base', [\App\Http\Controllers\IT\ArticleController::class, 'store'])->name('knowledge-base.store');
-        Route::get('/knowledge-base/{id}/edit', [\App\Http\Controllers\IT\ArticleController::class, 'edit'])->name('knowledge-base.edit');
-        Route::put('/knowledge-base/{id}', [\App\Http\Controllers\IT\ArticleController::class, 'update'])->name('knowledge-base.update');
-        Route::delete('/knowledge-base/{id}', [\App\Http\Controllers\IT\ArticleController::class, 'destroy'])->name('knowledge-base.destroy');
-        Route::get('/knowledge-base/{id}/preview', [\App\Http\Controllers\IT\ArticleController::class, 'show'])->name('knowledge-base.show');
-
-        Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
+        // Knowledge Base - using resource route
+        Route::resource('knowledge-base', \App\Http\Controllers\IT\ArticleController::class);
+        
+        // Tickets - using resource route with custom additions
         Route::get('/tickets/bulk', [TicketController::class, 'bulk'])->name('tickets.bulk');
         Route::post('/tickets/bulk-update', [TicketController::class, 'bulkUpdate'])->name('tickets.bulk-update');
-        Route::get('/tickets/{id}', [TicketController::class, 'show'])->name('tickets.show');
-        Route::put('/tickets/{id}', [TicketController::class, 'update'])->name('tickets.update');
         Route::post('/tickets/{id}/assign-self', [TicketController::class, 'assignToSelf'])->name('tickets.assign-self');
+        Route::resource('tickets', TicketController::class)->except(['create', 'store', 'destroy']);
     });
 
     // Admin routes

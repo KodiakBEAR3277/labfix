@@ -7,6 +7,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\Rule;
+
 
 class UserController extends Controller
 {
@@ -103,12 +105,66 @@ class UserController extends Controller
     // Update user (we'll add this later for U in CRUD)
     public function update(Request $request, $id)
     {
-        // Will implement in next phase
+        $user = User::findOrFail($id);
+
+        $validated = $request->validate([
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+            'role' => ['required', 'in:student,staff,it-support,admin'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'student_staff_id' => ['nullable', 'string', 'max:50'],
+            'is_active' => ['boolean'],
+            'email_notifications' => ['boolean'],
+            'can_submit_tickets' => ['boolean'],
+            'password' => ['nullable', 'confirmed', Password::defaults()],
+        ]);
+
+        // Prepare update data
+        $updateData = [
+            'first_name' => $validated['first_name'],
+            'last_name' => $validated['last_name'],
+            'email' => $validated['email'],
+            'role' => $validated['role'],
+            'phone' => $validated['phone'] ?? null,
+            'student_staff_id' => $validated['student_staff_id'] ?? null,
+            'is_active' => $request->has('is_active'),
+            'email_notifications' => $request->has('email_notifications'),
+            'can_submit_tickets' => $request->has('can_submit_tickets'),
+        ];
+
+        // Only update password if provided
+        if (!empty($validated['password'])) {
+            $updateData['password'] = Hash::make($validated['password']);
+        }
+
+        $user->update($updateData);
+
+        return redirect()
+            ->route('admin.users.show', $user->id)
+            ->with('success', 'User updated successfully!');
     }
 
     // Delete user (we'll add this later for D in CRUD)
     public function destroy($id)
     {
-        // Will implement in next phase
+        $user = User::findOrFail($id);
+        
+        // Prevent deleting yourself
+            /**
+             * @disregard P1013 Undefined method 'id'
+             */
+        if ($user->id === auth()->id()) {
+            return redirect()
+                ->route('admin.users.index')
+                ->with('error', 'You cannot delete your own account!');
+        }
+
+        $userName = $user->full_name;
+        $user->delete();
+
+        return redirect()
+            ->route('admin.users.index')
+            ->with('success', "User '{$userName}' has been deleted successfully!");
     }
 }

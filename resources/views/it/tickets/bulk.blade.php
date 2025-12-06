@@ -3,7 +3,7 @@
 @section('title', 'Bulk Operations')
 
 @section('navigation')
-    @include('components.nav.it')
+    <x-nav.it />
 @endsection
 
 @section('content')
@@ -141,7 +141,7 @@
                 @foreach($selectedTickets as $ticket)
                     <div class="ticket-preview">
                         <div class="ticket-info">
-                            <h4>{{ $ticket->formatted_id }} - {{ $ticket->title }}</h4>
+                            <h4>{{ $ticket->ticket_number }} - {{ $ticket->title }}</h4>
                             <p>{{ $ticket->equipment->lab->name }}, {{ $ticket->equipment->equipment_code }} • {{ ucfirst($ticket->priority) }} Priority</p>
                         </div>
                     </div>

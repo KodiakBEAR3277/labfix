@@ -45,7 +45,7 @@ class TicketController extends Controller
             $query->where('priority', $request->priority);
         }
 
-        // Lab filter - FIXED to use relationship
+        // Lab filter
         if ($request->filled('lab') && $request->lab !== 'all') {
             $query->whereHas('equipment.lab', function($q) use ($request) {
                 $q->where('name', $request->lab);
@@ -66,21 +66,29 @@ class TicketController extends Controller
         // Get IT staff for assignment dropdown
         $itStaff = User::whereIn('role', ['it-support', 'admin'])->get();
 
-        // Get unique labs for filter - FIXED to use Lab model
+        // Get unique labs for filter
         $labs = Lab::where('is_active', true)->pluck('name');
 
         return view('it.tickets.index', compact('tickets', 'stats', 'itStaff', 'labs'));
     }
 
-    // Show single ticket detail
+    // Show single ticket detail (VIEW ONLY)
     public function show($id)
+    {
+        $ticket = Report::with(['reporter', 'assignedTo', 'equipment.lab'])->findOrFail($id);
+
+        return view('it.tickets.show', compact('ticket'));
+    }
+
+    // Show edit form for ticket (EDIT ONLY)
+    public function edit($id)
     {
         $ticket = Report::with(['reporter', 'assignedTo', 'equipment.lab'])->findOrFail($id);
         
         // Get IT staff for assignment dropdown
         $itStaff = User::whereIn('role', ['it-support', 'admin'])->get();
 
-        return view('it.tickets.show', compact('ticket', 'itStaff'));
+        return view('it.tickets.edit', compact('ticket', 'itStaff'));
     }
 
     // Update ticket (status, priority, assignment)

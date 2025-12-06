@@ -3,7 +3,7 @@
 @section('title', 'Ticket Queue')
 
 @section('navigation')
-    @include('components.nav.it')
+    <x-nav.it />
 @endsection
 
 @section('content')
@@ -117,7 +117,7 @@
                     @forelse($tickets as $ticket)
                         <tr>
                             <td><input type="checkbox" class="ticket-checkbox ticket-select" value="{{ $ticket->id }}" onchange="updateBulkBar()"></td>
-                            <td class="ticket-id">{{ $ticket->formatted_id }}</td>
+                            <td class="ticket-id">{{ $ticket->ticket_number }}</td>
                             <td>{{ $ticket->title }}</td>
                             <td>{{ $ticket->reporter->full_name }}</td>
                             <td>{{ $ticket->equipment->lab->name }}, {{ $ticket->equipment->equipment_code }}</td>
@@ -128,14 +128,7 @@
                             <td>
                                 <div class="action-menu">
                                     <a href="{{ route('it.tickets.show', $ticket->id) }}" class="action-btn">View</a>
-                                    @if(!$ticket->assigned_to)
-                                        <form action="{{ route('it.tickets.assign-self', $ticket->id) }}" method="POST" style="display: inline;">
-                                            @csrf
-                                            <button type="submit" class="action-btn">Assign</button>
-                                        </form>
-                                    @else
-                                        <a href="{{ route('it.tickets.show', $ticket->id) }}" class="action-btn">Update</a>
-                                    @endif
+                                    <a href="{{ route('it.tickets.edit', $ticket->id) }}" class="action-btn">Edit</a>
                                 </div>
                             </td>
                         </tr>

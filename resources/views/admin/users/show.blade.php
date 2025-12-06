@@ -56,14 +56,20 @@
                         <a href="{{ route('admin.users.edit', $user->id) }}" class="btn btn-primary" style="text-align: center;">
                             Edit User
                         </a>
-                        <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" 
-                              onsubmit="return confirm('Are you sure you want to delete this user?');">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger" style="width: 100%;">
-                                Delete User
+                        @if($user->id !== auth()->id())
+                            <form action="{{ route('admin.users.destroy', $user->id) }}" method="POST" 
+                                onsubmit="return confirm('Are you sure you want to delete this user?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger" style="width: 100%;">
+                                    Delete User
+                                </button>
+                            </form>
+                        @else
+                            <button class="btn btn-danger" style="width: 100%; opacity: 0.5;" disabled>
+                                Cannot Delete Your Own Account
                             </button>
-                        </form>
+                        @endif
                     </div>
                 </div>
             </div>

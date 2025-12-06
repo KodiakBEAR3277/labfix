@@ -3,7 +3,7 @@
 @section('title', 'My Assignments')
 
 @section('navigation')
-    @include('components.nav.it')
+    <x-nav.it />
 @endsection
 
 @section('content')
@@ -54,7 +54,7 @@
                 <div class="ticket-card {{ $ticket->priority === 'high' ? 'priority-high' : '' }}">
                     <div class="ticket-header">
                         <div>
-                            <div class="ticket-id">{{ $ticket->formatted_id }}</div>
+                            <div class="ticket-id">{{ $ticket->ticket_number }}</div>
                             <h3 class="ticket-title">{{ $ticket->title }}</h3>
                         </div>
                         <span class="priority-badge priority-{{ $ticket->priority }}">
@@ -81,8 +81,8 @@
                     <div class="ticket-footer">
                         <span class="status-badge status-{{ $ticket->status_color }}">{{ ucfirst(str_replace('-', ' ', $ticket->status)) }}</span>
                         <div class="ticket-actions">
-                            <button class="action-btn" onclick="window.location.href='{{ route('it.tickets.show', $ticket->id) }}'">Update Status</button>
                             <a href="{{ route('it.tickets.show', $ticket->id) }}" class="action-btn">View Details</a>
+                            <a href="{{ route('it.tickets.edit', $ticket->id) }}" class="action-btn">Update Status</a>
                         </div>
                     </div>
                 </div>
