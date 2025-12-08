@@ -3,12 +3,12 @@
 @section('title', 'Edit Ticket')
 
 @section('navigation')
-    <x-nav.it />
+    <x-nav.admin />
 @endsection
 
 @section('content')
     <div class="container">
-        <a href="{{ route('it.tickets.show', $ticket->id) }}" class="back-btn">← Back to Ticket</a>
+        <a href="{{ route('admin.tickets.show', $ticket->id) }}" class="back-btn">← Back to Ticket</a>
 
         <div class="page-header">
             <h1>Edit Ticket</h1>
@@ -59,7 +59,7 @@
                 <div class="card" style="margin-top: 1.5rem;">
                     <h2 class="card-title">Update Ticket Details</h2>
                     
-                    <form action="{{ route('it.tickets.update', $ticket->id) }}" method="POST">
+                    <form action="{{ route('admin.tickets.update', $ticket->id) }}" method="POST">
                         @csrf
                         @method('PUT')
 
@@ -90,33 +90,19 @@
                                 <label>Assign To</label>
                                 <select name="assigned_to">
                                     <option value="">Unassigned</option>
-                                    @if(auth()->user()->isAdmin())
-                                        {{-- Admins can assign to anyone --}}
-                                        @foreach($itStaff as $staff)
-                                            <option value="{{ $staff->id }}" {{ $ticket->assigned_to == $staff->id ? 'selected' : '' }}>
-                                                {{ $staff->full_name }}
-                                            </option>
-                                        @endforeach
-                                    @else
-                                        {{-- IT staff can only assign to themselves --}}
-                                        <option value="{{ auth()->id() }}" {{ $ticket->assigned_to == auth()->id() ? 'selected' : '' }}>
-                                            Myself ({{ auth()->user()->full_name }})
+                                    @foreach($itStaff as $staff)
+                                        <option value="{{ $staff->id }}" {{ $ticket->assigned_to == $staff->id ? 'selected' : '' }}>
+                                            {{ $staff->full_name }} ({{ ucfirst(str_replace('-', ' ', $staff->role)) }})
                                         </option>
-                                    @endif
+                                    @endforeach
                                 </select>
-                                <p class="help-text">
-                                    @if(auth()->user()->isAdmin())
-                                        Assign this ticket to an IT technician
-                                    @else
-                                        You can assign this ticket to yourself
-                                    @endif
-                                </p>
+                                <p class="help-text">Assign this ticket to any IT technician or admin</p>
                             </div>
                         </div>
 
                         <div class="action-buttons">
                             <button type="submit" class="btn btn-primary">Update Ticket & Notify User</button>
-                            <a href="{{ route('it.tickets.show', $ticket->id) }}" class="btn btn-secondary">Cancel</a>
+                            <a href="{{ route('admin.tickets.show', $ticket->id) }}" class="btn btn-secondary">Cancel</a>
                         </div>
                     </form>
                 </div>
@@ -127,8 +113,19 @@
                     <p style="color: #9ca3af; margin-bottom: 1rem;">Apply common status changes with one click</p>
                     
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                        @if($ticket->status !== 'assigned' && !$ticket->assigned_to)
+                            <form action="{{ route('admin.tickets.update', $ticket->id) }}" method="POST">
+                                @csrf
+                                @method('PUT')
+                                <input type="hidden" name="status" value="assigned">
+                                <input type="hidden" name="priority" value="{{ $ticket->priority }}">
+                                <input type="hidden" name="assigned_to" value="{{ auth()->id() }}">
+                                <button type="submit" class="btn btn-secondary" style="width: 100%;">Assign to Me</button>
+                            </form>
+                        @endif
+
                         @if($ticket->status !== 'in-progress')
-                            <form action="{{ route('it.tickets.update', $ticket->id) }}" method="POST">
+                            <form action="{{ route('admin.tickets.update', $ticket->id) }}" method="POST">
                                 @csrf
                                 @method('PUT')
                                 <input type="hidden" name="status" value="in-progress">
@@ -139,7 +136,7 @@
                         @endif
 
                         @if($ticket->status !== 'resolved')
-                            <form action="{{ route('it.tickets.update', $ticket->id) }}" method="POST">
+                            <form action="{{ route('admin.tickets.update', $ticket->id) }}" method="POST">
                                 @csrf
                                 @method('PUT')
                                 <input type="hidden" name="status" value="resolved">
@@ -149,13 +146,29 @@
                             </form>
                         @endif
 
-                        @if(!$ticket->assigned_to || $ticket->assigned_to !== auth()->id())
-                            <form action="{{ route('it.tickets.assign-self', $ticket->id) }}" method="POST">
+                        @if($ticket->status !== 'closed')
+                            <form action="{{ route('admin.tickets.update', $ticket->id) }}" method="POST">
                                 @csrf
-                                <button type="submit" class="btn btn-secondary" style="width: 100%;">Assign to Me</button>
+                                @method('PUT')
+                                <input type="hidden" name="status" value="closed">
+                                <input type="hidden" name="priority" value="{{ $ticket->priority }}">
+                                <input type="hidden" name="assigned_to" value="{{ $ticket->assigned_to }}">
+                                <button type="submit" class="btn btn-secondary" style="width: 100%;">Close Ticket</button>
                             </form>
                         @endif
                     </div>
+                </div>
+
+                <!-- Danger Zone -->
+                <div class="card" style="margin-top: 1.5rem; border-color: rgba(239, 68, 68, 0.3);">
+                    <h2 class="card-title" style="color: #ef4444;">Danger Zone</h2>
+                    <p style="color: #9ca3af; margin-bottom: 1rem;">Irreversible actions - proceed with caution</p>
+                    
+                    <form action="{{ route('admin.tickets.destroy', $ticket->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this ticket? This action cannot be undone!');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger">Delete This Ticket Permanently</button>
+                    </form>
                 </div>
             </div>
 
@@ -183,6 +196,18 @@
                             <span class="info-label">Created</span>
                             <span class="info-value">{{ $ticket->created_at->diffForHumans() }}</span>
                         </div>
+                        @if($ticket->assigned_at)
+                            <div class="info-item">
+                                <span class="info-label">Assigned</span>
+                                <span class="info-value">{{ $ticket->assigned_at->diffForHumans() }}</span>
+                            </div>
+                        @endif
+                        @if($ticket->resolved_at)
+                            <div class="info-item">
+                                <span class="info-label">Resolved</span>
+                                <span class="info-value">{{ $ticket->resolved_at->diffForHumans() }}</span>
+                            </div>
+                        @endif
                     </div>
                 </div>
 
@@ -192,7 +217,7 @@
                     <p style="color: #d1d5db; line-height: 1.6;">
                         {{ Str::limit($ticket->description, 200) }}
                     </p>
-                    <a href="{{ route('it.tickets.show', $ticket->id) }}" class="btn btn-secondary" style="margin-top: 1rem;">View Full Details</a>
+                    <a href="{{ route('admin.tickets.show', $ticket->id) }}" class="btn btn-secondary" style="margin-top: 1rem;">View Full Details</a>
                 </div>
 
                 <!-- Equipment Info -->
@@ -215,6 +240,23 @@
                                 </span>
                             </span>
                         </div>
+                        <div class="info-item">
+                            <span class="info-label">Lab</span>
+                            <span class="info-value">{{ $ticket->equipment->lab->name }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reporter Info -->
+                <div class="card" style="margin-top: 1.5rem;">
+                    <h2 class="card-title">Reporter</h2>
+                    <div class="reporter-info">
+                        <div class="reporter-avatar">{{ $ticket->reporter->initials }}</div>
+                        <div class="reporter-name">{{ $ticket->reporter->full_name }}</div>
+                        <div class="reporter-role">{{ ucfirst(str_replace('-', ' ', $ticket->reporter->role)) }}</div>
+                        @if($ticket->reporter->email)
+                            <p style="color: #9ca3af; margin-top: 0.5rem; font-size: 0.9rem;">{{ $ticket->reporter->email }}</p>
+                        @endif
                     </div>
                 </div>
             </div>

@@ -136,7 +136,7 @@
                                 <p class="activity-desc">{{ \App\Models\Report::where('status', 'new')->count() }} tickets waiting</p>
                             </div>
                         </a>
-                        <a href="{{ route('it.assignments') }}" class="activity-item">
+                        <a href="{{ route('it.assignments.index') }}" class="activity-item">
                             <span class="activity-icon">👤</span>
                             <div class="activity-time">
                                 <h4 class="activity-title">My Assignments</h4>

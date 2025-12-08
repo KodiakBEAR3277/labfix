@@ -10,10 +10,7 @@
     <div class="container">
         <div class="page-header">
             <h1>Ticket Queue</h1>
-            <div class="header-actions">
-                <button class="btn btn-secondary" onclick="exportTickets()">Export</button>
-                <button class="btn btn-primary" onclick="goToBulkActions()">Bulk Actions</button>
-            </div>
+            <p>View available tickets and manage your assignments</p>
         </div>
 
         @if(session('success'))
@@ -39,6 +36,17 @@
             <div class="stat-card">
                 <div class="stat-label">High Priority</div>
                 <div class="stat-value">{{ $stats['high_priority'] }}</div>
+            </div>
+        </div>
+
+        <!-- Info Banner for IT Support -->
+        <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem; color: #60a5fa;">
+                <span style="font-size: 1.5rem;">ℹ️</span>
+                <div style="flex: 1;">
+                    <strong>IT Support View:</strong> You can view all tickets and assign unassigned tickets to yourself. 
+                    <a href="{{ route('it.assignments.index') }}" style="color: #2dd4bf; text-decoration: none; font-weight: 600;">View My Assignments →</a>
+                </div>
             </div>
         </div>
 
@@ -88,20 +96,11 @@
             </div>
         </form>
 
-        <!-- Bulk Actions Bar (shown when tickets are selected) -->
-        <div class="bulk-actions" id="bulkActionsBar" style="display: none;">
-            <span class="bulk-text"><span id="selectedCount">0</span> tickets selected</span>
-            <button class="btn btn-secondary" onclick="bulkAssignToMe()">Assign to Me</button>
-            <button class="btn btn-secondary" onclick="goToBulkActions()">More Actions</button>
-            <button class="btn btn-secondary" onclick="clearSelection()">Clear Selection</button>
-        </div>
-
         <!-- Tickets Table -->
         <div class="table-container">
             <table>
                 <thead>
                     <tr>
-                        <th><input type="checkbox" class="ticket-checkbox" id="selectAll" onchange="toggleSelectAll()"></th>
                         <th>Ticket ID</th>
                         <th>Issue</th>
                         <th>Reporter</th>
@@ -116,25 +115,59 @@
                 <tbody>
                     @forelse($tickets as $ticket)
                         <tr>
-                            <td><input type="checkbox" class="ticket-checkbox ticket-select" value="{{ $ticket->id }}" onchange="updateBulkBar()"></td>
                             <td class="ticket-id">{{ $ticket->ticket_number }}</td>
-                            <td>{{ $ticket->title }}</td>
+                            <td>
+                                <strong>{{ $ticket->title }}</strong>
+                                <br>
+                                <small style="color: #9ca3af;">{{ ucfirst($ticket->category) }}</small>
+                            </td>
                             <td>{{ $ticket->reporter->full_name }}</td>
                             <td>{{ $ticket->equipment->lab->name }}, {{ $ticket->equipment->equipment_code }}</td>
-                            <td><span class="status-badge status-{{ $ticket->status_color }}">{{ ucfirst(str_replace('-', ' ', $ticket->status)) }}</span></td>
-                            <td><span class="priority-{{ $ticket->priority }}">{{ ucfirst($ticket->priority) }}</span></td>
-                            <td>{{ $ticket->assignedTo ? $ticket->assignedTo->full_name : 'Unassigned' }}</td>
+                            <td>
+                                <span class="status-badge status-{{ $ticket->status_color }}">
+                                    {{ ucfirst(str_replace('-', ' ', $ticket->status)) }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="priority-badge priority-{{ $ticket->priority }}">
+                                    {{ $ticket->priority === 'high' ? '🔴' : ($ticket->priority === 'medium' ? '🟡' : '🟢') }} 
+                                    {{ ucfirst($ticket->priority) }}
+                                </span>
+                            </td>
+                            <td>
+                                @if($ticket->assignedTo)
+                                    @if($ticket->assigned_to === auth()->id())
+                                        <span style="color: #2dd4bf; font-weight: 600;">You</span>
+                                    @else
+                                        {{ $ticket->assignedTo->full_name }}
+                                    @endif
+                                @else
+                                    <span style="color: #9ca3af;">Unassigned</span>
+                                @endif
+                            </td>
                             <td>{{ $ticket->created_at->diffForHumans() }}</td>
                             <td>
                                 <div class="action-menu">
                                     <a href="{{ route('it.tickets.show', $ticket->id) }}" class="action-btn">View</a>
-                                    <a href="{{ route('it.tickets.edit', $ticket->id) }}" class="action-btn">Edit</a>
+                                    
+                                    @if($ticket->assigned_to === auth()->id())
+                                        {{-- If assigned to current user, they can edit via assignments --}}
+                                        <a href="{{ route('it.assignments.edit', $ticket->id) }}" class="action-btn" style="color: #2dd4bf;">Update</a>
+                                    @elseif(!$ticket->assigned_to)
+                                        {{-- If unassigned, IT support can assign to self --}}
+                                        <form action="{{ route('it.tickets.assign-self', $ticket->id) }}" method="POST" style="display: inline;">
+                                            @csrf
+                                            <button type="submit" class="action-btn" style="color: #2dd4bf; border: none; background: none; cursor: pointer; padding: 0;">
+                                                Assign to Me
+                                            </button>
+                                        </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="10" style="text-align: center; padding: 3rem; color: #9ca3af;">
+                            <td colspan="9" style="text-align: center; padding: 3rem; color: #9ca3af;">
                                 @if(request()->hasAny(['search', 'status', 'priority', 'lab']))
                                     <div style="font-size: 2rem; margin-bottom: 1rem;">🔍</div>
                                     <h3 style="margin-bottom: 0.5rem; color: #d1d5db;">No tickets found</h3>
@@ -181,96 +214,38 @@
                 </div>
             @endif
         </div>
+
+        <!-- Quick Stats Panel -->
+        <div style="margin-top: 2rem; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+            <div style="background: rgba(45, 212, 191, 0.1); border: 1px solid rgba(45, 212, 191, 0.3); padding: 1.5rem; border-radius: 8px;">
+                <h3 style="color: #2dd4bf; margin-bottom: 0.5rem; font-size: 1rem;">My Active Tickets</h3>
+                <div style="font-size: 2rem; font-weight: bold; color: #ffffff;">
+                    {{ \App\Models\Report::where('assigned_to', auth()->id())->open()->count() }}
+                </div>
+                <a href="{{ route('it.assignments.index') }}" style="color: #2dd4bf; text-decoration: none; font-size: 0.9rem;">
+                    View My Assignments →
+                </a>
+            </div>
+
+            <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); padding: 1.5rem; border-radius: 8px;">
+                <h3 style="color: #ef4444; margin-bottom: 0.5rem; font-size: 1rem;">Unassigned Tickets</h3>
+                <div style="font-size: 2rem; font-weight: bold; color: #ffffff;">
+                    {{ \App\Models\Report::whereNull('assigned_to')->open()->count() }}
+                </div>
+                <a href="{{ route('it.tickets.index', ['status' => 'new']) }}" style="color: #ef4444; text-decoration: none; font-size: 0.9rem;">
+                    View Unassigned →
+                </a>
+            </div>
+
+            <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); padding: 1.5rem; border-radius: 8px;">
+                <h3 style="color: #3b82f6; margin-bottom: 0.5rem; font-size: 1rem;">High Priority</h3>
+                <div style="font-size: 2rem; font-weight: bold; color: #ffffff;">
+                    {{ \App\Models\Report::where('priority', 'high')->open()->count() }}
+                </div>
+                <a href="{{ route('it.tickets.index', ['priority' => 'high']) }}" style="color: #3b82f6; text-decoration: none; font-size: 0.9rem;">
+                    View High Priority →
+                </a>
+            </div>
+        </div>
     </div>
 @endsection
-
-@push('scripts')
-<script>
-    // Toggle select all checkboxes
-    function toggleSelectAll() {
-        const selectAll = document.getElementById('selectAll');
-        const checkboxes = document.querySelectorAll('.ticket-select');
-        checkboxes.forEach(cb => cb.checked = selectAll.checked);
-        updateBulkBar();
-    }
-
-    // Update bulk actions bar visibility
-    function updateBulkBar() {
-        const selected = document.querySelectorAll('.ticket-select:checked');
-        const bulkBar = document.getElementById('bulkActionsBar');
-        const countSpan = document.getElementById('selectedCount');
-        
-        if (selected.length > 0) {
-            bulkBar.style.display = 'flex';
-            countSpan.textContent = selected.length;
-        } else {
-            bulkBar.style.display = 'none';
-        }
-    }
-
-    // Clear selection
-    function clearSelection() {
-        document.querySelectorAll('.ticket-select').forEach(cb => cb.checked = false);
-        document.getElementById('selectAll').checked = false;
-        updateBulkBar();
-    }
-
-    // Bulk assign to current user
-    function bulkAssignToMe() {
-        const selected = Array.from(document.querySelectorAll('.ticket-select:checked')).map(cb => cb.value);
-        if (selected.length === 0) {
-            alert('Please select at least one ticket');
-            return;
-        }
-        
-        // Create a form and submit
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '{{ route("it.tickets.bulk-update") }}';
-        
-        const csrf = document.createElement('input');
-        csrf.type = 'hidden';
-        csrf.name = '_token';
-        csrf.value = '{{ csrf_token() }}';
-        form.appendChild(csrf);
-        
-        const action = document.createElement('input');
-        action.type = 'hidden';
-        action.name = 'action';
-        action.value = 'assign';
-        form.appendChild(action);
-        
-        const assignedTo = document.createElement('input');
-        assignedTo.type = 'hidden';
-        assignedTo.name = 'assigned_to';
-        assignedTo.value = '{{ auth()->id() }}';
-        form.appendChild(assignedTo);
-        
-        selected.forEach(id => {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = 'ticket_ids[]';
-            input.value = id;
-            form.appendChild(input);
-        });
-        
-        document.body.appendChild(form);
-        form.submit();
-    }
-
-    // Go to bulk actions page
-    function goToBulkActions() {
-        const selected = Array.from(document.querySelectorAll('.ticket-select:checked')).map(cb => cb.value);
-        if (selected.length === 0) {
-            alert('Please select at least one ticket');
-            return;
-        }
-        window.location.href = '{{ route("it.tickets.bulk") }}?ids=' + selected.join(',');
-    }
-
-    // Export tickets (placeholder)
-    function exportTickets() {
-        alert('Export functionality coming soon!');
-    }
-</script>
-@endpush

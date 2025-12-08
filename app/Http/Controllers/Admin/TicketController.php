@@ -1,17 +1,16 @@
 <?php
 
-namespace App\Http\Controllers\IT;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Report;
 use App\Models\User;
 use App\Models\Lab;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class TicketController extends Controller
 {
-    // Show all tickets (IT Queue)
+    // Show all tickets with admin controls
     public function index(Request $request)
     {
         $query = Report::with(['reporter', 'assignedTo', 'equipment.lab']);
@@ -52,46 +51,54 @@ class TicketController extends Controller
             });
         }
 
-        // Get tickets with pagination
-        $tickets = $query->latest()->paginate(10)->withQueryString();
+        // Assigned filter
+        if ($request->filled('assigned') && $request->assigned !== 'all') {
+            if ($request->assigned === 'unassigned') {
+                $query->whereNull('assigned_to');
+            } else {
+                $query->where('assigned_to', $request->assigned);
+            }
+        }
 
-        // Get stats
+        $tickets = $query->latest()->paginate(20)->withQueryString();
+
+        // Stats
         $stats = [
+            'total' => Report::count(),
             'open' => Report::open()->count(),
             'assigned' => Report::where('status', 'assigned')->count(),
             'in_progress' => Report::where('status', 'in-progress')->count(),
+            'resolved' => Report::closed()->count(),
             'high_priority' => Report::where('priority', 'high')->open()->count(),
+            'unassigned' => Report::whereNull('assigned_to')->open()->count(),
         ];
 
-        // Get IT staff for assignment dropdown
+        // Get IT staff for filters
         $itStaff = User::whereIn('role', ['it-support', 'admin'])->get();
-
+        
         // Get unique labs for filter
         $labs = Lab::where('is_active', true)->pluck('name');
 
-        return view('it.tickets.index', compact('tickets', 'stats', 'itStaff', 'labs'));
+        return view('admin.tickets.index', compact('tickets', 'stats', 'itStaff', 'labs'));
     }
 
-    // Show single ticket detail (VIEW ONLY)
+    // Show ticket details
     public function show($id)
     {
         $ticket = Report::with(['reporter', 'assignedTo', 'equipment.lab'])->findOrFail($id);
-
-        return view('it.tickets.show', compact('ticket'));
+        return view('admin.tickets.show', compact('ticket'));
     }
 
-    // Show edit form for ticket (EDIT ONLY)
+    // Show edit form
     public function edit($id)
     {
         $ticket = Report::with(['reporter', 'assignedTo', 'equipment.lab'])->findOrFail($id);
-        
-        // Get IT staff for assignment dropdown
         $itStaff = User::whereIn('role', ['it-support', 'admin'])->get();
-
-        return view('it.tickets.edit', compact('ticket', 'itStaff'));
+        
+        return view('admin.tickets.edit', compact('ticket', 'itStaff'));
     }
 
-    // Update ticket (status, priority, assignment)
+    // Update ticket
     public function update(Request $request, $id)
     {
         $ticket = Report::findOrFail($id);
@@ -102,10 +109,8 @@ class TicketController extends Controller
             'assigned_to' => ['nullable', 'exists:users,id'],
         ]);
 
-        // Track if status changed to resolved
         $wasResolved = $ticket->status !== 'resolved' && $validated['status'] === 'resolved';
 
-        // Update ticket
         $ticket->update([
             'status' => $validated['status'],
             'priority' => $validated['priority'],
@@ -115,27 +120,11 @@ class TicketController extends Controller
         ]);
 
         return redirect()
-            ->route('it.tickets.show', $ticket->id)
+            ->route('admin.tickets.show', $ticket->id)
             ->with('success', 'Ticket updated successfully!');
     }
 
-    // Assign ticket to self
-    public function assignToSelf($id)
-    {
-        $ticket = Report::findOrFail($id);
-
-        $ticket->update([
-            'assigned_to' => Auth::id(),
-            'status' => 'assigned',
-            'assigned_at' => $ticket->assigned_at ?? now(),
-        ]);
-
-        return redirect()
-            ->route('it.tickets.show', $ticket->id)
-            ->with('success', 'Ticket assigned to you!');
-    }
-
-    // Bulk operations view
+    // Bulk operations
     public function bulk(Request $request)
     {
         $selectedIds = $request->query('ids', []);
@@ -145,11 +134,9 @@ class TicketController extends Controller
         }
 
         $selectedTickets = Report::with(['equipment.lab'])->whereIn('id', $selectedIds)->get();
-
-        // Get IT staff for assignment
         $itStaff = User::whereIn('role', ['it-support', 'admin'])->get();
 
-        return view('it.tickets.bulk', compact('selectedTickets', 'itStaff'));
+        return view('admin.tickets.bulk', compact('selectedTickets', 'itStaff'));
     }
 
     // Process bulk operations
@@ -203,37 +190,23 @@ class TicketController extends Controller
         }
 
         return redirect()
-            ->route('it.tickets.index')
+            ->route('admin.tickets.index')
             ->with('success', $message);
     }
 
-    // Show IT assignments (tickets assigned to current user)
-    public function assignments(Request $request)
+    // Delete ticket (admin only)
+    public function destroy($id)
     {
-        $query = Report::where('assigned_to', Auth::id())
-            ->with(['reporter', 'equipment.lab']);
+        $ticket = Report::findOrFail($id);
+        
+        // Store ticket number for success message
+        $ticketNumber = $ticket->ticket_number;
+        
+        // Delete the ticket
+        $ticket->delete();
 
-        // Status filter
-        if ($request->filled('status')) {
-            if ($request->status === 'active') {
-                $query->open();
-            } else {
-                $query->where('status', $request->status);
-            }
-        }
-
-        $tickets = $query->latest()->paginate(10)->withQueryString();
-
-        // Stats
-        $stats = [
-            'total_assigned' => Report::where('assigned_to', Auth::id())->count(),
-            'in_progress' => Report::where('assigned_to', Auth::id())->where('status', 'in-progress')->count(),
-            'high_priority' => Report::where('assigned_to', Auth::id())->where('priority', 'high')->open()->count(),
-            'completed_today' => Report::where('assigned_to', Auth::id())
-                ->whereDate('resolved_at', today())
-                ->count(),
-        ];
-
-        return view('it.assignments.index', compact('tickets', 'stats'));
+        return redirect()
+            ->route('admin.tickets.index')
+            ->with('success', "Ticket {$ticketNumber} has been deleted successfully!");
     }
 }

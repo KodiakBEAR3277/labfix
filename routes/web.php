@@ -10,6 +10,8 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\User\DashboardController as UserDashboardController;
 use App\Http\Controllers\IT\DashboardController as ITDashboardController;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\IT\AssignmentController;
+use App\Http\Controllers\Admin\TicketController as AdminTicketController;
 
 // Public routes
 Route::get('/', fn() => view('landing'))->name('landing');
@@ -52,35 +54,51 @@ Route::middleware('auth')->group(function () {
 
     });
 
-    // IT routes
-    Route::prefix('it')->name('it.')->group(function () {
+    // IT routes - Self-assignment allowed
+    Route::prefix('it')->name('it.')->middleware(['auth', 'role:it-support,admin'])->group(function () {
         Route::get('/dashboard', [ITDashboardController::class, 'index'])->name('dashboard');
         
-        Route::get('/assignments', [TicketController::class, 'assignments'])->name('assignments');
+        Route::resource('assignments', AssignmentController::class)->only(['index', 'show', 'edit', 'update']);
         
-        // Knowledge Base - using resource route
+        // Knowledge Base
         Route::resource('knowledge-base', \App\Http\Controllers\IT\ArticleController::class);
         
-        // Tickets - using resource route with custom additions
-        Route::get('/tickets/bulk', [TicketController::class, 'bulk'])->name('tickets.bulk');
-        Route::post('/tickets/bulk-update', [TicketController::class, 'bulkUpdate'])->name('tickets.bulk-update');
+        // Tickets - IT can view and self-assign
+        Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
+        Route::get('/tickets/{id}', [TicketController::class, 'show'])->name('tickets.show');
+        Route::get('/tickets/{id}/edit', [TicketController::class, 'edit'])->name('tickets.edit');
+        Route::put('/tickets/{id}', [TicketController::class, 'update'])->name('tickets.update');
         Route::post('/tickets/{id}/assign-self', [TicketController::class, 'assignToSelf'])->name('tickets.assign-self');
-        Route::resource('tickets', TicketController::class)->except(['create', 'store', 'destroy']);
+        
+        // Bulk operations - ADMIN ONLY
+        Route::get('/tickets/bulk', [TicketController::class, 'bulk'])->name('tickets.bulk')->middleware('role:admin');
+        Route::post('/tickets/bulk-update', [TicketController::class, 'bulkUpdate'])->name('tickets.bulk-update')->middleware('role:admin');
     });
 
-    // Admin routes
-    Route::prefix('admin')->name('admin.')->group(function () {
+    // Admin routes - Full ticket management
+    Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
-        Route::get('/labs', fn() => view('admin.labs'))->name('labs');
         Route::get('/settings', fn() => view('admin.settings'))->name('settings');
         
-        // User management with full CRUD
+        // User management
         Route::resource('users', AdminUserController::class);
+        
+        // Lab management
+        Route::resource('labs', \App\Http\Controllers\Admin\LabController::class);
+        Route::post('/labs/{id}/toggle-status', [\App\Http\Controllers\Admin\LabController::class, 'toggleStatus'])->name('labs.toggle-status');
+        
+        // Equipment management
+        Route::resource('equipment', \App\Http\Controllers\Admin\EquipmentController::class)->except(['index', 'show']);
+        
+        // Ticket Management (NEW)
+        Route::get('/tickets/bulk', [AdminTicketController::class, 'bulk'])->name('tickets.bulk');
+        Route::post('/tickets/bulk-update', [AdminTicketController::class, 'bulkUpdate'])->name('tickets.bulk-update');
+        Route::resource('tickets', AdminTicketController::class);
     });
 });
 
 // Profile routes (accessible to all authenticated users)
-Route::prefix('profile')->name('profile.')->group(function () {
+Route::prefix('profile')->name('profile.')->middleware('auth')->group(function () {
     Route::get('/', [ProfileController::class, 'show'])->name('show');
     Route::get('/edit', [ProfileController::class, 'edit'])->name('edit');
     Route::put('/update', [ProfileController::class, 'update'])->name('update');

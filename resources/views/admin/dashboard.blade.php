@@ -60,13 +60,19 @@
                 <p class="action-description">Add, edit, or remove users and manage roles</p>
             </a>
 
+            <a href="{{ route('admin.tickets.index') }}" class="action-card">
+                <div class="action-icon">📋</div>
+                <h3 class="action-title">Ticket Management</h3>
+                <p class="action-description">Add, edit, or remove users and manage roles</p>
+            </a>
+
             <a href="{{ route('admin.settings') }}" class="action-card">
                 <div class="action-icon">⚙️</div>
                 <h3 class="action-title">System Settings</h3>
                 <p class="action-description">Configure system-wide settings and preferences</p>
             </a>
 
-            <a href="{{ route('admin.labs') }}" class="action-card">
+            <a href="{{ route('admin.labs.index') }}" class="action-card">
                 <div class="action-icon">🖥️</div>
                 <h3 class="action-title">Lab Configuration</h3>
                 <p class="action-description">Manage lab layouts and equipment IDs</p>

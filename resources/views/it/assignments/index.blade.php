@@ -13,6 +13,12 @@
             <p>Tickets currently assigned to you</p>
         </div>
 
+        @if(session('success'))
+            <div class="alert alert-success" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.3); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; color: #34d399;">
+                {{ session('success') }}
+            </div>
+        @endif
+
         <!-- Stats Row -->
         <div class="stats-row">
             <div class="stat-card">
@@ -34,7 +40,7 @@
         </div>
 
         <!-- Filter Tabs -->
-        <form method="GET" action="{{ route('it.assignments') }}">
+        <form method="GET" action="{{ route('it.assignments.index') }}">
             <div class="filter-tabs">
                 <button type="submit" name="status" value="" class="tab {{ !request('status') ? 'active' : '' }}">
                     All Assignments ({{ $stats['total_assigned'] }})
@@ -51,7 +57,7 @@
         <!-- Tickets Grid -->
         <div class="tickets-grid">
             @forelse($tickets as $ticket)
-                <div class="ticket-card {{ $ticket->priority === 'high' ? 'priority-high' : '' }}">
+                <div class="ticket-card {{ $ticket->priority === 'high' ? 'priority-high' : '' }}" onclick="window.location.href='{{ route('it.assignments.show', $ticket->id) }}'" style="cursor: pointer;">
                     <div class="ticket-header">
                         <div>
                             <div class="ticket-id">{{ $ticket->ticket_number }}</div>
@@ -80,9 +86,9 @@
                     </p>
                     <div class="ticket-footer">
                         <span class="status-badge status-{{ $ticket->status_color }}">{{ ucfirst(str_replace('-', ' ', $ticket->status)) }}</span>
-                        <div class="ticket-actions">
-                            <a href="{{ route('it.tickets.show', $ticket->id) }}" class="action-btn">View Details</a>
-                            <a href="{{ route('it.tickets.edit', $ticket->id) }}" class="action-btn">Update Status</a>
+                        <div class="ticket-actions" onclick="event.stopPropagation();">
+                            <a href="{{ route('it.assignments.show', $ticket->id) }}" class="action-btn">View Details</a>
+                            <a href="{{ route('it.assignments.edit', $ticket->id) }}" class="action-btn">Update Status</a>
                         </div>
                     </div>
                 </div>
