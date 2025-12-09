@@ -29,7 +29,7 @@
 }
 
 /* New Status - Blue */
-.status-new {
+.status-info {
     background: var(--color-info-bg);
     color: var(--color-info-light);
     border: var(--border-width) solid var(--color-info-border);
@@ -206,15 +206,34 @@
 
 /* Full priority badge variant (IT ticket detail page) */
 .priority-badge.priority-high {
-    padding: 0.6rem 1.2rem;
+    padding: 0.5rem 1rem;
     border-radius: 20px;
     font-weight: var(--font-weight-semibold);
-    font-size: var(--font-size-md);
+    font-size: var(--font-size-sm);
     background: var(--color-danger-bg);
     color: var(--color-danger);
     border: var(--border-width) solid var(--color-danger-border);
 }
 
+.priority-badge.priority-medium {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-sm);
+    background: var(--color-warning-bg);
+    color: var(--color-warning);
+    border: var(--border-width) solid var(--color-warning-border);
+}
+
+.priority-badge.priority-low {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-sm);
+    background: var(--color-success-bg);
+    color: var(--color-success);
+    border: var(--border-width) solid var(--color-success-border);
+}
 /* ============================================
    ALERT BADGE
    Used in: IT Dashboard priority alerts

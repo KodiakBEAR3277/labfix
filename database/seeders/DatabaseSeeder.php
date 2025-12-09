@@ -25,5 +25,7 @@ class DatabaseSeeder extends Seeder
         
         // 5. Create reports (depends on users, labs, and equipment)
         $this->call(ReportSeeder::class);
+
+        $this->call(SettingsSeeder::class);
     }
 }

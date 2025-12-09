@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'LabFix') - Computer Lab Management</title>
+    <title>@yield('title', 'Dashboard') - {{ \App\Models\Setting::get('system_name', 'LabFix') }}</title>
     
     <link rel="stylesheet" href="{{ asset('css/main.css') }}">
     @stack('styles')

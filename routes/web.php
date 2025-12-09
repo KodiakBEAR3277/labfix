@@ -12,9 +12,11 @@ use App\Http\Controllers\IT\DashboardController as ITDashboardController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\IT\AssignmentController;
 use App\Http\Controllers\Admin\TicketController as AdminTicketController;
+use App\Http\Controllers\Admin\SettingsController;
 
 // Public routes
 Route::get('/', fn() => view('landing'))->name('landing');
+Route::get('/contact', fn() => view('contact'))->name('contact');
 
 // Auth routes
 Route::middleware('guest')->group(function () {
@@ -95,6 +97,12 @@ Route::middleware('auth')->group(function () {
         Route::post('/tickets/bulk-update', [AdminTicketController::class, 'bulkUpdate'])->name('tickets.bulk-update');
         Route::resource('tickets', AdminTicketController::class);
     });
+});
+
+// Admin Settings
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/admin/settings', [SettingsController::class, 'index'])->name('admin.settings');
+    Route::put('/admin/settings', [SettingsController::class, 'update'])->name('admin.settings.update');
 });
 
 // Profile routes (accessible to all authenticated users)

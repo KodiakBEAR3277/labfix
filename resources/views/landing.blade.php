@@ -15,7 +15,7 @@
             <div class="nav-links">
                 <a href="#features" class="nav-link">Features</a>    
                 <a href="#about" class="nav-link">About</a>
-                <a href="#contact" class="nav-link">Contact</a>
+                <a href="{{ route('contact') }}" class="nav-link">Contact</a>
             </div>
         </div>
         @auth

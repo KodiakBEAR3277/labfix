@@ -7,6 +7,7 @@ use App\Models\Report;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Setting;
 
 class ReportController extends Controller
 {
@@ -116,6 +117,7 @@ class ReportController extends Controller
             'description' => $validated['description'],
             'attachments' => $attachmentPaths,
             'status' => 'new',
+            // Use system setting for default priority, with keyword detection override
             'priority' => $this->determinePriority($validated),
         ]);
 
@@ -139,6 +141,7 @@ class ReportController extends Controller
             }
         }
 
-        return 'medium';
+        // Use system setting for default priority
+        return Setting::get('default_priority', 'medium');
     }
 }

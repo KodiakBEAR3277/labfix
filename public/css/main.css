@@ -36,6 +36,7 @@
 
 /* Landing page specific styles */
 @import 'layouts/landing.css';
+@import 'layouts/contact.css';
 
 /* Authentication pages */
 @import 'layouts/auth.css';

@@ -46,17 +46,40 @@ class Report extends Model
         return $this->belongsTo(User::class, 'assigned_to');
     }
 
-    // Generate unique ticket number
+    // Relationship: Equipment
+    public function equipment(): BelongsTo
+    {
+        return $this->belongsTo(Equipment::class);
+    }
+
+    /**
+     * Generate unique ticket number based on system settings
+     */
     public static function generateTicketNumber(): string
     {
+        $format = \App\Models\Setting::get('ticket_number_format', 'format_1');
+        
         $year = date('Y');
+        $month = date('m');
+        $day = date('d');
+        
+        // Get the last ticket number for this year to increment
         $lastTicket = self::whereYear('created_at', $year)
             ->orderBy('id', 'desc')
             ->first();
         
-        $number = $lastTicket ? (int) substr($lastTicket->ticket_number, -3) + 1 : 1;
+        // Extract the last 4-digit number and increment
+        $number = $lastTicket ? (int) substr($lastTicket->ticket_number, -4) + 1 : 1;
+        $paddedNumber = str_pad($number, 4, '0', STR_PAD_LEFT);
         
-        return 'TKT-' . $year . '-' . str_pad($number, 3, '0', STR_PAD_LEFT);
+        return match($format) {
+            'format_1' => "TKT-{$year}-{$paddedNumber}",              // TKT-2025-0001
+            'format_2' => "TKT{$year}{$paddedNumber}",                // TKT20250001
+            'format_3' => "TKT-{$year}{$month}-{$paddedNumber}",      // TKT-202512-0001
+            'format_4' => "TKT-{$year}{$month}{$day}-{$paddedNumber}", // TKT-20251209-0001
+            'format_5' => "TICKET-{$year}-{$paddedNumber}",           // TICKET-2025-0001
+            default => "TKT-{$year}-{$paddedNumber}",                 // Fallback to format_1
+        };
     }
 
     // Get formatted ticket ID for display
@@ -123,11 +146,6 @@ class Report extends Model
     public function scopeStatus($query, $status)
     {
         return $query->where('status', $status);
-    }
-    // Relationship: Equipment
-    public function equipment(): BelongsTo
-    {
-        return $this->belongsTo(Equipment::class);
     }
 
     // Override boot to update equipment status when report changes

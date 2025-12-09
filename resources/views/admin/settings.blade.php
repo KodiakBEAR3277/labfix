@@ -13,210 +13,149 @@
             <p>Configure system-wide settings and preferences</p>
         </div>
 
-        <div class="settings-grid">
-            <!-- General Settings -->
-            <div class="settings-card">
-                <div class="card-header">
-                    <div class="card-icon">⚙️</div>
-                    <h2 class="card-title">General Settings</h2>
-                </div>
-                
-                <div class="form-group">
-                    <label>System Name</label>
-                    <input type="text" value="LabFix - Computer Lab Management">
-                    <p class="help-text">This will be displayed throughout the application</p>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Default Language</label>
-                        <select>
-                            <option>English</option>
-                            <option>Filipino</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Timezone</label>
-                        <select>
-                            <option>Asia/Manila (PHT)</option>
-                            <option>UTC</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Support Email</label>
-                    <input type="email" value="support@labfix.edu">
-                    <p class="help-text">Email address for system notifications and support</p>
-                </div>
+        @if(session('success'))
+            <div class="alert alert-success" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.3); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; color: #34d399;">
+                {{ session('success') }}
             </div>
+        @endif
 
-            <!-- Notification Settings -->
-            <div class="settings-card">
-                <div class="card-header">
-                    <div class="card-icon">🔔</div>
-                    <h2 class="card-title">Notification Settings</h2>
-                </div>
+        <form action="{{ route('admin.settings.update') }}" method="POST">
+            @csrf
+            @method('PUT')
 
-                <div class="toggle-item">
-                    <div class="toggle-info">
-                        <h4>Email Notifications</h4>
-                        <p>Send email alerts for new tickets and updates</p>
+            <div class="settings-grid">
+                <!-- General Settings -->
+                <div class="settings-card">
+                    <div class="card-header">
+                        <div class="card-icon">⚙️</div>
+                        <h2 class="card-title">General Settings</h2>
                     </div>
-                    <div class="toggle-switch active" onclick="this.classList.toggle('active')">
-                        <div class="toggle-slider"></div>
-                    </div>
-                </div>
-
-                <div class="toggle-item">
-                    <div class="toggle-info">
-                        <h4>Notify Users on Status Change</h4>
-                        <p>Automatically notify users when ticket status changes</p>
-                    </div>
-                    <div class="toggle-switch active" onclick="this.classList.toggle('active')">
-                        <div class="toggle-slider"></div>
-                    </div>
-                </div>
-
-                <div class="toggle-item">
-                    <div class="toggle-info">
-                        <h4>Notify IT on New Tickets</h4>
-                        <p>Alert IT support team when new tickets are submitted</p>
-                    </div>
-                    <div class="toggle-switch active" onclick="this.classList.toggle('active')">
-                        <div class="toggle-slider"></div>
-                    </div>
-                </div>
-
-                <div class="toggle-item">
-                    <div class="toggle-info">
-                        <h4>Daily Summary Reports</h4>
-                        <p>Send daily summary to administrators</p>
-                    </div>
-                    <div class="toggle-switch" onclick="this.classList.toggle('active')">
-                        <div class="toggle-slider"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Ticket Settings -->
-            <div class="settings-card">
-                <div class="card-header">
-                    <div class="card-icon">📋</div>
-                    <h2 class="card-title">Ticket Settings</h2>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Auto-Close Resolved Tickets After</label>
-                        <select>
-                            <option>Never</option>
-                            <option>24 hours</option>
-                            <option>3 days</option>
-                            <option selected>7 days</option>
-                            <option>14 days</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Default Priority</label>
-                        <select>
-                            <option>Low</option>
-                            <option selected>Medium</option>
-                            <option>High</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Ticket ID Format</label>
-                    <input type="text" value="TKT-{YEAR}-{NUMBER}" disabled>
-                    <p class="help-text">Example: TKT-2025-001</p>
-                </div>
-
-                <div class="toggle-item">
-                    <div class="toggle-info">
-                        <h4>Allow Attachments</h4>
-                        <p>Users can upload screenshots and files</p>
-                    </div>
-                    <div class="toggle-switch active" onclick="this.classList.toggle('active')">
-                        <div class="toggle-slider"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Priority Rules -->
-            <div class="settings-card">
-                <div class="card-header">
-                    <div class="card-icon">⚠️</div>
-                    <h2 class="card-title">Priority Rules</h2>
-                </div>
-
-                <div class="priority-rules">
-                    <div class="priority-rule">
-                        <div class="priority-icon">🔴</div>
-                        <div class="priority-info">
-                            <h4>High Priority</h4>
-                            <p>Critical issues affecting multiple users or lab operations</p>
+                    
+                    @foreach($settings['general'] as $setting)
+                        <div class="form-group">
+                            <label>{{ ucwords(str_replace('_', ' ', $setting->key)) }}</label>
+                            @if($setting->type === 'string')
+                                <input type="text" name="settings[{{ $setting->key }}]" value="{{ $setting->value }}">
+                            @endif
                         </div>
-                    </div>
-
-                    <div class="priority-rule">
-                        <div class="priority-icon">🟡</div>
-                        <div class="priority-info">
-                            <h4>Medium Priority</h4>
-                            <p>Standard issues affecting single workstation functionality</p>
-                        </div>
-                    </div>
-
-                    <div class="priority-rule">
-                        <div class="priority-icon">🟢</div>
-                        <div class="priority-info">
-                            <h4>Low Priority</h4>
-                            <p>Minor issues or enhancement requests</p>
-                        </div>
-                    </div>
+                    @endforeach
                 </div>
 
-                <div class="form-group" style="margin-top: 1.5rem;">
-                    <label>Auto-Escalate After</label>
-                    <select>
-                        <option>Never</option>
-                        <option>4 hours</option>
-                        <option selected>8 hours</option>
-                        <option>24 hours</option>
-                    </select>
-                    <p class="help-text">Automatically increase priority if ticket is unresolved</p>
+                <!-- Notification Settings -->
+                <div class="settings-card">
+                    <div class="card-header">
+                        <div class="card-icon">🔔</div>
+                        <h2 class="card-title">Notification Settings</h2>
+                    </div>
+
+                    @foreach($settings['notifications'] as $setting)
+                        <div class="toggle-item">
+                            <div class="toggle-info">
+                                <h4>{{ ucwords(str_replace('_', ' ', str_replace('_enabled', '', $setting->key))) }}</h4>
+                            </div>
+                            <div class="toggle-switch {{ $setting->value ? 'active' : '' }}" onclick="toggleCheckbox(this, '{{ $setting->key }}')">
+                                <div class="toggle-slider"></div>
+                            </div>
+                            <input type="checkbox" name="settings[{{ $setting->key }}]" id="{{ $setting->key }}" value="1" {{ $setting->value ? 'checked' : '' }} style="display: none;">
+                        </div>
+                    @endforeach
+                </div>
+
+                <!-- Ticket Settings -->
+                <div class="settings-card">
+                    <div class="card-header">
+                        <div class="card-icon">📋</div>
+                        <h2 class="card-title">Ticket Settings</h2>
+                    </div>
+
+                    @foreach($settings['tickets'] as $setting)
+                        <div class="form-group">
+                            <label>{{ ucwords(str_replace('_', ' ', $setting->key)) }}</label>
+                            
+                            @if($setting->key === 'ticket_number_format')
+                                {{-- Special handling for ticket number format --}}
+                                <select name="settings[{{ $setting->key }}]">
+                                    @php
+                                        $formats = [
+                                            'format_1' => 'TKT-YYYY-0001 (e.g., TKT-2025-0001)',
+                                            'format_2' => 'TKTYYYY0001 (e.g., TKT20250001)',
+                                            'format_3' => 'TKT-YYYYMM-0001 (e.g., TKT-202512-0001)',
+                                            'format_4' => 'TKT-YYYYMMDD-0001 (e.g., TKT-20251209-0001)',
+                                            'format_5' => 'TICKET-YYYY-0001 (e.g., TICKET-2025-0001)',
+                                        ];
+                                    @endphp
+                                    
+                                    @foreach($formats as $key => $label)
+                                        <option value="{{ $key }}" {{ $setting->value === $key ? 'selected' : '' }}>
+                                            {{ $label }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <p class="help-text">This format will be used for all new tickets. Existing tickets won't change.</p>
+                                
+                            @elseif($setting->type === 'integer')
+                                <input type="number" name="settings[{{ $setting->key }}]" value="{{ $setting->value }}" min="0">
+                                
+                            @elseif($setting->type === 'boolean')
+                                <div class="toggle-item">
+                                    <div class="toggle-switch {{ $setting->value ? 'active' : '' }}" onclick="toggleCheckbox(this, '{{ $setting->key }}')">
+                                        <div class="toggle-slider"></div>
+                                    </div>
+                                    <input type="checkbox" name="settings[{{ $setting->key }}]" id="{{ $setting->key }}" value="1" {{ $setting->value ? 'checked' : '' }} style="display: none;">
+                                </div>
+                                
+                            @else
+                                <input type="text" name="settings[{{ $setting->key }}]" value="{{ $setting->value }}">
+                            @endif
+                        </div>
+                    @endforeach
+                    
+                    <p class="info-label">Note: to disable the automatic functions, simply place the values at 0</p>
+                </div>
+
+                <!-- Maintenance Mode -->
+                <div class="settings-card">
+                    <div class="card-header">
+                        <div class="card-icon">🔧</div>
+                        <h2 class="card-title">Maintenance Mode</h2>
+                    </div>
+
+                    @foreach($settings['maintenance'] as $setting)
+                        @if($setting->type === 'boolean')
+                            <div class="toggle-item">   
+                                <div class="toggle-info">
+                                    <h4>{{ ucwords(str_replace('_', ' ', $setting->key)) }}</h4>
+                                </div>
+                                <div class="toggle-switch {{ $setting->value ? 'active' : '' }}" onclick="toggleCheckbox(this, '{{ $setting->key }}')">
+                                    <div class="toggle-slider"></div>
+                                </div>
+                                <input type="checkbox" name="settings[{{ $setting->key }}]" id="{{ $setting->key }}" value="1" {{ $setting->value ? 'checked' : '' }} style="display: none;">
+                            </div>
+                        @else
+                            <div class="form-group">
+                                <label>{{ ucwords(str_replace('_', ' ', $setting->key)) }}</label>
+                                <textarea name="settings[{{ $setting->key }}]">{{ $setting->value }}</textarea>
+                            </div>
+                        @endif
+                    @endforeach
                 </div>
             </div>
 
-            <!-- Maintenance Mode -->
-            <div class="settings-card">
-                <div class="card-header">
-                    <div class="card-icon">🔧</div>
-                    <h2 class="card-title">Maintenance Mode</h2>
-                </div>
-
-                <div class="toggle-item">
-                    <div class="toggle-info">
-                        <h4>Enable Maintenance Mode</h4>
-                        <p>Temporarily disable ticket submissions for system maintenance</p>
-                    </div>
-                    <div class="toggle-switch" onclick="this.classList.toggle('active')">
-                        <div class="toggle-slider"></div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Maintenance Message</label>
-                    <textarea placeholder="The system is currently undergoing maintenance. Please try again later.">The system is currently undergoing maintenance. Please try again later.</textarea>
-                </div>
+            <!-- Action Buttons -->
+            <div class="action-buttons" style="margin-top: 2rem;">
+                <button type="submit" class="btn btn-primary">Save All Changes</button>
+                <button type="button" class="btn btn-secondary" onclick="location.reload()">Cancel</button>
             </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="action-buttons">
-            <button class="btn btn-primary">Save All Changes</button>
-            <button class="btn btn-secondary">Reset to Defaults</button>
-        </div>
+        </form>
     </div>
 @endsection
+
+@push('scripts')
+<script>
+    function toggleCheckbox(toggleElement, checkboxId) {
+        toggleElement.classList.toggle('active');
+        const checkbox = document.getElementById(checkboxId);
+        checkbox.checked = toggleElement.classList.contains('active');
+    }
+</script>
+@endpush
