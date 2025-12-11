@@ -19,6 +19,12 @@
             </div>
         @endif
 
+        @if(session('error'))
+            <div class="alert alert-danger" style="background: rgba(239, 68, 68, 0.2); border: 1px solid rgba(239, 68, 68, 0.3); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; color: #ef4444;">
+                {{ session('error') }}
+            </div>
+        @endif
+
         <!-- Stats Row -->
         <div class="stats-row">
             <div class="stat-card">
@@ -73,12 +79,12 @@
                         <th>Status</th>
                         <th>Priority</th>
                         <th>Date</th>
-                        <th>Action</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($reports as $report)
-                        <tr onclick="window.location.href='{{ route('user.reports.show', $report->id) }}'" style="cursor: pointer;">
+                        <tr>
                             <td class="ticket-id">{{ $report->ticket_number }}</td>
                             <td>{{ $report->title }}</td>
                             <td>{{ $report->equipment->lab->name }}</td>
@@ -92,9 +98,24 @@
                             </td>
                             <td>{{ $report->created_at->format('M d, Y') }}</td>
                             <td>
-                                <button class="action-btn" onclick="event.stopPropagation(); window.location.href='{{ route('user.reports.show', $report->id) }}'">
-                                    View
-                                </button>
+                                <div class="action-menu">
+                                    <a href="{{ route('user.reports.show', $report->id) }}" class="action-btn">View</a>
+                                    
+                                    @if(!$report->assigned_to)
+                                        {{-- Only show Edit and Delete if not yet assigned --}}
+                                        <a href="{{ route('user.reports.edit', $report->id) }}" class="action-btn" style="color: #3b82f6;">Edit</a>
+                                        <form action="{{ route('user.reports.destroy', $report->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to cancel this ticket?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="action-btn" style="color: #ef4444; border: none; background: none; cursor: pointer; padding: 0; font: inherit;">Cancel</button>
+                                        </form>
+                                    @else
+                                        {{-- Show indicator that it's assigned --}}
+                                        <span class="action-btn" style="opacity: 0.5; cursor: not-allowed;" title="Cannot edit - ticket is assigned">
+                                            🔒 Locked
+                                        </span>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                     @empty
@@ -146,6 +167,16 @@
                     </div>
                 </div>
             @endif
+        </div>
+
+        <!-- Info Banner -->
+        <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); padding: 1rem; border-radius: 8px; margin-top: 1.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem; color: #3b82f6;">
+                <span style="font-size: 1.5rem;">ℹ️</span>
+                <div style="flex: 1;">
+                    <strong>Note:</strong> You can edit or cancel tickets before they're assigned to a technician. Once assigned, contact the technician to make changes.
+                </div>
+            </div>
         </div>
     </div>
 @endsection
