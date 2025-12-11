@@ -92,17 +92,17 @@
         <form method="GET" action="{{ route('admin.tickets.index') }}" id="filterForm">
             <div class="filter-bar">
                 <div class="filter-row">
-                    <div class="search-box">
-                        <span class="search-icon">🔍</span>
-                        <input 
-                            type="text" 
-                            name="search"
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input 
+                        type="text" 
+                        name="search"
                             placeholder="Search by ticket ID, title, reporter, or location..."
-                            value="{{ request('search') }}"
-                            onchange="document.getElementById('filterForm').submit()"
-                        >
-                    </div>
-                    <div class="filter-group">
+                        value="{{ request('search') }}"
+                        onchange="document.getElementById('filterForm').submit()"
+                    >
+                </div>
+                <div class="filter-group">
                         <span class="filter-label">Status:</span>
                         <select name="status" onchange="document.getElementById('filterForm').submit()">
                             <option value="all" {{ request('status') === 'all' || !request('status') ? 'selected' : '' }}>All Status</option>
@@ -234,7 +234,7 @@
                     @endforelse
                 </tbody>
             </table>
-
+            
             <!-- Pagination -->
             @if($tickets->hasPages())
                 <div class="pagination">
@@ -289,7 +289,7 @@
                 <div class="modal-actions">
                     <button type="submit" class="btn btn-primary">Assign Selected Tickets</button>
                     <button type="button" class="btn btn-cancel" onclick="closeQuickAssignModal()">Cancel</button>
-                </div>
+            </div>
             </form>
         </div>
     </div>

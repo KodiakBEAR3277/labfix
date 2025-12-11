@@ -7,6 +7,7 @@ use App\Models\Report;
 use App\Models\User;
 use App\Models\Lab;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class TicketController extends Controller
 {
@@ -208,5 +209,47 @@ class TicketController extends Controller
         return redirect()
             ->route('admin.tickets.index')
             ->with('success', "Ticket {$ticketNumber} has been deleted successfully!");
+    }
+
+    // View trashed tickets
+    public function trashed()
+    {
+        $tickets = Report::onlyTrashed()
+            ->with(['reporter', 'equipment.lab'])
+            ->latest('deleted_at')
+            ->paginate(20);
+        
+        return view('admin.tickets.trashed', compact('tickets'));
+    }
+
+    // Restore a ticket
+    public function restore($id)
+    {
+        $ticket = Report::onlyTrashed()->findOrFail($id);
+        $ticket->restore();
+        
+        return redirect()
+            ->route('admin.tickets.index')
+            ->with('success', "Ticket {$ticket->ticket_number} has been restored!");
+    }
+
+    // Permanently delete
+    public function forceDelete($id)
+    {
+        $ticket = Report::onlyTrashed()->findOrFail($id);
+        $ticketNumber = $ticket->ticket_number;
+        
+        // Delete attachments
+        if ($ticket->attachments) {
+            foreach ($ticket->attachments as $attachment) {
+                Storage::disk('public')->delete($attachment);
+            }
+        }
+        
+        $ticket->forceDelete();
+        
+        return redirect()
+            ->route('admin.tickets.trashed')
+            ->with('success', "Ticket {$ticketNumber} has been permanently deleted!");
     }
 }

@@ -129,6 +129,82 @@ class ReportController extends Controller
             ->with('success', "Report submitted successfully! Ticket: {$report->ticket_number}");
     }
 
+    // Show edit form
+    public function edit($id)
+    {
+        $report = Report::where('user_id', Auth::id())->findOrFail($id);
+        
+        // Only allow editing if ticket hasn't been assigned yet
+        if ($report->assigned_to) {
+            return redirect()
+                ->route('user.reports.show', $report->id)
+                ->with('error', 'Cannot edit ticket that has been assigned to a technician.');
+        }
+        
+        return view('user.reports.edit', compact('report'));
+    }
+
+    // Update report
+    public function update(Request $request, $id)
+    {
+        $report = Report::where('user_id', Auth::id())->findOrFail($id);
+        
+        // Only allow updating if ticket hasn't been assigned yet
+        if ($report->assigned_to) {
+            return redirect()
+                ->route('user.reports.show', $report->id)
+                ->with('error', 'Cannot edit ticket that has been assigned to a technician.');
+        }
+        
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'description' => ['required', 'string', 'min:10'],
+            'category' => ['required', 'in:hardware,software,network,other'],
+            'attachments.*' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:5120'],
+        ]);
+
+        // Handle new file uploads
+        $attachmentPaths = $report->attachments ?? [];
+        if ($request->hasFile('attachments')) {
+            foreach ($request->file('attachments') as $file) {
+                $path = $file->store('attachments', 'public');
+                $attachmentPaths[] = $path;
+            }
+        }
+
+        $report->update([
+            'title' => $validated['title'],
+            'description' => $validated['description'],
+            'category' => $validated['category'],
+            'attachments' => $attachmentPaths,
+        ]);
+
+        return redirect()
+            ->route('user.reports.show', $report->id)
+            ->with('success', 'Report updated successfully!');
+    }
+
+    // Soft delete report
+    public function destroy($id)
+    {
+        $report = Report::where('user_id', Auth::id())->findOrFail($id);
+        
+        // Only allow deletion if ticket hasn't been assigned yet
+        if ($report->assigned_to) {
+            return redirect()
+                ->route('user.reports.show', $report->id)
+                ->with('error', 'Cannot delete ticket that has been assigned to a technician. Please contact support if you need to cancel this ticket.');
+        }
+        
+        // Soft delete
+        $ticketNumber = $report->ticket_number;
+        $report->delete();
+
+        return redirect()
+            ->route('user.reports.index')
+            ->with('success', "Ticket {$ticketNumber} has been cancelled. Admins can restore it if needed.");
+    }
+
     // Auto-determine priority based on keywords
     private function determinePriority(array $data): string
     {
@@ -141,7 +217,6 @@ class ReportController extends Controller
             }
         }
 
-        // Use system setting for default priority
         return Setting::get('default_priority', 'medium');
     }
 }

@@ -46,7 +46,7 @@ Route::middleware('auth')->group(function () {
     // User routes
     Route::prefix('user')->name('user.')->group(function () {
         Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
-        Route::resource('reports', \App\Http\Controllers\User\ReportController::class)->except(['edit', 'update', 'destroy']);
+        Route::resource('reports', \App\Http\Controllers\User\ReportController::class);
         
         Route::get('/lab-status', fn() => view('user.lab-status'))->name('lab-status');
         Route::get('/knowledge-base', [\App\Http\Controllers\User\KnowledgeBaseController::class, 'index'])->name('knowledge-base');
@@ -71,7 +71,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/tickets/{id}/edit', [TicketController::class, 'edit'])->name('tickets.edit');
         Route::put('/tickets/{id}', [TicketController::class, 'update'])->name('tickets.update');
         Route::post('/tickets/{id}/assign-self', [TicketController::class, 'assignToSelf'])->name('tickets.assign-self');
-        
         // Bulk operations - ADMIN ONLY
         Route::get('/tickets/bulk', [TicketController::class, 'bulk'])->name('tickets.bulk')->middleware('role:admin');
         Route::post('/tickets/bulk-update', [TicketController::class, 'bulkUpdate'])->name('tickets.bulk-update')->middleware('role:admin');
@@ -92,6 +91,11 @@ Route::middleware('auth')->group(function () {
         // Equipment management
         Route::resource('equipment', \App\Http\Controllers\Admin\EquipmentController::class)->except(['index', 'show']);
         
+        // In routes/web.php - Admin section
+        Route::get('/tickets/trashed', [AdminTicketController::class, 'trashed'])->name('tickets.trashed');
+        Route::post('/tickets/{id}/restore', [AdminTicketController::class, 'restore'])->name('tickets.restore');
+        Route::delete('/tickets/{id}/force-delete', [AdminTicketController::class, 'forceDelete'])->name('tickets.force-delete');
+
         // Ticket Management (NEW)
         Route::get('/tickets/bulk', [AdminTicketController::class, 'bulk'])->name('tickets.bulk');
         Route::post('/tickets/bulk-update', [AdminTicketController::class, 'bulkUpdate'])->name('tickets.bulk-update');
