@@ -12,7 +12,7 @@ class LabSeeder extends Seeder
         $labs = [
             [
                 'name' => 'Computer Lab A',
-                'code' => 'LAB-A',
+                'code' => 'EB-202',
                 'location' => 'Building 1, 2nd Floor',
                 'capacity' => 20,
                 'description' => 'General purpose computer laboratory with standard desktop computers',
@@ -20,7 +20,7 @@ class LabSeeder extends Seeder
             ],
             [
                 'name' => 'Computer Lab B',
-                'code' => 'LAB-B',
+                'code' => 'EB-203',
                 'location' => 'Building 2, 1st Floor',
                 'capacity' => 25,
                 'description' => 'Large computer laboratory for programming courses',
@@ -28,23 +28,23 @@ class LabSeeder extends Seeder
             ],
             [
                 'name' => 'Computer Lab C',
-                'code' => 'LAB-C',
+                'code' => 'EB-204',
                 'location' => 'Building 1, 3rd Floor',
                 'capacity' => 20,
                 'description' => 'Computer laboratory with high-performance workstations',
                 'is_active' => true,
             ],
             [
-                'name' => 'Multimedia Lab',
-                'code' => 'LAB-MM',
-                'location' => 'Building 3, 2nd Floor',
+                'name' => 'Networking Lab',
+                'code' => 'EB-311',
+                'location' => 'Building 3, 3rd Floor',
                 'capacity' => 15,
                 'description' => 'Specialized lab for multimedia and design work',
                 'is_active' => true,
             ],
             [
                 'name' => 'Programming Lab',
-                'code' => 'LAB-PROG',
+                'code' => 'EB-306',
                 'location' => 'Building 2, 3rd Floor',
                 'capacity' => 18,
                 'description' => 'Advanced programming laboratory with development tools',
@@ -52,8 +52,8 @@ class LabSeeder extends Seeder
             ],
             [
                 'name' => 'Library Computer Area',
-                'code' => 'LAB-LIB',
-                'location' => 'Library, 1st Floor',
+                'code' => 'LRC',
+                'location' => 'Library, 2nd Floor',
                 'capacity' => 12,
                 'description' => 'Public access computers in the library',
                 'is_active' => true,

@@ -8,9 +8,11 @@ use App\Models\User;
 use App\Models\Lab;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Traits\LogsTicketTransactions;
 
 class TicketController extends Controller
 {
+    use LogsTicketTransactions;
     // Show all tickets with admin controls
     public function index(Request $request)
     {
@@ -110,16 +112,33 @@ class TicketController extends Controller
             'assigned_to' => ['nullable', 'exists:users,id'],
         ]);
 
-        $wasResolved = $ticket->status !== 'resolved' && $validated['status'] === 'resolved';
+        // Track what changed
+        $statusChanged = $ticket->status !== $validated['status'];
+        $priorityChanged = $ticket->priority !== $validated['priority'];
+        $assignmentChanged = $ticket->assigned_to !== $validated['assigned_to'];
 
+        // Store old values
+        $oldStatus = $ticket->status;
+        $oldPriority = $ticket->priority;
+
+        // Update the ticket
         $ticket->update([
             'status' => $validated['status'],
             'priority' => $validated['priority'],
             'assigned_to' => $validated['assigned_to'],
-            'assigned_at' => $validated['assigned_to'] && !$ticket->assigned_at ? now() : $ticket->assigned_at,
-            'resolved_at' => $wasResolved ? now() : $ticket->resolved_at,
         ]);
 
+        // LOG CHANGES
+        if ($statusChanged) {
+            $this->logStatusChange($ticket, $oldStatus, $validated['status']);
+        }
+        if ($priorityChanged) {
+            $this->logPriorityChange($ticket, $oldPriority, $validated['priority']);
+        }
+        if ($assignmentChanged && $validated['assigned_to']) {
+            $this->logAssignment($ticket, $validated['assigned_to']);
+        }
+        
         return redirect()
             ->route('admin.tickets.show', $ticket->id)
             ->with('success', 'Ticket updated successfully!');
@@ -152,47 +171,107 @@ class TicketController extends Controller
             'priority' => ['required_if:action,priority', 'nullable', 'in:low,medium,high'],
         ]);
 
-        $tickets = Report::whereIn('id', $validated['ticket_ids']);
+        $tickets = Report::whereIn('id', $validated['ticket_ids'])->get();
+        $updatedCount = 0;
 
-        switch ($validated['action']) {
-            case 'assign':
-                $tickets->update([
-                    'assigned_to' => $validated['assigned_to'],
-                    'status' => 'assigned',
-                    'assigned_at' => now(),
-                ]);
-                $message = 'Tickets assigned successfully!';
-                break;
+        foreach ($tickets as $ticket) {
+            switch ($validated['action']) {
+                case 'assign':
+                    $oldAssignedTo = $ticket->assigned_to;
+                    
+                    $ticket->update([
+                        'assigned_to' => $validated['assigned_to'],
+                        'status' => 'assigned',
+                    ]);
+                    
+                    // Log assignment
+                    $assignedUser = User::find($validated['assigned_to']);
+                    $this->logTransaction(
+                        $ticket,
+                        'assigned',
+                        'Ticket assigned to ' . $assignedUser->full_name,
+                        $oldAssignedTo,
+                        $validated['assigned_to']
+                    );
+                    
+                    // Log status change if it was changed
+                    if ($ticket->status !== 'assigned') {
+                        $this->logTransaction(
+                            $ticket,
+                            'status_changed',
+                            'Status changed to Assigned',
+                            $ticket->status,
+                            'assigned'
+                        );
+                    }
+                    
+                    $message = 'Tickets assigned successfully!';
+                    break;
 
-            case 'status':
-                $updateData = ['status' => $validated['status']];
-                if ($validated['status'] === 'resolved') {
-                    $updateData['resolved_at'] = now();
-                }
-                $tickets->update($updateData);
-                $message = 'Ticket status updated successfully!';
-                break;
+                case 'status':
+                    $oldStatus = $ticket->status;
+                    $updateData = ['status' => $validated['status']];
+                    
+                    $ticket->update($updateData);
+                    
+                    // Log status change
+                    $this->logTransaction(
+                        $ticket,
+                        'status_changed',
+                        'Status changed from ' . ucfirst(str_replace('-', ' ', $oldStatus)) . ' to ' . ucfirst(str_replace('-', ' ', $validated['status'])),
+                        $oldStatus,
+                        $validated['status']
+                    );
+                    
+                    $message = 'Ticket status updated successfully!';
+                    break;
 
-            case 'priority':
-                $tickets->update(['priority' => $validated['priority']]);
-                $message = 'Ticket priority updated successfully!';
-                break;
+                case 'priority':
+                    $oldPriority = $ticket->priority;
+                    
+                    $ticket->update(['priority' => $validated['priority']]);
+                    
+                    // Log priority change
+                    $this->logTransaction(
+                        $ticket,
+                        'priority_changed',
+                        'Priority changed from ' . ucfirst($oldPriority) . ' to ' . ucfirst($validated['priority']),
+                        $oldPriority,
+                        $validated['priority']
+                    );
+                    
+                    $message = 'Ticket priority updated successfully!';
+                    break;
 
-            case 'close':
-                $tickets->update([
-                    'status' => 'closed',
-                    'closed_at' => now(),
-                ]);
-                $message = 'Tickets closed successfully!';
-                break;
+                case 'close':
+                    $oldStatus = $ticket->status;
+                    
+                    $ticket->update([
+                        'status' => 'closed',
+                    ]);
+                    
+                    // Log status change to closed
+                    $this->logTransaction(
+                        $ticket,
+                        'status_changed',
+                        'Status changed from ' . ucfirst(str_replace('-', ' ', $oldStatus)) . ' to Closed',
+                        $oldStatus,
+                        'closed'
+                    );
+                    
+                    $message = 'Tickets closed successfully!';
+                    break;
 
-            default:
-                $message = 'Operation completed!';
+                default:
+                    $message = 'Operation completed!';
+            }
+            
+            $updatedCount++;
         }
 
         return redirect()
             ->route('admin.tickets.index')
-            ->with('success', $message);
+            ->with('success', $message . " ({$updatedCount} tickets updated)");
     }
 
     // Delete ticket (admin only)

@@ -96,7 +96,10 @@ Route::middleware('auth')->group(function () {
         Route::post('/tickets/{id}/restore', [AdminTicketController::class, 'restore'])->name('tickets.restore');
         Route::delete('/tickets/{id}/force-delete', [AdminTicketController::class, 'forceDelete'])->name('tickets.force-delete');
 
-        // Ticket Management (NEW)
+        // Transaction History 
+        Route::get('/transactions', [\App\Http\Controllers\Admin\TransactionController::class, 'index'])->name('transactions.index');
+
+        // Ticket Management
         Route::get('/tickets/bulk', [AdminTicketController::class, 'bulk'])->name('tickets.bulk');
         Route::post('/tickets/bulk-update', [AdminTicketController::class, 'bulkUpdate'])->name('tickets.bulk-update');
         Route::resource('tickets', AdminTicketController::class);

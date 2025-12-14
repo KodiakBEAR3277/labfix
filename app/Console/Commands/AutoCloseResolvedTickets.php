@@ -35,16 +35,37 @@ class AutoCloseResolvedTickets extends Command
         $cutoffDate = Carbon::now()->subDays($days);
         
         $tickets = Report::where('status', 'resolved')
-            ->where('resolved_at', '<=', $cutoffDate)
-            ->whereNull('closed_at')
-            ->get();
+            ->with('transactions')
+            ->get()
+            ->filter(function($ticket) use ($cutoffDate) {
+                // Find the resolved transaction
+                $resolvedTransaction = $ticket->transactions()
+                    ->where('action', 'status_changed')
+                    ->where('new_value', 'resolved')
+                    ->first();
+                    
+                return $resolvedTransaction && $resolvedTransaction->created_at <= $cutoffDate;
+            });
 
         $count = 0;
         foreach ($tickets as $ticket) {
+            $oldStatus = $ticket->status;
+            
             $ticket->update([
                 'status' => 'closed',
-                'closed_at' => now(),
             ]);
+            
+            // Log the status change
+            \App\Models\TicketTransaction::create([
+                'ticket_id' => $ticket->id,
+                'user_id' => 1, // System/Admin
+                'action' => 'status_changed',
+                'old_value' => $oldStatus,
+                'new_value' => 'closed',
+                'description' => 'Automatically closed after ' . $days . ' days in resolved status',
+                'created_at' => now(),
+            ]);
+            
             $count++;
         }
 

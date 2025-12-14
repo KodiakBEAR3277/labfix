@@ -175,13 +175,16 @@
                             <span class="info-label">Priority</span>
                             <span class="info-value priority-{{ $ticket->priority }}">{{ ucfirst($ticket->priority) }}</span>
                         </div>
+                        @php
+                            $assignedTransaction = $ticket->transactions()->where('action', 'assigned')->first();
+                        @endphp
                         <div class="info-item">
                             <span class="info-label">Time on Task</span>
-                            <span class="info-value">{{ $ticket->assigned_at ? $ticket->assigned_at->diffForHumans(null, true) : 'Just assigned' }}</span>
+                            <span class="info-value">{{ $assignedTransaction ? $assignedTransaction->created_at->diffForHumans(null, true) : 'Just assigned' }}</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Assigned</span>
-                            <span class="info-value">{{ $ticket->assigned_at ? $ticket->assigned_at->format('M d, g:i A') : 'Recently' }}</span>
+                            <span class="info-value">{{ $assignedTransaction ? $assignedTransaction->created_at->format('M d, g:i A') : 'Recently' }}</span>
                         </div>
                     </div>
                 </div>

@@ -63,16 +63,6 @@
                     </div>
 
                     <div class="auth-form-group">
-                        <label>Role</label>
-                        <select name="role" required>
-                            <option value="">Select your role</option>
-                            <option value="student" {{ old('role') == 'student' ? 'selected' : '' }}>Student</option>
-                            <option value="staff" {{ old('role') == 'staff' ? 'selected' : '' }}>Staff</option>
-                            <option value="it-support" {{ old('role') == 'it-support' ? 'selected' : '' }}>IT Support</option>
-                        </select>
-                    </div>
-
-                    <div class="auth-form-group">
                         <label>Password</label>
                         <input type="password" name="password" required>
                     </div>
@@ -101,6 +91,13 @@
                         <div class="auth-social-icon auth-facebook-icon"></div>
                         Facebook
                     </a>
+                </div>
+
+                <div class="auth-footer-text">
+                    <p style="color: #9ca3af; font-size: 0.9rem; margin-top: 1rem; text-align: center;">
+                        New accounts are created as <strong>Students</strong> by default.<br>
+                        Contact an administrator if you need a different role.
+                    </p>
                 </div>
             </div>
         </div>

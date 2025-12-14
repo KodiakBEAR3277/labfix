@@ -196,16 +196,22 @@
                             <span class="info-label">Created</span>
                             <span class="info-value">{{ $ticket->created_at->diffForHumans() }}</span>
                         </div>
-                        @if($ticket->assigned_at)
+                        @php
+                            $assignedTransaction = $ticket->transactions()->where('action', 'assigned')->first();
+                            $resolvedTransaction = $ticket->transactions()->where('action', 'status_changed')->where('new_value', 'resolved')->first();
+                        @endphp
+
+                        @if($assignedTransaction)
                             <div class="info-item">
-                                <span class="info-label">Assigned</span>
-                                <span class="info-value">{{ $ticket->assigned_at->diffForHumans() }}</span>
+                                <span class="info-label">Response Time</span>
+                                <span class="info-value">{{ $ticket->created_at->diffForHumans($assignedTransaction->created_at, true) }}</span>
                             </div>
                         @endif
-                        @if($ticket->resolved_at)
+
+                        @if($resolvedTransaction)
                             <div class="info-item">
-                                <span class="info-label">Resolved</span>
-                                <span class="info-value">{{ $ticket->resolved_at->diffForHumans() }}</span>
+                                <span class="info-label">Resolution Time</span>
+                                <span class="info-value">{{ $ticket->created_at->diffForHumans($resolvedTransaction->created_at, true) }}</span>
                             </div>
                         @endif
                     </div>

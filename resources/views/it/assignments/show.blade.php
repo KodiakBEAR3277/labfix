@@ -48,9 +48,12 @@
                         <span class="status-badge status-{{ $ticket->status_color }}">{{ ucfirst(str_replace('-', ' ', $ticket->status)) }}</span>
                     </div>
                 </div>
+                @php
+                    $assignedTransaction = $ticket->transactions->where('action', 'assigned')->first();
+                @endphp
                 <div class="meta-item">
                     <div class="meta-label">Assigned</div>
-                    <div class="meta-value">{{ $ticket->assigned_at ? $ticket->assigned_at->diffForHumans() : 'Just now' }}</div>
+                    <div class="meta-value">{{ $assignedTransaction ? $assignedTransaction->created_at->diffForHumans() : 'Just now' }}</div>
                 </div>
                 <div class="meta-item">
                     <div class="meta-label">Last Updated</div>
@@ -125,60 +128,7 @@
                 @endif
 
                 <!-- Activity Timeline -->
-                <div class="card">
-                    <h2 class="card-title">Activity Timeline</h2>
-                    <div class="timeline">
-                        @if($ticket->resolved_at)
-                            <div class="timeline-item">
-                                <div class="timeline-dot"></div>
-                                <div class="timeline-content">
-                                    <div class="timeline-header">
-                                        <span class="timeline-title">Ticket Resolved</span>
-                                        <span class="timeline-time">{{ $ticket->resolved_at->format('M d, Y g:i A') }}</span>
-                                    </div>
-                                    <p class="timeline-text">You marked this ticket as resolved</p>
-                                </div>
-                            </div>
-                        @endif
-
-                        @if($ticket->status === 'in-progress')
-                            <div class="timeline-item">
-                                <div class="timeline-dot"></div>
-                                <div class="timeline-content">
-                                    <div class="timeline-header">
-                                        <span class="timeline-title">Work Started</span>
-                                        <span class="timeline-time">{{ $ticket->updated_at->format('M d, Y g:i A') }}</span>
-                                    </div>
-                                    <p class="timeline-text">You started working on this ticket</p>
-                                </div>
-                            </div>
-                        @endif
-
-                        <div class="timeline-item">
-                            <div class="timeline-dot"></div>
-                            <div class="timeline-content">
-                                <div class="timeline-header">
-                                    <span class="timeline-title">Assigned to Me</span>
-                                    <span class="timeline-time">{{ $ticket->assigned_at ? $ticket->assigned_at->format('M d, Y g:i A') : $ticket->created_at->format('M d, Y g:i A') }}</span>
-                                </div>
-                                <p class="timeline-text">This ticket was assigned to you</p>
-                            </div>
-                        </div>
-
-                        <div class="timeline-item">
-                            <div class="timeline-dot"></div>
-                            <div class="timeline-content">
-                                <div class="timeline-header">
-                                    <span class="timeline-title">Ticket Created</span>
-                                    <span class="timeline-time">{{ $ticket->created_at->format('M d, Y g:i A') }}</span>
-                                </div>
-                                <p class="timeline-text">
-                                    Report submitted by {{ $ticket->reporter->full_name }}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <x-ticket-timeline :ticket="$ticket" />
             </div>
 
             <!-- Sidebar -->
@@ -225,14 +175,18 @@
                             <span class="info-label">Priority</span>
                             <span class="info-value priority-{{ $ticket->priority }}">{{ ucfirst($ticket->priority) }}</span>
                         </div>
+                        @php
+                            $assignedTransaction = $ticket->transactions->where('action', 'assigned')->first();
+                            $resolvedTransaction = $ticket->transactions->where('action', 'status_changed')->where('new_value', 'resolved')->first();
+                        @endphp
                         <div class="info-item">
                             <span class="info-label">Time on Task</span>
-                            <span class="info-value">{{ $ticket->assigned_at ? $ticket->assigned_at->diffForHumans(null, true) : 'Just assigned' }}</span>
+                            <span class="info-value">{{ $assignedTransaction ? $assignedTransaction->created_at->diffForHumans(null, true) : 'Just assigned' }}</span>
                         </div>
-                        @if($ticket->resolved_at)
+                        @if($resolvedTransaction)
                             <div class="info-item">
                                 <span class="info-label">Resolution Time</span>
-                                <span class="info-value">{{ $ticket->assigned_at->diffForHumans($ticket->resolved_at, true) }}</span>
+                                <span class="info-value">{{ $ticket->created_at->diffForHumans($resolvedTransaction->created_at, true) }}</span>
                             </div>
                         @endif
                     </div>

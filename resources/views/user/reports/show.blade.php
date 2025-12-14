@@ -126,64 +126,7 @@
                 @endif
 
                 <!-- Activity Timeline -->
-                <div class="content-card">
-                    <h2 class="card-title">Activity Timeline</h2>
-                    <div class="timeline">
-                        @if($report->closed_at)
-                            <div class="timeline-item">
-                                <div class="timeline-dot"></div>
-                                <div class="timeline-content">
-                                    <div class="timeline-header">
-                                        <span class="timeline-title">Ticket Closed</span>
-                                        <span class="timeline-time">{{ $report->closed_at->format('M d, Y g:i A') }}</span>
-                                    </div>
-                                    <p class="timeline-text">Issue marked as closed</p>
-                                </div>
-                            </div>
-                        @endif
-
-                        @if($report->resolved_at)
-                            <div class="timeline-item">
-                                <div class="timeline-dot"></div>
-                                <div class="timeline-content">
-                                    <div class="timeline-header">
-                                        <span class="timeline-title">Ticket Resolved</span>
-                                        <span class="timeline-time">{{ $report->resolved_at->format('M d, Y g:i A') }}</span>
-                                    </div>
-                                    <p class="timeline-text">Issue marked as resolved</p>
-                                </div>
-                            </div>
-                        @endif
-
-                        @if($report->assigned_at)
-                            <div class="timeline-item">
-                                <div class="timeline-dot"></div>
-                                <div class="timeline-content">
-                                    <div class="timeline-header">
-                                        <span class="timeline-title">Ticket Assigned</span>
-                                        <span class="timeline-time">{{ $report->assigned_at->format('M d, Y g:i A') }}</span>
-                                    </div>
-                                    <p class="timeline-text">
-                                        Assigned to {{ $report->assignedTo->full_name ?? 'IT Support' }}
-                                    </p>
-                                </div>
-                            </div>
-                        @endif
-
-                        <div class="timeline-item">
-                            <div class="timeline-dot"></div>
-                            <div class="timeline-content">
-                                <div class="timeline-header">
-                                    <span class="timeline-title">Ticket Created</span>
-                                    <span class="timeline-time">{{ $report->created_at->format('M d, Y g:i A') }}</span>
-                                </div>
-                                <p class="timeline-text">
-                                    Report submitted by {{ $report->reporter->full_name }}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <x-ticket-timeline :ticket="$report" />
             </div>
 
             <!-- Sidebar -->
@@ -199,16 +142,20 @@
                         <span class="info-label">Priority</span>
                         <span class="info-value priority-{{ $report->priority }}">{{ ucfirst($report->priority) }}</span>
                     </div>
-                    @if($report->assigned_at)
+                    @php
+                        $assignedTransaction = $report->transactions()->where('action', 'assigned')->first();
+                        $resolvedTransaction = $report->transactions()->where('action', 'status_changed')->where('new_value', 'resolved')->first();
+                    @endphp
+                    @if($assignedTransaction)
                         <div class="info-row">
                             <span class="info-label">Response Time</span>
-                            <span class="info-value">{{ $report->created_at->diffForHumans($report->assigned_at, true) }}</span>
+                            <span class="info-value">{{ $report->created_at->diffForHumans($assignedTransaction->created_at, true) }}</span>
                         </div>
                     @endif
-                    @if($report->resolved_at && $report->created_at)
+                    @if($resolvedTransaction)
                         <div class="info-row">
                             <span class="info-label">Resolution Time</span>
-                            <span class="info-value">{{ $report->created_at->diffForHumans($report->resolved_at, true) }}</span>
+                            <span class="info-value">{{ $report->created_at->diffForHumans($resolvedTransaction->created_at, true) }}</span>
                         </div>
                     @endif
                     <div class="info-row">
@@ -218,33 +165,33 @@
                 </div>
                 
                 @if(!$report->assigned_to && !$report->deleted_at)
-                <div class="card" style="margin-top: 1.5rem;">
-                    <h2 class="card-title">Manage Report</h2>
-                    <div class="action-buttons">
-                        <a href="{{ route('user.reports.edit', $report->id) }}" class="btn btn-primary">
-                            Edit Report
-                        </a>
-                        <form action="{{ route('user.reports.destroy', $report->id) }}" method="POST" 
-                            onsubmit="return confirm('Are you sure you want to cancel this ticket? Admins can restore it later if needed.');">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger">
-                                Cancel Ticket
-                            </button>
-                        </form>
+                    <div class="card" style="margin-top: 1.5rem;">
+                        <h2 class="card-title">Manage Report</h2>
+                        <div class="action-buttons">
+                            <a href="{{ route('user.reports.edit', $report->id) }}" class="btn btn-primary">
+                                Edit Report
+                            </a>
+                            <form action="{{ route('user.reports.destroy', $report->id) }}" method="POST" 
+                                onsubmit="return confirm('Are you sure you want to cancel this ticket? Admins can restore it later if needed.');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger">
+                                    Cancel Ticket
+                                </button>
+                            </form>
+                        </div>
+                        <p style="color: #9ca3af; font-size: 0.85rem; margin-top: 1rem; text-align: center;">
+                            Available until ticket is assigned
+                        </p>
                     </div>
-                    <p style="color: #9ca3af; font-size: 0.85rem; margin-top: 1rem; text-align: center;">
-                        Available until ticket is assigned
-                    </p>
-                </div>
-            @elseif($report->assigned_to)
-                <div class="card" style="margin-top: 1.5rem; background: rgba(45, 212, 191, 0.1); border-color: rgba(45, 212, 191, 0.3);">
-                    <h2 class="card-title" style="color: #2dd4bf;">✓ Ticket Assigned</h2>
-                    <p style="color: #d1d5db; font-size: 0.9rem; line-height: 1.6;">
-                        This ticket has been assigned and can no longer be edited. Contact the assigned technician if you need to make changes.
-                    </p>
-                </div>
-            @endif
+                @elseif($report->assigned_to)
+                    <div class="card" style="margin-top: 1.5rem; background: rgba(45, 212, 191, 0.1); border-color: rgba(45, 212, 191, 0.3);">
+                        <h2 class="card-title" style="color: #2dd4bf;">✓ Ticket Assigned</h2>
+                        <p style="color: #d1d5db; font-size: 0.9rem; line-height: 1.6;">
+                            This ticket has been assigned and can no longer be edited. Contact the assigned technician if you need to make changes.
+                        </p>
+                    </div>
+                @endif
 
                 <!-- Assigned Technician -->
                 @if($report->assignedTo)

@@ -125,66 +125,7 @@
                 @endif
 
                 <!-- Activity Timeline -->
-                <div class="card">
-                    <h2 class="card-title">Activity Timeline</h2>
-                    <div class="timeline">
-                        @if($ticket->closed_at)
-                            <div class="timeline-item">
-                                <div class="timeline-dot"></div>
-                                <div class="timeline-content">
-                                    <div class="timeline-header">
-                                        <span class="timeline-title">Ticket Closed</span>
-                                        <span class="timeline-time">{{ $ticket->closed_at->format('M d, Y g:i A') }}</span>
-                                    </div>
-                                    <p class="timeline-text">Issue marked as closed</p>
-                                </div>
-                            </div>
-                        @endif
-
-                        @if($ticket->resolved_at)
-                            <div class="timeline-item">
-                                <div class="timeline-dot"></div>
-                                <div class="timeline-content">
-                                    <div class="timeline-header">
-                                        <span class="timeline-title">Ticket Resolved</span>
-                                        <span class="timeline-time">{{ $ticket->resolved_at->format('M d, Y g:i A') }}</span>
-                                    </div>
-                                    <p class="timeline-text">
-                                        Resolved by {{ $ticket->assignedTo ? $ticket->assignedTo->full_name : 'IT Support' }}
-                                    </p>
-                                </div>
-                            </div>
-                        @endif
-
-                        @if($ticket->assigned_at)
-                            <div class="timeline-item">
-                                <div class="timeline-dot"></div>
-                                <div class="timeline-content">
-                                    <div class="timeline-header">
-                                        <span class="timeline-title">Ticket Assigned</span>
-                                        <span class="timeline-time">{{ $ticket->assigned_at->format('M d, Y g:i A') }}</span>
-                                    </div>
-                                    <p class="timeline-text">
-                                        Assigned to {{ $ticket->assignedTo ? $ticket->assignedTo->full_name : 'IT Support' }}
-                                    </p>
-                                </div>
-                            </div>
-                        @endif
-
-                        <div class="timeline-item">
-                            <div class="timeline-dot"></div>
-                            <div class="timeline-content">
-                                <div class="timeline-header">
-                                    <span class="timeline-title">Ticket Created</span>
-                                    <span class="timeline-time">{{ $ticket->created_at->format('M d, Y g:i A') }}</span>
-                                </div>
-                                <p class="timeline-text">
-                                    Report submitted by {{ $ticket->reporter->full_name }}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <x-ticket-timeline :ticket="$ticket" />
             </div>
 
             <!-- Sidebar -->
@@ -203,16 +144,22 @@
                             <span class="info-label">Priority</span>
                             <span class="info-value priority-{{ $ticket->priority }}">{{ ucfirst($ticket->priority) }}</span>
                         </div>
-                        @if($ticket->assigned_at)
+                        @php
+                            $assignedTransaction = $ticket->transactions()->where('action', 'assigned')->first();
+                            $resolvedTransaction = $ticket->transactions()->where('action', 'status_changed')->where('new_value', 'resolved')->first();
+                        @endphp
+
+                        @if($assignedTransaction)
                             <div class="info-item">
                                 <span class="info-label">Response Time</span>
-                                <span class="info-value">{{ $ticket->created_at->diffForHumans($ticket->assigned_at, true) }}</span>
+                                <span class="info-value">{{ $ticket->created_at->diffForHumans($assignedTransaction->created_at, true) }}</span>
                             </div>
                         @endif
-                        @if($ticket->resolved_at && $ticket->created_at)
+
+                        @if($resolvedTransaction)
                             <div class="info-item">
                                 <span class="info-label">Resolution Time</span>
-                                <span class="info-value">{{ $ticket->created_at->diffForHumans($ticket->resolved_at, true) }}</span>
+                                <span class="info-value">{{ $ticket->created_at->diffForHumans($resolvedTransaction->created_at, true) }}</span>
                             </div>
                         @endif
                         <div class="info-item">

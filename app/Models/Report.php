@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Report extends Model
 {
@@ -23,16 +24,10 @@ class Report extends Model
         'status',
         'priority',
         'attachments',
-        'assigned_at',
-        'resolved_at',
-        'closed_at',
     ];
 
     protected $casts = [
         'attachments' => 'array',
-        'assigned_at' => 'datetime',
-        'resolved_at' => 'datetime',
-        'closed_at' => 'datetime',
         'deleted_at' => 'datetime',
     ];
 
@@ -162,5 +157,10 @@ class Report extends Model
                 $report->equipment->updateStatusFromReports();
             }
         });
+    }
+
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(TicketTransaction::class, 'ticket_id');
     }
 }

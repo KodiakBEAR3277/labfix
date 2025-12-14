@@ -49,16 +49,17 @@ class AuthController extends Controller
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'role' => ['required', 'in:student,staff,it-support'],
             'password' => ['required', 'confirmed', Password::defaults()],
             'terms' => ['accepted'],
         ]);
 
+        // Create user with default 'student' role
+        // Admins can change the role later if needed
         $user = User::create([
             'first_name' => $validated['first_name'],
             'last_name' => $validated['last_name'],
             'email' => $validated['email'],
-            'role' => $validated['role'],
+            'role' => 'student', // Default role for all new registrations
             'password' => Hash::make($validated['password']),
         ]);
 

@@ -160,10 +160,25 @@
                     </div>
                     <div class="activity-feed">
                         @php
-                            $recentResolved = \App\Models\Report::whereNotNull('resolved_at')
-                                ->latest('resolved_at')
-                                ->take(3)
-                                ->get();
+                            // Get recent tickets that were resolved - use transactions
+                            $recentResolvedTickets = \App\Models\Report::with(['transactions' => function($query) {
+                                $query->where('action', 'status_changed')
+                                    ->where('new_value', 'resolved')
+                                    ->latest('created_at')
+                                    ->take(3);
+                            }])->get();
+                            
+                            $recentResolved = [];
+                            foreach ($recentResolvedTickets as $ticket) {
+                                $resolvedTransaction = $ticket->transactions->first();
+                                if ($resolvedTransaction) {
+                                    $recentResolved[] = (object)[
+                                        'ticket_number' => $ticket->ticket_number,
+                                        'resolved_at' => $resolvedTransaction->created_at,
+                                    ];
+                                }
+                                if (count($recentResolved) >= 3) break;
+                            }
                         @endphp
                         @forelse($recentResolved as $resolved)
                             <div class="activity-item">

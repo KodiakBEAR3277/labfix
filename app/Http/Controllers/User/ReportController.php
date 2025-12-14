@@ -8,9 +8,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Setting;
+use App\Traits\LogsTicketTransactions;
 
 class ReportController extends Controller
 {
+    use LogsTicketTransactions;
+    
     // Show all user's reports
     public function index(Request $request)
     {
@@ -121,6 +124,8 @@ class ReportController extends Controller
             'priority' => $this->determinePriority($validated),
         ]);
 
+        $this->logCreated($report);
+
         // Update equipment status
         $report->equipment->updateStatusFromReports();
 
@@ -179,6 +184,8 @@ class ReportController extends Controller
             'attachments' => $attachmentPaths,
         ]);
 
+        $this->logUpdate($report);
+
         return redirect()
             ->route('user.reports.show', $report->id)
             ->with('success', 'Report updated successfully!');
@@ -198,6 +205,7 @@ class ReportController extends Controller
         
         // Soft delete
         $ticketNumber = $report->ticket_number;
+        $this->logDeletion($report);
         $report->delete();
 
         return redirect()

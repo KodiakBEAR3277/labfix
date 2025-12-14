@@ -104,7 +104,7 @@
                                     @if(!$report->assigned_to)
                                         {{-- Only show Edit and Delete if not yet assigned --}}
                                         <a href="{{ route('user.reports.edit', $report->id) }}" class="action-btn" style="color: #3b82f6;">Edit</a>
-                                        <form action="{{ route('user.reports.destroy', $report->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to cancel this ticket?');">
+                                        <form action="{{ route('user.reports.destroy', $report->id) }}" class="action-btn" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to cancel this ticket?');">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="action-btn" style="color: #ef4444; border: none; background: none; cursor: pointer; padding: 0; font: inherit;">Cancel</button>

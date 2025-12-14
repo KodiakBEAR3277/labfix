@@ -51,26 +51,33 @@ class DashboardController extends Controller
                 'icon' => '👤',
                 'title' => "New user registered: {$user->full_name} (" . ucfirst($user->role) . ")",
                 'time' => $user->created_at->diffForHumans(),
+                'timestamp' => $user->created_at->timestamp,
             ];
         }
 
-        // Recent resolved tickets
-        $recentResolved = Report::whereNotNull('resolved_at')
-            ->latest('resolved_at')
-            ->take(2)
-            ->get();
-        
-        foreach ($recentResolved as $ticket) {
-            $activities[] = [
-                'icon' => '✅',
-                'title' => "Ticket {$ticket->ticket_number} resolved",
-                'time' => $ticket->resolved_at->diffForHumans(),
-            ];
+        // Recent resolved tickets - get from transactions
+        $recentTickets = Report::with(['transactions' => function($query) {
+            $query->where('action', 'status_changed')
+                  ->where('new_value', 'resolved')
+                  ->latest('created_at')
+                  ->take(2);
+        }])->get();
+
+        foreach ($recentTickets as $ticket) {
+            $resolvedTransaction = $ticket->transactions->first();
+            if ($resolvedTransaction) {
+                $activities[] = [
+                    'icon' => '✅',
+                    'title' => "Ticket {$ticket->ticket_number} resolved",
+                    'time' => $resolvedTransaction->created_at->diffForHumans(),
+                    'timestamp' => $resolvedTransaction->created_at->timestamp,
+                ];
+            }
         }
 
-        // Sort by time
+        // Sort by timestamp (newest first)
         usort($activities, function($a, $b) {
-            return strtotime($b['time']) - strtotime($a['time']);
+            return $b['timestamp'] - $a['timestamp'];
         });
 
         return array_slice($activities, 0, 5);

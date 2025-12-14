@@ -26,13 +26,18 @@ class AssignmentController extends Controller
 
         $tickets = $query->latest()->paginate(10)->withQueryString();
 
-        // Stats
+        // Stats - updated to use transactions
         $stats = [
             'total_assigned' => Report::where('assigned_to', Auth::id())->count(),
             'in_progress' => Report::where('assigned_to', Auth::id())->where('status', 'in-progress')->count(),
             'high_priority' => Report::where('assigned_to', Auth::id())->where('priority', 'high')->open()->count(),
             'completed_today' => Report::where('assigned_to', Auth::id())
-                ->whereDate('resolved_at', today())
+                ->where('status', 'resolved')
+                ->whereHas('transactions', function($query) {
+                    $query->where('action', 'status_changed')
+                          ->where('new_value', 'resolved')
+                          ->whereDate('created_at', today());
+                })
                 ->count(),
         ];
 
@@ -43,7 +48,7 @@ class AssignmentController extends Controller
     public function show($id)
     {
         $ticket = Report::where('assigned_to', Auth::id())
-            ->with(['reporter', 'equipment.lab'])
+            ->with(['reporter', 'equipment.lab', 'transactions.user'])
             ->findOrFail($id);
 
         return view('it.assignments.show', compact('ticket'));
@@ -69,15 +74,43 @@ class AssignmentController extends Controller
             'priority' => ['required', 'in:low,medium,high'],
         ]);
 
-        // Track if status changed to resolved
-        $wasResolved = $ticket->status !== 'resolved' && $validated['status'] === 'resolved';
+        // Track if status or priority changed
+        $statusChanged = $ticket->status !== $validated['status'];
+        $priorityChanged = $ticket->priority !== $validated['priority'];
+        
+        $oldStatus = $ticket->status;
+        $oldPriority = $ticket->priority;
 
-        // Update ticket (keeping current assignment)
+        // Update ticket
         $ticket->update([
             'status' => $validated['status'],
             'priority' => $validated['priority'],
-            'resolved_at' => $wasResolved ? now() : $ticket->resolved_at,
         ]);
+
+        // Log changes
+        if ($statusChanged) {
+            \App\Models\TicketTransaction::create([
+                'ticket_id' => $ticket->id,
+                'user_id' => Auth::id(),
+                'action' => 'status_changed',
+                'old_value' => $oldStatus,
+                'new_value' => $validated['status'],
+                'description' => 'Status changed from ' . ucfirst(str_replace('-', ' ', $oldStatus)) . ' to ' . ucfirst(str_replace('-', ' ', $validated['status'])),
+                'created_at' => now(),
+            ]);
+        }
+        
+        if ($priorityChanged) {
+            \App\Models\TicketTransaction::create([
+                'ticket_id' => $ticket->id,
+                'user_id' => Auth::id(),
+                'action' => 'priority_changed',
+                'old_value' => $oldPriority,
+                'new_value' => $validated['priority'],
+                'description' => 'Priority changed from ' . ucfirst($oldPriority) . ' to ' . ucfirst($validated['priority']),
+                'created_at' => now(),
+            ]);
+        }
 
         return redirect()
             ->route('it.assignments.show', $ticket->id)

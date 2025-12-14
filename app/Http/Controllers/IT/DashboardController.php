@@ -29,7 +29,13 @@ class DashboardController extends Controller
             'open_tickets' => Report::open()->count(),
             'my_assignments' => Report::where('assigned_to', Auth::id())->open()->count(),
             'high_priority' => Report::where('priority', 'high')->open()->count(),
-            'resolved_today' => Report::whereDate('resolved_at', today())->count(),
+            'resolved_today' => Report::where('status', 'resolved')
+                ->whereHas('transactions', function($query) {
+                    $query->where('action', 'status_changed')
+                          ->where('new_value', 'resolved')
+                          ->whereDate('created_at', today());
+                })
+                ->count(),
             'avg_response_time' => $this->calculateAverageResponseTime(),
             'team_satisfaction' => $this->calculateTeamSatisfaction(),
         ];
@@ -39,30 +45,49 @@ class DashboardController extends Controller
 
     private function calculateAverageResponseTime()
     {
-        $assignedTickets = Report::whereNotNull('assigned_at')
-            ->whereNotNull('created_at')
-            ->whereDate('created_at', '>=', now()->subDays(7))
+        $recentTickets = Report::whereDate('created_at', '>=', now()->subDays(7))
+            ->with(['transactions' => function($query) {
+                $query->where('action', 'assigned');
+            }])
             ->get();
 
-        if ($assignedTickets->isEmpty()) {
+        if ($recentTickets->isEmpty()) {
             return '0.0';
         }
 
         $totalHours = 0;
-        foreach ($assignedTickets as $ticket) {
-            $hours = $ticket->created_at->diffInHours($ticket->assigned_at);
-            $totalHours += $hours;
+        $countWithAssignment = 0;
+        
+        foreach ($recentTickets as $ticket) {
+            // Find the assignment transaction
+            $assignedTransaction = $ticket->transactions->where('action', 'assigned')->first();
+            
+            if ($assignedTransaction) {
+                $hours = $ticket->created_at->diffInHours($assignedTransaction->created_at);
+                $totalHours += $hours;
+                $countWithAssignment++;
+            }
         }
 
-        $average = $totalHours / $assignedTickets->count();
+        if ($countWithAssignment === 0) {
+            return '0.0';
+        }
+
+        $average = $totalHours / $countWithAssignment;
         return number_format($average, 1);
     }
 
     private function calculateTeamSatisfaction()
     {
-        // For now, return a static high number
-        // TODO: Implement actual satisfaction tracking system
-        $resolvedThisMonth = Report::whereMonth('resolved_at', now()->month)->count();
+        // Get tickets resolved this month
+        $resolvedThisMonth = Report::where('status', 'resolved')
+            ->whereHas('transactions', function($query) {
+                $query->where('action', 'status_changed')
+                      ->where('new_value', 'resolved')
+                      ->whereMonth('created_at', now()->month);
+            })
+            ->count();
+            
         $totalThisMonth = Report::whereMonth('created_at', now()->month)->count();
         
         if ($totalThisMonth === 0) {

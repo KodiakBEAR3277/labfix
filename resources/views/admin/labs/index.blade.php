@@ -51,7 +51,7 @@
         <!-- Labs Grid -->
         <div class="labs-grid">
             @forelse($labs as $lab)
-                <div class="lab-card">
+                <div class="lab-card" id="lab-{{ $lab->id }}">
                     <div class="lab-header">
                         <div class="lab-title-section">
                             <div class="lab-icon">💻</div>
@@ -110,43 +110,74 @@
                             <h3 class="section-title">Equipment Layout ({{ $lab->equipment->count() }} items)</h3>
                             <button class="btn-add" onclick="addEquipment({{ $lab->id }})">+ Add Equipment</button>
                         </div>
-                        <div class="equipment-grid">
-                            @forelse($lab->equipment->take(20) as $equipment)
-                                @php
-                                    $statusClass = match($equipment->status) {
-                                        'operational' => 'equipment-working',
-                                        'has-issue' => 'equipment-issue',
-                                        'maintenance' => 'equipment-maintenance',
-                                        default => ''
-                                    };
-                                    $icon = match($equipment->type) {
-                                        'computer' => '💻',
-                                        'printer' => '🖨️',
-                                        'projector' => '📽️',
-                                        default => '🖥️'
-                                    };
-                                @endphp
-                                <div class="equipment-item {{ $statusClass }}" onclick="editEquipment({{ $equipment->id }})">
-                                    <div class="tooltip">
-                                        {{ $equipment->equipment_code }}: {{ ucfirst($equipment->status) }}
-                                        @if($equipment->notes)
-                                            <br>{{ Str::limit($equipment->notes, 50) }}
-                                        @endif
+                        
+                        @php
+                            $equipmentPerPage = 20;
+                            $totalEquipment = $lab->equipment->count();
+                            $totalPages = $totalEquipment > 0 ? ceil($totalEquipment / $equipmentPerPage) : 0;
+                        @endphp
+                        
+                        @if($totalEquipment > 0)
+                            <div class="equipment-grid" id="equipment-grid-{{ $lab->id }}">
+                                @foreach($lab->equipment as $index => $equipment)
+                                    @php
+                                        $statusClass = match($equipment->status) {
+                                            'operational' => 'equipment-working',
+                                            'has-issue' => 'equipment-issue',
+                                            'maintenance' => 'equipment-maintenance',
+                                            default => ''
+                                        };
+                                        $icon = match($equipment->type) {
+                                            'computer' => '💻',
+                                            'printer' => '🖨️',
+                                            'projector' => '📽️',
+                                            default => '🖥️'
+                                        };
+                                        // Calculate which page (1-indexed)
+                                        $pageNumber = intval(floor($index / $equipmentPerPage)) + 1;
+                                        $isFirstPage = ($pageNumber === 1);
+                                    @endphp
+                                    <div class="equipment-item {{ $statusClass }}" 
+                                         data-lab-id="{{ $lab->id }}"
+                                         data-page="{{ $pageNumber }}"
+                                         style="display: {{ $isFirstPage ? 'flex' : 'none' }} !important;"
+                                         onclick="editEquipment({{ $equipment->id }})">
+                                        <div class="tooltip">
+                                            {{ $equipment->equipment_code }}: {{ ucfirst($equipment->status) }}
+                                            @if($equipment->notes)
+                                                <br>{{ Str::limit($equipment->notes, 50) }}
+                                            @endif
+                                        </div>
+                                        <div class="equipment-icon">{{ $icon }}</div>
+                                        <div class="equipment-id">{{ $equipment->equipment_code }}</div>
                                     </div>
-                                    <div class="equipment-icon">{{ $icon }}</div>
-                                    <div class="equipment-id">{{ $equipment->equipment_code }}</div>
+                                @endforeach
+                            </div>
+                            
+                            @if($totalPages > 1)
+                                <div class="equipment-pagination" style="display: flex; justify-content: center; align-items: center; gap: 0.5rem; margin-top: 1rem;">
+                                    <button class="page-btn" onclick="changeEquipmentPage({{ $lab->id }}, 'prev')" id="prev-{{ $lab->id }}" disabled style="padding: 0.5rem 1rem; background: #374151; color: #9ca3af; border: 1px solid #4b5563; border-radius: 6px; cursor: pointer;">
+                                        ← Previous
+                                    </button>
+                                    <span style="color: #9ca3af; font-size: 0.9rem;">
+                                        Page <span id="current-page-{{ $lab->id }}">1</span> of {{ $totalPages }}
+                                    </span>
+                                    <button class="page-btn" onclick="changeEquipmentPage({{ $lab->id }}, 'next')" id="next-{{ $lab->id }}" style="padding: 0.5rem 1rem; background: #374151; color: #ffffff; border: 1px solid #4b5563; border-radius: 6px; cursor: pointer;">
+                                        Next →
+                                    </button>
                                 </div>
-                            @empty
+                            @else
+                                <p style="text-align: center; margin-top: 1rem; color: #9ca3af; font-size: 0.9rem;">
+                                    Showing all {{ $totalEquipment }} items
+                                </p>
+                            @endif
+                        @else
+                            <div class="equipment-grid">
                                 <div style="grid-column: 1/-1; text-align: center; padding: 2rem; color: #9ca3af;">
                                     <p>No equipment added yet</p>
                                     <button class="btn-add" style="margin-top: 1rem;" onclick="addEquipment({{ $lab->id }})">+ Add Equipment</button>
                                 </div>
-                            @endforelse
-                        </div>
-                        @if($lab->equipment->count() > 20)
-                            <p style="text-align: center; margin-top: 1rem; color: #9ca3af; font-size: 0.9rem;">
-                                Showing 20 of {{ $lab->equipment->count() }} items
-                            </p>
+                            </div>
                         @endif
                     </div>
                 </div>
@@ -255,6 +286,80 @@
 @push('scripts')
 <script>
     let currentEquipmentId = null;
+    
+    // Store current page for each lab
+    const labPages = {};
+    
+    // Initialize lab pages (all start at page 1)
+    @foreach($labs as $lab)
+        labPages[{{ $lab->id }}] = 1;
+    @endforeach
+
+    // Equipment pagination function
+    function changeEquipmentPage(labId, direction) {
+        const grid = document.getElementById(`equipment-grid-${labId}`);
+        if (!grid) {
+            console.error('Grid not found for lab:', labId);
+            return;
+        }
+        
+        // Get all equipment items for this specific lab
+        const items = grid.querySelectorAll(`.equipment-item[data-lab-id="${labId}"]`);
+        if (items.length === 0) {
+            console.error('No equipment items found for lab:', labId);
+            return;
+        }
+        
+        const itemsPerPage = 20;
+        const totalPages = Math.ceil(items.length / itemsPerPage);
+        
+        // Get current page or default to 1
+        let currentPage = labPages[labId] || 1;
+        
+        // Update page based on direction
+        if (direction === 'next' && currentPage < totalPages) {
+            currentPage++;
+        } else if (direction === 'prev' && currentPage > 1) {
+            currentPage--;
+        } else {
+            // No change needed
+            return;
+        }
+        
+        // Store the new page
+        labPages[labId] = currentPage;
+        
+        // Show/hide equipment based on page - use !important to override
+        items.forEach(item => {
+            const itemPage = parseInt(item.dataset.page);
+            if (itemPage === currentPage) {
+                item.style.setProperty('display', 'flex', 'important');
+            } else {
+                item.style.setProperty('display', 'none', 'important');
+            }
+        });
+        
+        // Update page counter
+        const currentPageSpan = document.getElementById(`current-page-${labId}`);
+        if (currentPageSpan) {
+            currentPageSpan.textContent = currentPage;
+        }
+        
+        // Update button states
+        const prevBtn = document.getElementById(`prev-${labId}`);
+        const nextBtn = document.getElementById(`next-${labId}`);
+        
+        if (prevBtn) {
+            prevBtn.disabled = (currentPage === 1);
+            prevBtn.style.opacity = (currentPage === 1) ? '0.5' : '1';
+            prevBtn.style.cursor = (currentPage === 1) ? 'not-allowed' : 'pointer';
+        }
+        if (nextBtn) {
+            nextBtn.disabled = (currentPage === totalPages);
+            nextBtn.style.opacity = (currentPage === totalPages) ? '0.5' : '1';
+            nextBtn.style.cursor = (currentPage === totalPages) ? 'not-allowed' : 'pointer';
+        }
+    }
 
     // Lab Modal Functions
     function openAddLabModal() {
@@ -282,6 +387,10 @@
                 document.getElementById('labLocation').value = lab.location || '';
                 document.getElementById('labDescription').value = lab.description || '';
                 document.getElementById('labModal').classList.add('active');
+            })
+            .catch(error => {
+                console.error('Error loading lab:', error);
+                alert('Error loading lab data. Please try again.');
             });
     }
 
@@ -313,6 +422,10 @@
                 document.getElementById('deleteEquipmentBtn').style.display = 'inline-block';
                 currentEquipmentId = equipmentId;
                 document.getElementById('equipmentModal').classList.add('active');
+            })
+            .catch(error => {
+                console.error('Error loading equipment:', error);
+                alert('Error loading equipment data. Please try again.');
             });
     }
 

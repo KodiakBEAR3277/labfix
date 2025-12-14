@@ -15,6 +15,7 @@
             </div>
             <div class="header-actions">
                 <button class="btn btn-secondary" onclick="exportTickets()">📊 Export Report</button>
+                <a href="{{ route('admin.transactions.index') }}" class="btn btn-secondary">📜 Ticket History</a>
                 <button class="btn btn-primary" onclick="goToBulkActions()">⚡ Bulk Actions</button>
             </div>
         </div>

@@ -23,8 +23,12 @@ class DashboardController extends Controller
         $stats = [
             'active' => Report::where('user_id', $user->id)->open()->count(),
             'resolved_this_month' => Report::where('user_id', $user->id)
-                ->closed()
-                ->whereMonth('resolved_at', now()->month)
+                ->where('status', 'resolved')
+                ->whereHas('transactions', function($query) {
+                    $query->where('action', 'status_changed')
+                          ->where('new_value', 'resolved')
+                          ->whereMonth('created_at', now()->month);
+                })
                 ->count(),
             'avg_resolution_time' => $this->calculateAverageResolutionTime($user->id),
         ];
@@ -35,8 +39,11 @@ class DashboardController extends Controller
     private function calculateAverageResolutionTime($userId)
     {
         $resolvedReports = Report::where('user_id', $userId)
-            ->whereNotNull('resolved_at')
-            ->whereNotNull('created_at')
+            ->whereIn('status', ['resolved', 'closed'])
+            ->with(['transactions' => function($query) {
+                $query->where('action', 'status_changed')
+                      ->where('new_value', 'resolved');
+            }])
             ->get();
 
         if ($resolvedReports->isEmpty()) {
@@ -44,13 +51,27 @@ class DashboardController extends Controller
         }
 
         $totalHours = 0;
+        $countWithResolution = 0;
+        
         foreach ($resolvedReports as $report) {
-            $hours = $report->created_at->diffInHours($report->resolved_at);
-            $totalHours += $hours;
+            // Find the resolved transaction
+            $resolvedTransaction = $report->transactions
+                ->where('action', 'status_changed')
+                ->where('new_value', 'resolved')
+                ->first();
+            
+            if ($resolvedTransaction) {
+                $hours = $report->created_at->diffInHours($resolvedTransaction->created_at);
+                $totalHours += $hours;
+                $countWithResolution++;
+            }
         }
 
-        $average = $totalHours / $resolvedReports->count();
-        
+        if ($countWithResolution === 0) {
+            return '0';
+        }
+
+        $average = $totalHours / $countWithResolution;
         return number_format($average, 1);
     }
 }

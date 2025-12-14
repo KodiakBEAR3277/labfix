@@ -8,9 +8,12 @@ use App\Models\User;
 use App\Models\Lab;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Traits\LogsTicketTransactions;
 
 class TicketController extends Controller
 {
+    use LogsTicketTransactions;
+    
     // Show all tickets (IT Queue)
     public function index(Request $request)
     {
@@ -75,7 +78,7 @@ class TicketController extends Controller
     // Show single ticket detail (VIEW ONLY)
     public function show($id)
     {
-        $ticket = Report::with(['reporter', 'assignedTo', 'equipment.lab'])->findOrFail($id);
+        $ticket = Report::with(['reporter', 'assignedTo', 'equipment.lab', 'transactions.user'])->findOrFail($id);
 
         return view('it.tickets.show', compact('ticket'));
     }
@@ -102,17 +105,32 @@ class TicketController extends Controller
             'assigned_to' => ['nullable', 'exists:users,id'],
         ]);
 
-        // Track if status changed to resolved
-        $wasResolved = $ticket->status !== 'resolved' && $validated['status'] === 'resolved';
+        // Track what changed
+        $statusChanged = $ticket->status !== $validated['status'];
+        $priorityChanged = $ticket->priority !== $validated['priority'];
+        $assignmentChanged = $ticket->assigned_to !== $validated['assigned_to'];
 
-        // Update ticket
+        // Store old values
+        $oldStatus = $ticket->status;
+        $oldPriority = $ticket->priority;
+
+        // Update the ticket
         $ticket->update([
             'status' => $validated['status'],
             'priority' => $validated['priority'],
             'assigned_to' => $validated['assigned_to'],
-            'assigned_at' => $validated['assigned_to'] && !$ticket->assigned_at ? now() : $ticket->assigned_at,
-            'resolved_at' => $wasResolved ? now() : $ticket->resolved_at,
         ]);
+
+        // LOG CHANGES
+        if ($statusChanged) {
+            $this->logStatusChange($ticket, $oldStatus, $validated['status']);
+        }
+        if ($priorityChanged) {
+            $this->logPriorityChange($ticket, $oldPriority, $validated['priority']);
+        }
+        if ($assignmentChanged && $validated['assigned_to']) {
+            $this->logAssignment($ticket, $validated['assigned_to']);
+        }
 
         return redirect()
             ->route('it.tickets.show', $ticket->id)
@@ -127,84 +145,19 @@ class TicketController extends Controller
         $ticket->update([
             'assigned_to' => Auth::id(),
             'status' => 'assigned',
-            'assigned_at' => $ticket->assigned_at ?? now(),
         ]);
+        
+        // Log assignment
+        $this->logAssignment($ticket, Auth::id());
+        
+        // Log status change if needed
+        if ($ticket->getOriginal('status') !== 'assigned') {
+            $this->logStatusChange($ticket, $ticket->getOriginal('status'), 'assigned');
+        }
 
         return redirect()
             ->route('it.tickets.show', $ticket->id)
             ->with('success', 'Ticket assigned to you!');
-    }
-
-    // Bulk operations view
-    public function bulk(Request $request)
-    {
-        $selectedIds = $request->query('ids', []);
-        
-        if (is_string($selectedIds)) {
-            $selectedIds = explode(',', $selectedIds);
-        }
-
-        $selectedTickets = Report::with(['equipment.lab'])->whereIn('id', $selectedIds)->get();
-
-        // Get IT staff for assignment
-        $itStaff = User::whereIn('role', ['it-support', 'admin'])->get();
-
-        return view('it.tickets.bulk', compact('selectedTickets', 'itStaff'));
-    }
-
-    // Process bulk operations
-    public function bulkUpdate(Request $request)
-    {
-        $validated = $request->validate([
-            'ticket_ids' => ['required', 'array'],
-            'ticket_ids.*' => ['exists:reports,id'],
-            'action' => ['required', 'in:assign,status,priority,close'],
-            'assigned_to' => ['required_if:action,assign', 'nullable', 'exists:users,id'],
-            'status' => ['required_if:action,status', 'nullable', 'in:new,assigned,in-progress,resolved,closed'],
-            'priority' => ['required_if:action,priority', 'nullable', 'in:low,medium,high'],
-        ]);
-
-        $tickets = Report::whereIn('id', $validated['ticket_ids']);
-
-        switch ($validated['action']) {
-            case 'assign':
-                $tickets->update([
-                    'assigned_to' => $validated['assigned_to'],
-                    'status' => 'assigned',
-                    'assigned_at' => now(),
-                ]);
-                $message = 'Tickets assigned successfully!';
-                break;
-
-            case 'status':
-                $updateData = ['status' => $validated['status']];
-                if ($validated['status'] === 'resolved') {
-                    $updateData['resolved_at'] = now();
-                }
-                $tickets->update($updateData);
-                $message = 'Ticket status updated successfully!';
-                break;
-
-            case 'priority':
-                $tickets->update(['priority' => $validated['priority']]);
-                $message = 'Ticket priority updated successfully!';
-                break;
-
-            case 'close':
-                $tickets->update([
-                    'status' => 'closed',
-                    'closed_at' => now(),
-                ]);
-                $message = 'Tickets closed successfully!';
-                break;
-
-            default:
-                $message = 'Operation completed!';
-        }
-
-        return redirect()
-            ->route('it.tickets.index')
-            ->with('success', $message);
     }
 
     // Show IT assignments (tickets assigned to current user)
@@ -230,7 +183,12 @@ class TicketController extends Controller
             'in_progress' => Report::where('assigned_to', Auth::id())->where('status', 'in-progress')->count(),
             'high_priority' => Report::where('assigned_to', Auth::id())->where('priority', 'high')->open()->count(),
             'completed_today' => Report::where('assigned_to', Auth::id())
-                ->whereDate('resolved_at', today())
+                ->where('status', 'resolved')
+                ->whereHas('transactions', function($query) {
+                    $query->where('action', 'status_changed')
+                          ->where('new_value', 'resolved')
+                          ->whereDate('created_at', today());
+                })
                 ->count(),
         ];
 

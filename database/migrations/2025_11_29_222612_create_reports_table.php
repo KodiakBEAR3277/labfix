@@ -31,9 +31,6 @@ return new class extends Migration
             $table->json('attachments')->nullable();
             
             // Timestamps
-            $table->timestamp('assigned_at')->nullable();
-            $table->timestamp('resolved_at')->nullable();
-            $table->timestamp('closed_at')->nullable();
             $table->timestamps();
             
             // Indexes for better query performance
