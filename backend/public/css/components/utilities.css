@@ -420,6 +420,18 @@
     gap: var(--spacing-xl);
 }
 
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.content-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
 /* ============================================
    MISC UTILITIES
    ============================================ */

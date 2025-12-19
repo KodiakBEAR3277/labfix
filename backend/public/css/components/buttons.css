@@ -119,6 +119,10 @@ button[type="submit"] {
     font-size: var(--font-size-sm);
     transition: all var(--transition-base);
     font-weight: var(--font-weight-semibold);
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .action-btn:hover {
