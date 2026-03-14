@@ -1,7 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Models\Equipment;
+use App\Http\Controllers\IT\ArticleController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Admin\EquipmentController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\User\ReportController;
@@ -10,9 +13,12 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\User\DashboardController as UserDashboardController;
 use App\Http\Controllers\IT\DashboardController as ITDashboardController;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Admin\LabController;
 use App\Http\Controllers\IT\AssignmentController;
 use App\Http\Controllers\Admin\TicketController as AdminTicketController;
+use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\User\KnowledgeBaseController;
 
 // Public routes
 Route::get('/', fn() => view('landing'))->name('landing');
@@ -46,13 +52,13 @@ Route::middleware('auth')->group(function () {
     // User routes
     Route::prefix('user')->name('user.')->group(function () {
         Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
-        Route::resource('reports', \App\Http\Controllers\User\ReportController::class);
+        Route::resource('reports', ReportController::class);
         
         Route::get('/lab-status', fn() => view('user.lab-status'))->name('lab-status');
-        Route::get('/knowledge-base', [\App\Http\Controllers\User\KnowledgeBaseController::class, 'index'])->name('knowledge-base');
-        Route::get('/knowledge-base/{slug}', [\App\Http\Controllers\User\KnowledgeBaseController::class, 'show'])->name('knowledge-base.show');
-        Route::post('/knowledge-base/{slug}/helpful', [\App\Http\Controllers\User\KnowledgeBaseController::class, 'markHelpful'])->name('knowledge-base.helpful');
-        Route::post('/knowledge-base/{slug}/not-helpful', [\App\Http\Controllers\User\KnowledgeBaseController::class, 'markNotHelpful'])->name('knowledge-base.not-helpful');
+        Route::get('/knowledge-base', [KnowledgeBaseController::class, 'index'])->name('knowledge-base');
+        Route::get('/knowledge-base/{slug}', [KnowledgeBaseController::class, 'show'])->name('knowledge-base.show');
+        Route::post('/knowledge-base/{slug}/helpful', [KnowledgeBaseController::class, 'markHelpful'])->name('knowledge-base.helpful');
+        Route::post('/knowledge-base/{slug}/not-helpful', [KnowledgeBaseController::class, 'markNotHelpful'])->name('knowledge-base.not-helpful');
 
     });
 
@@ -63,7 +69,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('assignments', AssignmentController::class)->only(['index', 'show', 'edit', 'update']);
         
         // Knowledge Base
-        Route::resource('knowledge-base', \App\Http\Controllers\IT\ArticleController::class);
+        Route::resource('knowledge-base', ArticleController::class);
         
         // Tickets - IT can view and self-assign
         Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
@@ -85,11 +91,11 @@ Route::middleware('auth')->group(function () {
         Route::resource('users', AdminUserController::class);
         
         // Lab management
-        Route::resource('labs', \App\Http\Controllers\Admin\LabController::class);
-        Route::post('/labs/{id}/toggle-status', [\App\Http\Controllers\Admin\LabController::class, 'toggleStatus'])->name('labs.toggle-status');
+        Route::resource('labs', LabController::class);
+        Route::post('/labs/{id}/toggle-status', [LabController::class, 'toggleStatus'])->name('labs.toggle-status');
         
         // Equipment management
-        Route::resource('equipment', \App\Http\Controllers\Admin\EquipmentController::class)->except(['index', 'show']);
+        Route::resource('equipment', EquipmentController::class)->except(['index', 'show']);
         
         // In routes/web.php - Admin section
         Route::get('/tickets/trashed', [AdminTicketController::class, 'trashed'])->name('tickets.trashed');
@@ -97,7 +103,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('/tickets/{id}/force-delete', [AdminTicketController::class, 'forceDelete'])->name('tickets.force-delete');
 
         // Transaction History 
-        Route::get('/transactions', [\App\Http\Controllers\Admin\TransactionController::class, 'index'])->name('transactions.index');
+        Route::get('/transactions', [TransactionController::class, 'index'])->name('transactions.index');
 
         // Ticket Management
         Route::get('/tickets/bulk', [AdminTicketController::class, 'bulk'])->name('tickets.bulk');
@@ -123,7 +129,7 @@ Route::prefix('profile')->name('profile.')->middleware('auth')->group(function (
 
 // API route for loading equipment by lab
 Route::get('/api/labs/{lab}/equipment', function ($labId) {
-    $equipment = \App\Models\Equipment::where('lab_id', $labId)
+    $equipment = Equipment::where('lab_id', $labId)
         ->orderBy('equipment_code')
         ->get(['id', 'equipment_code', 'status']);
     
