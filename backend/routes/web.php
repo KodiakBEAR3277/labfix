@@ -22,7 +22,7 @@ use App\Http\Controllers\User\KnowledgeBaseController;
 
 // Public routes
 Route::get('/', fn() => view('entry'))->name('landing');
-Route::get('/contact', fn() => view('contact'))->name('contact');
+Route::get('/contact', fn() => view('entry'))->name('contact');
 
 // Auth routes
 Route::middleware('guest')->group(function () {

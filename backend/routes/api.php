@@ -3,9 +3,18 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
+use App\Models\Setting;
 
 // Public API routes
 Route::post('/login', [AuthController::class, 'login']);
+
+Route::get('/contact-info', function () {
+    return response()->json([
+        'system_name'   => Setting::get('system_name', 'LabFix'),
+        'support_email' => Setting::get('support_email', 'support@labfix.edu'),
+        'support_phone' => Setting::get('support_phone', ''),
+    ]);
+});
 
 // Protected API routes (require token)
 Route::middleware('auth:sanctum')->group(function () {
