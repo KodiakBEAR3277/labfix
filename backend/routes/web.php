@@ -135,3 +135,7 @@ Route::get('/api/labs/{lab}/equipment', function ($labId) {
     
     return response()->json($equipment);
 });
+
+Route::get('/{any}', fn() => view('entry'))
+    ->where('any', '.*')
+    ->name('vue.catchall');

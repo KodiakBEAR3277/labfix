@@ -1,5 +1,12 @@
-import { createApp } from 'vue'
-import Landing from './Pages/Landing.vue'
-import App from './App.vue'
+// ============================================
+// LabFix - Vue Entry Point
+// File: resources/js/app.js
+// ============================================
 
-createApp(Landing).mount('#app')
+import { createApp } from 'vue'
+import App from './App.vue'
+import router from './router/index.js'
+
+createApp(App)
+    .use(router)
+    .mount('#app')
