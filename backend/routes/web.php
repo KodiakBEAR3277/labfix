@@ -21,7 +21,7 @@ use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\User\KnowledgeBaseController;
 
 // Public routes
-Route::get('/', fn() => view('landing'))->name('landing');
+Route::get('/', fn() => view('entry'))->name('landing');
 Route::get('/contact', fn() => view('contact'))->name('contact');
 
 // Auth routes
