@@ -44,7 +44,7 @@ const features = [
 
 // Mockup ticket data for the hero visual — mirrors what the blade had
 const mockTickets = [
-  { title: "PC-03 won't boot", lab: 'Lab A', priority: 'High', status: 'In Progress' },
+  { title: 'PC-03 wonld not boot', lab: 'Lab A', priority: 'High', status: 'In Progress' },
   { title: 'Projector cable missing', lab: 'Lab B', priority: 'Medium', status: 'Open' },
   { title: 'Mouse not responding', lab: 'Lab C', priority: 'Low', status: 'Assigned' },
 ]
@@ -54,21 +54,21 @@ const mockTickets = [
   <LandingLayout>
 
     <!-- ==================== HERO ==================== -->
-    <section class="hero container">
-      <div class="">
+    <section class="hero">
+      <div class="container">
         <div class="hero-content">
 
           <!-- Left: Text + CTA -->
           <div class="hero-text">
-            <h1>Streamline Your Computer Lab Issue Tracking</h1>
+            <h1>Streamline Your <br>Lab Equipment Issue Tracking</h1>
             <p>
               Report, track, and resolve computer lab equipment problems faster.
               LabFix connects students and staff with IT support through a simple,
               transparent ticketing system.
             </p>
             <div class="cta-buttons">
-              <a href="/register" class=" btn-primary">Get Started</a>
-              <a href="#features"  class=" btn-secondary">Learn More</a>
+              <a href="/register" class="btn-primary">Get Started</a>
+              <a href="#features"  class="btn-secondary">Learn More</a>
             </div>
           </div>
 
@@ -129,8 +129,8 @@ const mockTickets = [
           to final resolution.
         </p>
         <div class="cta-buttons" style="justify-content: center; margin-top: 2rem;">
-          <a href="/register" class="btn btn-primary">Create an Account</a>
-          <a href="/contact"  class="btn btn-secondary">Contact Us</a>
+          <a href="/register" class="btn-primary">Create an Account</a>
+          <a href="/contact" class="btn-secondary">Contact Us</a>
         </div>
       </div>
     </section>

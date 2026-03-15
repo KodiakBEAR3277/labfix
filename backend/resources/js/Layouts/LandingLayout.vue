@@ -2,37 +2,35 @@
 // LandingLayout.vue
 // Mirrors: resources/views/layouts/landing.blade.php
 // Used by: Landing.vue, Contact.vue (public-facing pages)
-//
-// The <head> meta/title handling is done by entry.blade.php.
-// This layout only handles the visible structure: nav + content + footer.
 
 import NavLanding from '../Components/Nav/NavLanding.vue'
-
-const props = defineProps({
-  // Lets individual pages customize the nav right-side link
-  // (same flexibility as the blade $navText/$navLink variables)
-  navText:     { type: String, default: "Don't have an account?" },
-  navLinkText: { type: String, default: 'Sign Up' },
-  navLinkHref: { type: String, default: '/register' },
-})
 </script>
 
 <template>
   <div class="landing-layout">
-    <NavLanding
-      :nav-text="navText"
-      :nav-link-text="navLinkText"
-      :nav-link-href="navLinkHref"
-    />
+    <NavLanding />
 
     <main>
-      <!-- Default slot: page content goes here -->
       <slot />
     </main>
 
-    <!-- Footer slot: optional, pages can inject footer content -->
     <footer v-if="$slots.footer">
       <slot name="footer" />
     </footer>
   </div>
 </template>
+
+<style>
+/*
+  Fix for the broken `body > .container` selector in landing.css.
+  That rule was written expecting .container to be a direct child of <body>,
+  but Vue wraps everything in .app-shell > .landing-layout first.
+  We replicate the same rule here targeting the correct parent instead.
+  Not scoped — needs to reach into child components like Landing.vue.
+*/
+.landing-layout .container {
+  max-width: 1200px;
+  padding: 32px 32px;
+  margin: 0 auto;
+}
+</style>
