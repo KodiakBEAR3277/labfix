@@ -34,6 +34,17 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+Route::get('/auth/status', function () {
+    $user = Auth::user();
+ 
+    return response()->json([
+        'user' => $user ? [
+            'role' => $user->role,
+            'name' => $user->full_name,
+        ] : null,
+    ]);
+});
+
 // Authenticated routes
 Route::middleware('auth')->group(function () {
     

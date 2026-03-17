@@ -119,7 +119,20 @@ const mockTickets = [
     </section>
 
     <!-- ==================== ABOUT ==================== -->
-    <section id="about" class="features" style="background: transparent;">
+    <!-- min-height: 100vh + flex centering makes this fill the viewport
+         like the hero and features sections do. No new CSS class needed —
+         this section has no dedicated rule in landing.css so inline is safe. -->
+    <section
+      id="about"
+      class="features"
+      style="
+        background: transparent;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      "
+    >
       <div class="feature-container" style="text-align: center; max-width: 700px;">
         <h2>About LabFix</h2>
         <p style="color: var(--color-text-secondary); font-size: var(--font-size-lg); line-height: var(--line-height-relaxed);">
