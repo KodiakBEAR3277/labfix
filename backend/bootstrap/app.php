@@ -18,6 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => CheckRole::class,
             'maintenance.check' => CheckMaintenanceMode::class,
         ]);
+        $middleware->web(append: [
+            \App\Http\Middleware\HandleInertiaRequests::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
