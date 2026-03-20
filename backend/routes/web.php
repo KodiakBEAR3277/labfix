@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
+use App\Models\Lab;
 use App\Models\Equipment;
 use App\Http\Controllers\IT\ArticleController;
 use App\Http\Controllers\AuthController;
@@ -65,7 +67,27 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
         Route::resource('reports', ReportController::class);
         
-        Route::get('/lab-status', fn() => view('user.lab-status'))->name('lab-status');
+        Route::get('/lab-status', function () {
+            $labs = Lab::where('is_active', true)
+                ->with('equipment')
+                ->get()
+                ->map(fn($lab) => [
+                    'id'        => $lab->id,
+                    'name'      => $lab->name,
+                    'code'      => $lab->code,
+                    'location'  => $lab->location,
+                    'capacity'  => $lab->capacity,
+                    'equipment' => $lab->equipment->map(fn($eq) => [
+                        'id'             => $eq->id,
+                        'equipment_code' => $eq->equipment_code,
+                        'type'           => $eq->type,
+                        'status'         => $eq->status,
+                        'notes'          => $eq->notes,
+                    ]),
+                ]);
+        
+            return Inertia::render('User/LabStatus', compact('labs'));
+        })->name('lab-status');
         Route::get('/knowledge-base', [KnowledgeBaseController::class, 'index'])->name('knowledge-base');
         Route::get('/knowledge-base/{slug}', [KnowledgeBaseController::class, 'show'])->name('knowledge-base.show');
         Route::post('/knowledge-base/{slug}/helpful', [KnowledgeBaseController::class, 'markHelpful'])->name('knowledge-base.helpful');
