@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Setting;
 use App\Traits\LogsTicketTransactions;
+use Inertia\Inertia;
+use App\Models\Lab;
 
 class ReportController extends Controller
 {
@@ -17,59 +19,75 @@ class ReportController extends Controller
     // Show all user's reports
     public function index(Request $request)
     {
-        $query = Report::where('user_id', Auth::id())->with('assignedTo');
-
-        // Search filter
+        $query = Report::where('user_id', Auth::id())->with('assignedTo', 'equipment.lab');
+    
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('ticket_number', 'like', "%{$search}%")
-                  ->orWhere('title', 'like', "%{$search}%")
-                  ->orWhere('lab_location', 'like', "%{$search}%")
-                  ->orWhere('equipment_id', 'like', "%{$search}%");
+                ->orWhere('title', 'like', "%{$search}%");
             });
         }
-
-        // Status filter
+    
         if ($request->filled('status') && $request->status !== 'all') {
-            if ($request->status === 'active') {
-                $query->open();
-            } elseif ($request->status === 'resolved') {
-                $query->closed();
-            } else {
-                $query->status($request->status);
-            }
+            if ($request->status === 'active')   $query->open();
+            elseif ($request->status === 'resolved') $query->closed();
+            else $query->status($request->status);
         }
-
-        // Get reports with pagination
+    
         $reports = $query->latest()->paginate(10)->withQueryString();
-
-        // Get stats
+    
         $stats = [
-            'total' => Report::where('user_id', Auth::id())->count(),
-            'active' => Report::where('user_id', Auth::id())->open()->count(),
-            'resolved' => Report::where('user_id', Auth::id())->closed()->count(),
-            'avg_resolution_time' => '2.5', // TODO: Calculate actual average
+            'total'               => Report::where('user_id', Auth::id())->count(),
+            'active'              => Report::where('user_id', Auth::id())->open()->count(),
+            'resolved'            => Report::where('user_id', Auth::id())->closed()->count(),
+            'avg_resolution_time' => '2.5',
         ];
-
-        return view('user.reports.index', compact('reports', 'stats'));
+    
+        return Inertia::render('User/Reports/Index', [
+            'reports' => $reports,
+            'stats'   => $stats,
+            'filters' => $request->only(['search', 'status']),
+        ]);
     }
 
     // Show single report
     public function show($id)
     {
         $report = Report::where('user_id', Auth::id())
-            ->with(['reporter', 'assignedTo'])
+            ->with(['reporter', 'assignedTo', 'equipment.lab', 'transactions.user'])
             ->findOrFail($id);
-
-        return view('user.reports.show', compact('report'));
+    
+        // Add human-readable date for the Vue component
+        $report->created_at_human = $report->created_at->diffForHumans();
+    
+        // Expose assignedTo as assigned_to_user so Vue can access it cleanly
+        $report->assigned_to_user = $report->assignedTo;
+    
+        return Inertia::render('User/Reports/Show', compact('report'));
     }
 
     // Show create form
     public function create()
     {
-        return view('user.reports.create');
+        $labs = Lab::where('is_active', true)
+            ->get()
+            ->map(fn($lab) => [
+                'id'                => $lab->id,
+                'name'              => $lab->name,
+                'capacity'          => $lab->capacity,
+                'operational_count' => $lab->operational_count, // uses the model accessor
+            ]);
+    
+        return Inertia::render('User/Reports/Create', [
+            'labs' => $labs,
+            'maintenance' => [
+                'active'  => (bool) Setting::get('maintenance_mode', false),
+                'message' => Setting::get('maintenance_message', ''),
+            ],
+        ]);
     }
+ 
 
     // Store new report
     public function store(Request $request)
@@ -138,15 +156,14 @@ class ReportController extends Controller
     public function edit($id)
     {
         $report = Report::where('user_id', Auth::id())->findOrFail($id);
-        
-        // Only allow editing if ticket hasn't been assigned yet
+    
         if ($report->assigned_to) {
             return redirect()
                 ->route('user.reports.show', $report->id)
                 ->with('error', 'Cannot edit ticket that has been assigned to a technician.');
         }
-        
-        return view('user.reports.edit', compact('report'));
+    
+        return Inertia::render('User/Reports/Edit', compact('report'));
     }
 
     // Update report

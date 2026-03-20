@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\Report;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
@@ -33,7 +34,7 @@ class DashboardController extends Controller
             'avg_resolution_time' => $this->calculateAverageResolutionTime($user->id),
         ];
 
-        return view('user.dashboard', compact('reports', 'stats'));
+        return Inertia::render('User/Dashboard', compact('reports', 'stats')); // ← only changed line
     }
 
     private function calculateAverageResolutionTime($userId)
