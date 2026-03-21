@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\Rule;
+use Inertia\Inertia;
 
 class ProfileController extends Controller
 {
@@ -14,14 +15,13 @@ class ProfileController extends Controller
     public function show()
     {
         $user = Auth::user();
-        return view('profile.show', compact('user'));
+        return Inertia::render('Profile/Show', compact('user'));
     }
 
     // Show edit profile form
     public function edit()
     {
-        $user = Auth::user();
-        return view('profile.edit', compact('user'));
+        return redirect()->route('profile.show');
     }
 
     // Update profile information
