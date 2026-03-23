@@ -1,12 +1,6 @@
 <script setup>
 // Pages/Profile/Show.vue
-// Mirrors: resources/views/profile/show.blade.php
-// Path:    resources/js/Pages/Profile/Show.vue
-//
-// Shared across all roles — picks the right nav from auth.user.role.
-// All three forms (info, password, preferences) are on this single page,
-// matching how the original blade profile/show.blade.php was structured.
-// All forms use native PUT POSTs — ProfileController stays completely unchanged.
+// Path: resources/js/Pages/Profile/Show.vue
 
 import AppLayout from '../../Layouts/AppLayout.vue'
 import NavUser from '../../Components/Nav/NavUser.vue'
@@ -20,7 +14,6 @@ const props = defineProps({
 })
 
 const authUser = computed(() => usePage().props.auth.user)
-
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? ''
 
 function roleLabel(role) {
@@ -32,6 +25,14 @@ function roleLabel(role) {
   }
   return map[role] ?? role
 }
+
+const dashboardHref = computed(() => {
+  switch (authUser.value?.role) {
+    case 'admin':      return '/admin/dashboard'
+    case 'it-support': return '/it/dashboard'
+    default:           return '/user/dashboard'
+  }
+})
 </script>
 
 <template>
@@ -43,6 +44,8 @@ function roleLabel(role) {
     </template>
 
     <div class="container">
+      <a :href="dashboardHref" class="back-btn">← Back to Dashboard</a>
+
       <div class="page-header">
         <h1>My Profile</h1>
         <p style="color:#9ca3af;">Manage your account information and preferences</p>
@@ -50,7 +53,7 @@ function roleLabel(role) {
 
       <div class="content-layout">
 
-        <!-- Left: sidebar with avatar + role info -->
+        <!-- Left sidebar -->
         <div>
           <div class="card" style="text-align:center;">
             <div class="user-avatar-large">{{ user.initials }}</div>
@@ -76,23 +79,32 @@ function roleLabel(role) {
                 </span>
               </div>
               <div class="info-item">
-                <span class="info-label">Can Submit Tickets</span>
-                <span class="info-value">{{ user.can_submit_tickets ? 'Yes' : 'No' }}</span>
+                <span class="info-label">Ticket Submission</span>
+                <span class="info-value">{{ user.can_submit_tickets ? 'Enabled' : 'Disabled' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Email Notifications</span>
+                <span class="info-value">{{ user.email_notifications ? 'Enabled' : 'Disabled' }}</span>
               </div>
             </div>
+
+            <!-- Logout -->
+            <form action="/logout" method="POST" style="margin-top:1.5rem;">
+              <input type="hidden" name="_token" :value="csrfToken">
+              <button type="submit" class="btn btn-danger" style="width:100%;">Sign Out</button>
+            </form>
           </div>
         </div>
 
-        <!-- Right: forms -->
+        <!-- Right column: forms -->
         <div style="display:flex;flex-direction:column;gap:1.5rem;">
 
-          <!-- Profile information form -->
+          <!-- Profile information -->
           <div class="card">
             <h2 class="card-title">Profile Information</h2>
-            <form :action="`/profile/update`" method="POST">
+            <form action="/profile/update" method="POST">
               <input type="hidden" name="_token"  :value="csrfToken">
               <input type="hidden" name="_method" value="PUT">
-
               <div class="form-row">
                 <div class="form-group">
                   <label>First Name</label>
@@ -103,64 +115,56 @@ function roleLabel(role) {
                   <input type="text" name="last_name" :value="user.last_name" required>
                 </div>
               </div>
-
               <div class="form-group">
                 <label>Email Address</label>
                 <input type="email" name="email" :value="user.email" required>
               </div>
-
               <div class="form-row">
                 <div class="form-group">
                   <label>Phone Number</label>
                   <input type="tel" name="phone" :value="user.phone ?? ''" placeholder="Optional">
                 </div>
                 <div class="form-group">
-                  <label>Student/Staff ID</label>
+                  <label>Student / Staff ID</label>
                   <input type="text" name="student_staff_id" :value="user.student_staff_id ?? ''" placeholder="Optional">
                 </div>
               </div>
-
               <div class="action-buttons">
                 <button type="submit" class="btn btn-primary">Update Profile</button>
               </div>
             </form>
           </div>
 
-          <!-- Change password form -->
+          <!-- Change password -->
           <div class="card">
             <h2 class="card-title">Change Password</h2>
             <form action="/profile/password" method="POST">
               <input type="hidden" name="_token"  :value="csrfToken">
               <input type="hidden" name="_method" value="PUT">
-
               <div class="form-group">
                 <label>Current Password</label>
                 <input type="password" name="current_password" required autocomplete="current-password">
               </div>
-
               <div class="form-group">
                 <label>New Password</label>
                 <input type="password" name="password" required autocomplete="new-password">
               </div>
-
               <div class="form-group">
                 <label>Confirm New Password</label>
                 <input type="password" name="password_confirmation" required autocomplete="new-password">
               </div>
-
               <div class="action-buttons">
                 <button type="submit" class="btn btn-primary">Update Password</button>
               </div>
             </form>
           </div>
 
-          <!-- Notification preferences form -->
+          <!-- Notification preferences -->
           <div class="card">
             <h2 class="card-title">Notification Preferences</h2>
             <form action="/profile/preferences" method="POST">
               <input type="hidden" name="_token"  :value="csrfToken">
               <input type="hidden" name="_method" value="PUT">
-
               <div class="toggle-item">
                 <div class="toggle-info">
                   <h4>Email Notifications</h4>
@@ -173,10 +177,21 @@ function roleLabel(role) {
                   style="width:auto;accent-color:#2dd4bf;cursor:pointer;"
                 >
               </div>
-
               <div class="action-buttons" style="margin-top:1rem;">
                 <button type="submit" class="btn btn-primary">Save Preferences</button>
               </div>
+            </form>
+          </div>
+
+          <!-- Danger zone -->
+          <div class="card" style="border-color:rgba(239,68,68,0.3);">
+            <h2 class="card-title" style="color:#ef4444;">Danger Zone</h2>
+            <p style="color:#9ca3af;margin-bottom:1rem;font-size:0.9rem;">
+              Sign out of your LabFix account on this device.
+            </p>
+            <form action="/logout" method="POST">
+              <input type="hidden" name="_token" :value="csrfToken">
+              <button type="submit" class="btn btn-danger">Sign Out</button>
             </form>
           </div>
 
