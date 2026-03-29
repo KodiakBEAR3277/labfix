@@ -5,20 +5,18 @@
 
 import AppLayout from '../../../Layouts/AppLayout.vue'
 import NavUser from '../../../Components/Nav/NavUser.vue'
-import { router } from '@inertiajs/vue3'
+import { Link, router } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
 
 const props = defineProps({
-  reports: Object,  // paginated
+  reports: Object,
   stats:   Object,
-  filters: Object,  // current search/status values passed back from controller
+  filters: Object,
 })
 
-// Local filter state — initialised from what the controller passed back
 const search = ref(props.filters?.search ?? '')
 const status = ref(props.filters?.status ?? 'all')
 
-// Re-fetch with updated filters — Inertia preserves scroll & only swaps data
 function applyFilters() {
   router.get('/user/reports', {
     search: search.value || undefined,
@@ -29,7 +27,6 @@ function applyFilters() {
   })
 }
 
-// Debounce search slightly so we don't fire on every keystroke
 let searchTimer = null
 watch(search, () => {
   clearTimeout(searchTimer)
@@ -58,7 +55,7 @@ function statusLabel(s) {
     <div class="container">
       <div class="page-header">
         <h1>My Reports</h1>
-        <a href="/user/reports/create" class="new-report-btn">+ New Report</a>
+        <Link href="/user/reports/create" class="new-report-btn">+ New Report</Link>
       </div>
 
       <!-- Stats -->
@@ -141,15 +138,15 @@ function statusLabel(s) {
                 <td>{{ new Date(report.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) }}</td>
                 <td>
                   <div class="action-menu">
-                    <a :href="`/user/reports/${report.id}`" class="action-btn">View</a>
+                    <Link :href="`/user/reports/${report.id}`" class="action-btn">View</Link>
                     <template v-if="!report.assigned_to">
-                      <a :href="`/user/reports/${report.id}/edit`" class="action-btn" style="color:#3b82f6;">Edit</a>
-                      <a
-                        :href="`/user/reports/${report.id}`"
+                      <Link :href="`/user/reports/${report.id}/edit`" class="action-btn" style="color:#3b82f6;">Edit</Link>
+                      <button
+                        type="button"
                         class="action-btn"
                         style="color:#ef4444;"
-                        @click.prevent="router.delete(`/user/reports/${report.id}`, { onBefore: () => confirm('Cancel this ticket?') })"
-                      >Cancel</a>
+                        @click="router.delete(`/user/reports/${report.id}`, { onBefore: () => confirm('Cancel this ticket?') })"
+                      >Cancel</button>
                     </template>
                     <template v-else>
                       <span class="action-btn" style="opacity:0.5;cursor:not-allowed;" title="Ticket is assigned">🔒 Locked</span>
@@ -163,8 +160,8 @@ function statusLabel(s) {
                 <div style="font-size:2rem;margin-bottom:1rem;">📋</div>
                 <h3 style="color:#d1d5db;">No reports found</h3>
                 <p>{{ search || status !== 'all' ? 'Try adjusting your filters' : 'Report your first issue to get started' }}</p>
-                <a v-if="search || status !== 'all'" href="/user/reports" class="btn btn-primary" style="margin-top:1rem;">Clear Filters</a>
-                <a v-else href="/user/reports/create" class="btn btn-primary" style="margin-top:1rem;">+ Report Issue</a>
+                <Link v-if="search || status !== 'all'" href="/user/reports" class="btn btn-primary" style="margin-top:1rem;">Clear Filters</Link>
+                <Link v-else href="/user/reports/create" class="btn btn-primary" style="margin-top:1rem;">+ Report Issue</Link>
               </td>
             </tr>
           </tbody>

@@ -3,14 +3,14 @@
 // Mirrors: resources/views/contact.blade.php
 // Layout:  LandingLayout.vue
 //
-// Fetches live contact info (email, phone, system name) from the Laravel
-// API endpoint GET /api/contact-info, which reads from the settings table.
-// Falls back to sensible defaults while loading or if the request fails.
+// Public SPA zone — uses Vue Router's <RouterLink> for navigation within
+// the public zone (/contact → /). Cross-zone links like /login remain
+// plain <a> since they need a full reload to boot Inertia.
 
 import { ref, onMounted } from 'vue'
+import { RouterLink } from 'vue-router'
 import LandingLayout from '../Layouts/LandingLayout.vue'
 
-// Reactive contact info — starts with fallbacks, replaced on load
 const contactInfo = ref({
     system_name:   'LabFix',
     support_email: 'support@labfix.edu',
@@ -26,15 +26,12 @@ onMounted(async () => {
         const data = await res.json()
         contactInfo.value = data
     } catch (e) {
-        // Non-fatal: fallback values are still shown
         error.value = true
     } finally {
         loading.value = false
     }
 })
 
-// Static contact cards — email/phone slots are filled from contactInfo
-// The structure mirrors the original contact.blade.php layout exactly
 const socialLinks = [
     { icon: '📘', label: 'Facebook',  href: '#' },
     { icon: '🐦', label: 'Twitter',   href: '#' },
@@ -47,25 +44,21 @@ const socialLinks = [
     <div class="contact-page">
         <div class="contact-container">
 
-            <!-- Back link -->
-            <a href="/" class="back-link">← Back to Home</a>
+            <!-- RouterLink: stays within the public Vue Router SPA zone -->
+            <RouterLink to="/" class="back-link">← Back to Home</RouterLink>
 
-            <!-- Header -->
             <div class="contact-header">
                 <h1>Contact Us</h1>
                 <p>
                     Get in touch with the
-                    <!-- Show system name from settings once loaded -->
                     <span v-if="!loading">{{ contactInfo.system_name }}</span>
                     <span v-else>LabFix</span>
                     support team
                 </p>
             </div>
 
-            <!-- Contact cards -->
             <div class="contact-grid">
 
-                <!-- Email card — data from settings -->
                 <div class="contact-card">
                     <div class="contact-icon">📧</div>
                     <h3>Email Support</h3>
@@ -77,13 +70,11 @@ const socialLinks = [
                     >
                         {{ contactInfo.support_email }}
                     </a>
-                    <!-- Skeleton while loading -->
-                    <span v-else class="contact-link" style="opacity: 0.4; cursor: default;">
+                    <span v-else class="contact-link" style="opacity:0.4;cursor:default;">
                         Loading...
                     </span>
                 </div>
 
-                <!-- Phone card — data from settings -->
                 <div class="contact-card">
                     <div class="contact-icon">📞</div>
                     <h3>Phone Support</h3>
@@ -95,15 +86,14 @@ const socialLinks = [
                     >
                         {{ contactInfo.support_phone }}
                     </a>
-                    <span v-else-if="loading" class="contact-link" style="opacity: 0.4; cursor: default;">
+                    <span v-else-if="loading" class="contact-link" style="opacity:0.4;cursor:default;">
                         Loading...
                     </span>
-                    <span v-else class="contact-link" style="opacity: 0.5; cursor: default;">
+                    <span v-else class="contact-link" style="opacity:0.5;cursor:default;">
                         Not available
                     </span>
                 </div>
 
-                <!-- Location card — static -->
                 <div class="contact-card">
                     <div class="contact-icon">📍</div>
                     <h3>Visit Us</h3>
@@ -113,7 +103,6 @@ const socialLinks = [
 
             </div>
 
-            <!-- Social links -->
             <div class="social-section">
                 <h2>Follow Us</h2>
                 <div class="social-links">
@@ -129,13 +118,13 @@ const socialLinks = [
                 </div>
             </div>
 
-            <!-- Quick help CTA -->
             <div class="quick-help">
                 <h2>Need Quick Help?</h2>
                 <p>
                     Before reaching out, check our Knowledge Base — many common lab
                     equipment issues are already documented with step-by-step fixes.
                 </p>
+                <!-- /login crosses into the Inertia zone — plain <a> required -->
                 <a href="/login" class="btn-help">Browse Knowledge Base</a>
             </div>
 

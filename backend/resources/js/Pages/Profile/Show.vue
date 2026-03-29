@@ -1,11 +1,12 @@
 <script setup>
 // Pages/Profile/Show.vue
-// Path: resources/js/Pages/Profile/Show.vue
+// Path:    resources/js/Pages/Profile/Show.vue
 
 import AppLayout from '../../Layouts/AppLayout.vue'
 import NavUser from '../../Components/Nav/NavUser.vue'
 import NavIT from '../../Components/Nav/NavIT.vue'
 import NavAdmin from '../../Components/Nav/NavAdmin.vue'
+import { Link } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import { usePage } from '@inertiajs/vue3'
 
@@ -26,6 +27,7 @@ function roleLabel(role) {
   return map[role] ?? role
 }
 
+// Dashboard back-link based on role
 const dashboardHref = computed(() => {
   switch (authUser.value?.role) {
     case 'admin':      return '/admin/dashboard'
@@ -44,7 +46,8 @@ const dashboardHref = computed(() => {
     </template>
 
     <div class="container">
-      <a :href="dashboardHref" class="back-btn">← Back to Dashboard</a>
+      <!-- Link navigates within Inertia zone — no reload -->
+      <Link :href="dashboardHref" class="back-btn">← Back to Dashboard</Link>
 
       <div class="page-header">
         <h1>My Profile</h1>
@@ -88,7 +91,12 @@ const dashboardHref = computed(() => {
               </div>
             </div>
 
-            <!-- Logout -->
+            <!--
+              Logout stays as a native POST form — NOT a Link.
+              Inertia's Link only does GET navigations by default.
+              Logout requires a POST to /logout so Laravel can invalidate
+              the session properly; a GET would bypass the CSRF check.
+            -->
             <form action="/logout" method="POST" style="margin-top:1.5rem;">
               <input type="hidden" name="_token" :value="csrfToken">
               <button type="submit" class="btn btn-danger" style="width:100%;">Sign Out</button>

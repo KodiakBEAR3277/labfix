@@ -5,7 +5,7 @@
 
 import AppLayout from '../../../Layouts/AppLayout.vue'
 import NavUser from '../../../Components/Nav/NavUser.vue'
-import { router } from '@inertiajs/vue3'
+import { Link, router } from '@inertiajs/vue3'
 
 const props = defineProps({
   report: Object,
@@ -68,7 +68,7 @@ function cancelReport() {
     <template #nav><NavUser /></template>
 
     <div id="user-report-details" class="container">
-      <a href="/user/reports" class="back-btn">← Back to My Reports</a>
+      <Link href="/user/reports" class="back-btn">← Back to My Reports</Link>
 
       <!-- Ticket header -->
       <div class="ticket-header">
@@ -97,13 +97,11 @@ function cancelReport() {
         <!-- Main content -->
         <div class="main-content">
 
-          <!-- Description -->
           <div class="content-card">
             <h2 class="card-title">Problem Description</h2>
             <p class="description-text">{{ report.description }}</p>
           </div>
 
-          <!-- Equipment info -->
           <div class="content-card">
             <h2 class="card-title">Equipment Information</h2>
             <div class="info-list">
@@ -144,7 +142,6 @@ function cancelReport() {
                   </div>
                 </div>
               </template>
-              <!-- Fallback if no transactions logged yet -->
               <template v-else>
                 <div class="timeline-item">
                   <div class="timeline-dot"></div>
@@ -165,7 +162,6 @@ function cancelReport() {
         <!-- Sidebar -->
         <div class="sidebar">
 
-          <!-- Quick info -->
           <div class="info-card">
             <h2 class="card-title">Quick Information</h2>
             <div class="info-row"><span class="info-label">Status</span><span class="info-value">{{ statusLabel(report.status) }}</span></div>
@@ -174,11 +170,11 @@ function cancelReport() {
             <div class="info-row"><span class="info-label">Age</span><span class="info-value">{{ report.created_at_human }}</span></div>
           </div>
 
-          <!-- Manage card — only shown if not assigned -->
+          <!-- Manage card -->
           <div v-if="!report.assigned_to" class="card">
             <h2 class="card-title">Manage Report</h2>
             <div class="action-buttons">
-              <a :href="`/user/reports/${report.id}/edit`" class="btn btn-primary">Edit Report</a>
+              <Link :href="`/user/reports/${report.id}/edit`" class="btn btn-primary">Edit Report</Link>
               <button type="button" class="btn btn-danger" @click="cancelReport">Cancel Ticket</button>
             </div>
             <p style="color:#9ca3af;font-size:0.85rem;margin-top:1rem;text-align:center;">Available until ticket is assigned</p>
@@ -207,7 +203,6 @@ function cancelReport() {
             </div>
           </div>
 
-          <!-- Lab status -->
           <div class="info-card">
             <h2 class="card-title">Lab Status</h2>
             <div class="info-row"><span class="info-label">Lab</span><span class="info-value">{{ report.equipment?.lab?.name }}</span></div>

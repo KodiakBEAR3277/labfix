@@ -5,9 +5,10 @@
 
 import AppLayout from '../../Layouts/AppLayout.vue'
 import NavUser from '../../Components/Nav/NavUser.vue'
+import { Link } from '@inertiajs/vue3'
 
 const props = defineProps({
-  article:        Object,
+  article:         Object,
   relatedArticles: Array,
 })
 
@@ -30,14 +31,13 @@ const categoryIcons = {
     <template #nav><NavUser /></template>
 
     <div class="container">
-      <a href="/user/knowledge-base" class="back-btn">← Back to Knowledge Base</a>
+      <Link href="/user/knowledge-base" class="back-btn">← Back to Knowledge Base</Link>
 
       <div class="content-grid">
 
         <!-- Main article content -->
         <div>
           <div class="card">
-            <!-- Article header -->
             <div style="margin-bottom:2rem;">
               <div style="display:flex;gap:0.75rem;align-items:center;margin-bottom:1rem;">
                 <span class="category-badge">
@@ -53,14 +53,13 @@ const categoryIcons = {
               </div>
             </div>
 
-            <!-- Article body — whitespace-pre-wrap preserves newlines from the DB -->
+            <!-- Article body -->
             <div style="color:#d1d5db;line-height:1.8;white-space:pre-wrap;">{{ article.content }}</div>
 
-            <!-- Helpfulness rating -->
+            <!-- Helpfulness rating — native POST forms, back() redirect from controller -->
             <div style="margin-top:2rem;padding-top:2rem;border-top:1px solid rgba(45,212,191,0.2);">
               <p style="color:#9ca3af;margin-bottom:1rem;">Was this article helpful?</p>
               <div style="display:flex;gap:1rem;">
-                <!-- Native POST forms — markHelpful/markNotHelpful use back() redirect -->
                 <form :action="`/user/knowledge-base/${article.slug}/helpful`" method="POST">
                   <input type="hidden" name="_token" :value="csrfToken">
                   <button type="submit" class="btn btn-secondary">
@@ -84,13 +83,13 @@ const categoryIcons = {
         <!-- Sidebar -->
         <div>
 
-          <!-- Related articles -->
           <div class="section-card" v-if="relatedArticles.length">
             <div class="section-header">
               <h2 class="section-title">Related Articles</h2>
             </div>
             <div class="link-list">
-              <a
+              <!-- Link for each related article — seamless Inertia navigation -->
+              <Link
                 v-for="related in relatedArticles"
                 :key="related.id"
                 :href="`/user/knowledge-base/${related.slug}`"
@@ -98,15 +97,14 @@ const categoryIcons = {
               >
                 <span>{{ categoryIcons[related.category] ?? '📄' }}</span>
                 {{ related.title }}
-              </a>
+              </Link>
             </div>
           </div>
 
-          <!-- Still need help -->
           <div class="help-banner" style="margin-top:1.5rem;">
             <h3>Still having issues?</h3>
             <p>Submit a support ticket and our IT team will help you directly.</p>
-            <a href="/user/reports/create" class="btn-contact">Submit a Ticket</a>
+            <Link href="/user/reports/create" class="btn-contact">Submit a Ticket</Link>
           </div>
 
         </div>

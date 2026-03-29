@@ -5,6 +5,7 @@
 
 import AppLayout from '../../../Layouts/AppLayout.vue'
 import NavUser from '../../../Components/Nav/NavUser.vue'
+import { Link } from '@inertiajs/vue3'
 
 const props = defineProps({
   report: Object,
@@ -18,7 +19,7 @@ const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? 
     <template #nav><NavUser /></template>
 
     <div class="container">
-      <a :href="`/user/reports/${report.id}`" class="back-btn">← Back to Report</a>
+      <Link :href="`/user/reports/${report.id}`" class="back-btn">← Back to Report</Link>
 
       <div class="page-header">
         <h1>Edit Report</h1>
@@ -26,7 +27,6 @@ const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? 
       </div>
 
       <div class="card" style="max-width:800px;margin:0 auto;">
-        <!-- Native POST with _method spoofing for PUT -->
         <form :action="`/user/reports/${report.id}`" method="POST" enctype="multipart/form-data">
           <input type="hidden" name="_token"  :value="csrfToken">
           <input type="hidden" name="_method" value="PUT">
@@ -79,7 +79,8 @@ const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? 
 
           <div class="action-buttons">
             <button type="submit" class="btn btn-primary">Update Report</button>
-            <a :href="`/user/reports/${report.id}`" class="btn btn-secondary">Cancel</a>
+            <!-- Link for cancel — no form submission, just navigate back -->
+            <Link :href="`/user/reports/${report.id}`" class="btn btn-secondary">Cancel</Link>
           </div>
         </form>
       </div>
