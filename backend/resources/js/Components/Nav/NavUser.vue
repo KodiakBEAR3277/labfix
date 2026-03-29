@@ -1,93 +1,86 @@
 <script setup>
 // NavUser.vue
-// Mirrors: resources/views/components/nav/user.blade.php
-// Used by: All User role Inertia pages via AppLayout.vue
-// Path:    resources/js/Components/Nav/NavUser.vue
+// Path: resources/js/Components/Nav/NavUser.vue
 //
-// Active link detection uses Inertia's usePage() to read the current URL,
-// replicating request()->routeIs() from the blade nav.
+// Uses Inertia's <Link> component instead of <a href> for all internal navigation.
+// This gives the full SPA "no full-page reload" experience — Inertia intercepts
+// the click, fetches only the new page's props via XHR, and swaps the component
+// without a browser reload.
 //
-// User name and initials come from the globally shared auth.user prop
-// set in HandleInertiaRequests::share() — no fetch needed.
-//
-// CSS: uses existing navigation.css classes — no new styles needed.
+// usePage().url is Inertia's reactive current URL — more reliable than
+// window.location.pathname because it updates instantly after navigation
+// without needing a page reload for the active class to reflect correctly.
 
 import { computed } from 'vue'
-import { usePage, router } from '@inertiajs/vue3'
+import { Link, usePage } from '@inertiajs/vue3'
 
 const page = usePage()
 
-// auth.user is shared globally by HandleInertiaRequests
 const user = computed(() => page.props.auth.user)
 
-// Replicate request()->routeIs() using the current URL path
-const currentPath = computed(() => window.location.pathname)
+// Inertia's reactive URL — updates immediately after each navigation
+const currentUrl = computed(() => page.url)
 
 function isActive(path) {
-  return currentPath.value === path
+  return currentUrl.value === path
 }
 
 function isActivePrefix(prefix, exclude = null) {
-  if (exclude && currentPath.value === exclude) return false
-  return currentPath.value.startsWith(prefix)
-}
-
-// Logout via Inertia POST (keeps CSRF handling clean)
-function logout() {
-  router.post('/logout')
+  if (exclude && currentUrl.value === exclude) return false
+  return currentUrl.value.startsWith(prefix)
 }
 </script>
 
 <template>
   <nav>
-    <div class="logo">LabFix</div>
+    <Link href="/user/dashboard" class="logo">LabFix</Link>
 
     <div class="nav-menu">
-      <a
+      <Link
         href="/user/dashboard"
         class="nav-link"
         :class="{ active: isActive('/user/dashboard') }"
       >
         Dashboard
-      </a>
+      </Link>
 
-      <a
+      <Link
         href="/user/reports/create"
         class="nav-link"
         :class="{ active: isActive('/user/reports/create') }"
       >
         Report Issue
-      </a>
+      </Link>
 
-      <a
+      <Link
         href="/user/reports"
         class="nav-link"
         :class="{ active: isActivePrefix('/user/reports', '/user/reports/create') }"
       >
         My Reports
-      </a>
+      </Link>
 
-      <a
+      <Link
         href="/user/knowledge-base"
         class="nav-link"
         :class="{ active: isActivePrefix('/user/knowledge-base') }"
       >
         Knowledge Base
-      </a>
+      </Link>
 
-      <a
+      <Link
         href="/user/lab-status"
         class="nav-link"
         :class="{ active: isActive('/user/lab-status') }"
       >
         Lab Status
-      </a>
+      </Link>
 
-      <!-- User profile avatar — matches blade's user-profile component -->
-      <a href="/profile" class="user-profile">
+      <!-- Profile avatar — also a Link -->
+      <Link href="/profile" class="user-profile">
         <div class="user-avatar">{{ user?.initials ?? 'U' }}</div>
         <span>{{ user?.first_name ?? 'User' }} {{ user?.last_name ?? '' }}</span>
-      </a>
+      </Link>
     </div>
   </nav>
 </template>

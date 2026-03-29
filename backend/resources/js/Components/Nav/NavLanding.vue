@@ -1,32 +1,29 @@
 <script setup>
 // NavLanding.vue
-// Mirrors: resources/views/components/nav/landing + @auth directive behavior
-// Used by: LandingLayout.vue
+// Path: resources/js/Components/Nav/NavLanding.vue
 //
-// On mount, fetches GET /auth/status (session-based, no token needed) to
-// check if a user is currently logged in via Laravel's session.
+// This nav lives in the Vue Router public zone (not Inertia), so it uses
+// Vue Router's <RouterLink> for navigation within the public SPA — this
+// gives the no-reload experience for /, /contact, etc.
 //
-// If logged in:   shows "Welcome back!" + role-appropriate dashboard link
-// If guest:       shows "Don't have an account?" + Sign Up link
+// Cross-zone links (/login, /register, /user/dashboard etc.) must stay as
+// plain <a href> because they cross into the Inertia zone, where a full
+// browser navigation is required to boot the Inertia app properly.
+// Using RouterLink or Inertia Link across the zone boundary would break routing.
 //
-// This replicates the blade's @auth / @else / @endauth block using v-if.
-//
-// IMPORTANT: credentials: 'same-origin' is required so the browser sends
-// the Laravel session cookie with the fetch — without it Laravel always
-// sees the request as a guest regardless of login state.
-//
-// CSS: uses existing nav classes from navigation.css / landing.css
+// Auth check: fetches GET /auth/status with credentials: 'same-origin' so
+// the Laravel session cookie is sent. Without this, Laravel always returns guest.
 
 import { ref, onMounted } from 'vue'
+import { RouterLink } from 'vue-router'
 
-// null = still loading, false = guest, object = authenticated user
 const user = ref(null)
 const loading = ref(true)
 
 onMounted(async () => {
   try {
     const res = await fetch('/auth/status', {
-      credentials: 'same-origin',       // sends the Laravel session cookie
+      credentials: 'same-origin',
       headers: { 'Accept': 'application/json' }
     })
     const data = await res.json()
@@ -38,7 +35,6 @@ onMounted(async () => {
   }
 })
 
-// Match Laravel's redirectBasedOnRole() logic
 function dashboardHref(role) {
   switch (role) {
     case 'admin':      return '/admin/dashboard'
@@ -50,25 +46,26 @@ function dashboardHref(role) {
 
 <template>
   <nav>
-    <a href="/" class="logo">LabFix</a>
+    <!-- RouterLink within the public SPA zone -->
+    <RouterLink to="/" class="logo">LabFix</RouterLink>
 
     <div class="nav-menu">
       <a href="/#features" class="nav-link">Features</a>
       <a href="/#about"    class="nav-link">About</a>
-      <a href="/contact"   class="nav-link">Contact</a>
+      <!-- /contact is also in the public SPA zone — use RouterLink -->
+      <RouterLink to="/contact" class="nav-link">Contact</RouterLink>
     </div>
 
     <div class="nav-menu">
-      <!-- Still checking session — render nothing to avoid flicker -->
       <template v-if="loading" />
 
-      <!-- @auth equivalent: user is logged in -->
+      <!-- Authenticated: plain <a> to cross into Inertia zone -->
       <template v-else-if="user">
         <span class="nav-link">Welcome back!</span>
         <a :href="dashboardHref(user.role)" class="auth-signup-btn">Dashboard</a>
       </template>
 
-      <!-- @else equivalent: guest -->
+      <!-- Guest: plain <a> to cross into Inertia zone -->
       <template v-else>
         <span class="nav-link">Don't have an account?</span>
         <a href="/register" class="auth-signup-btn">Sign Up</a>
