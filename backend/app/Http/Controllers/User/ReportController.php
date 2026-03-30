@@ -122,7 +122,7 @@ class ReportController extends Controller
         // Handle file uploads
         $attachmentPaths = [];
         if ($request->hasFile('attachments')) {
-            foreach ($request->file('attachments') as $file) {
+            foreach ($request->file('new_attachments') as $file) {
                 $path = $file->store('attachments', 'public');
                 $attachmentPaths[] = $path;
             }
@@ -188,7 +188,7 @@ class ReportController extends Controller
         // Handle new file uploads
         $attachmentPaths = $report->attachments ?? [];
         if ($request->hasFile('attachments')) {
-            foreach ($request->file('attachments') as $file) {
+            foreach ($request->file('new_attachments') as $file) {
                 $path = $file->store('attachments', 'public');
                 $attachmentPaths[] = $path;
             }

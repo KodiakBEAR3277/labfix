@@ -1,17 +1,16 @@
 <script setup>
 // Pages/User/KnowledgeBase.vue
-// Mirrors: resources/views/user/knowledge-base.blade.php
-// Path:    resources/js/Pages/User/KnowledgeBase.vue
+// Path: resources/js/Pages/User/KnowledgeBase.vue
 
 import AppLayout from '../../Layouts/AppLayout.vue'
 import NavUser from '../../Components/Nav/NavUser.vue'
-import { router } from '@inertiajs/vue3'
+import { Link, router } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
 
 const props = defineProps({
-  articles:        Object,   // paginated
+  articles:        Object,
   popularArticles: Array,
-  categories:      Object,   // { hardware: 3, software: 2, ... }
+  categories:      Object,
   filters:         Object,
 })
 
@@ -74,7 +73,7 @@ function formatDate(dateStr) {
         </div>
       </div>
 
-      <!-- Category cards -->
+      <!-- Category cards — @click still correct here, these are filter toggles not navigation -->
       <div class="categories-section">
         <h2 class="section-title">Browse by Category</h2>
         <div class="categories-grid">
@@ -113,12 +112,17 @@ function formatDate(dateStr) {
 
           <div class="articles-grid">
             <template v-if="articles.data.length">
-              <a
+              <!--
+                Link wraps the entire article card — same pattern as Dashboard
+                ticket cards. Replaces the <a href> which caused a full reload.
+                style="display:block" ensures the Link fills the card area.
+              -->
+              <Link
                 v-for="article in articles.data"
                 :key="article.id"
                 :href="`/user/knowledge-base/${article.slug}`"
                 class="article-card"
-                style="text-decoration:none;"
+                style="display:block;text-decoration:none;"
               >
                 <div class="article-content">
                   <div class="article-header">
@@ -135,7 +139,7 @@ function formatDate(dateStr) {
                   </p>
                 </div>
                 <div class="article-icon">→</div>
-              </a>
+              </Link>
             </template>
 
             <div v-else style="text-align:center;padding:3rem;color:#9ca3af;">
@@ -145,13 +149,18 @@ function formatDate(dateStr) {
             </div>
           </div>
 
-          <!-- Pagination -->
+          <!-- Pagination — router.get() is correct here since these are
+               pre-built URLs from Laravel's paginator, not form submissions -->
           <div v-if="articles.last_page > 1" class="pagination" style="margin-top:1.5rem;">
             <div class="page-info">
               Showing {{ articles.from }}–{{ articles.to }} of {{ articles.total }} articles
             </div>
             <div class="page-controls">
-              <button class="page-btn" :disabled="!articles.prev_page_url" @click="router.get(articles.prev_page_url)">← Previous</button>
+              <button
+                class="page-btn"
+                :disabled="!articles.prev_page_url"
+                @click="router.get(articles.prev_page_url)"
+              >← Previous</button>
               <button
                 v-for="p in articles.last_page"
                 :key="p"
@@ -159,12 +168,16 @@ function formatDate(dateStr) {
                 :class="{ active: p === articles.current_page }"
                 @click="router.get(articles.path + '?page=' + p)"
               >{{ p }}</button>
-              <button class="page-btn" :disabled="!articles.next_page_url" @click="router.get(articles.next_page_url)">Next →</button>
+              <button
+                class="page-btn"
+                :disabled="!articles.next_page_url"
+                @click="router.get(articles.next_page_url)"
+              >Next →</button>
             </div>
           </div>
         </div>
 
-        <!-- Sidebar: popular articles -->
+        <!-- Sidebar -->
         <div>
           <div class="section-card">
             <div class="section-header">
@@ -173,7 +186,7 @@ function formatDate(dateStr) {
             <div class="quick-links">
               <div class="quick-link-card">
                 <div class="link-list">
-                  <a
+                  <Link
                     v-for="article in popularArticles"
                     :key="article.id"
                     :href="`/user/knowledge-base/${article.slug}`"
@@ -181,17 +194,16 @@ function formatDate(dateStr) {
                   >
                     <span>{{ categoryIcons[article.category] ?? '📄' }}</span>
                     {{ article.title }}
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Help banner -->
           <div class="help-banner" style="margin-top:1.5rem;">
             <h3>Still need help?</h3>
             <p>Can't find what you're looking for? Submit a support ticket and our IT team will assist you.</p>
-            <a href="/user/reports/create" class="btn-contact">Submit a Ticket</a>
+            <Link href="/user/reports/create" class="btn-contact">Submit a Ticket</Link>
           </div>
         </div>
 
