@@ -1,18 +1,20 @@
 <script setup>
-// Login.vue
-// Mirrors: resources/views/auth/login.blade.php
-// Layout:  AuthLayout.vue
-// Path:    resources/js/Pages/Auth/Login.vue
+// Pages/Auth/Login.vue
+// Path: resources/js/Pages/Auth/Login.vue
 //
-// Uses a native <form> POST to /login — no fetch, no JSON.
-// Laravel's session-based AuthController needs zero changes:
-//   - back()->withErrors() on failed login → full-page reload back to /login
-//   - redirectBasedOnRole() on success → full-page redirect to dashboard
+// Now a proper Inertia page — served via Inertia::render('Auth/Login').
+// All navigation uses Inertia <Link>. No Vue Router imports.
 //
-// CSRF token is bound from <meta name="csrf-token"> which entry.blade.php outputs.
+// The login form remains a native HTML POST to /login.
+// On success Laravel redirects to the dashboard — since everything is now
+// in the same Inertia zone, Inertia handles the redirect response natively
+// and there is no full-page reload. On validation failure, back()->withErrors()
+// also works natively with Inertia and re-renders this page with errors.
 //
-// CSS: All classes from public/css/layouts/auth.css — no new styles needed.
+// NOTE: Inertia error handling via usePage().props.errors is available if you
+// want inline validation messages later — that's a separate improvement.
 
+import { Link } from '@inertiajs/vue3'
 import AuthLayout from '../../Layouts/AuthLayout.vue'
 
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? ''
@@ -21,26 +23,23 @@ const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? 
 <template>
   <AuthLayout>
 
-    <!-- Nav: "Don't have an account? Sign Up" -->
     <template #nav>
       <nav class="auth-nav">
-        <a href="/" class="auth-logo">
+        <Link href="/" class="auth-logo">
           <div class="auth-logo-icon"></div>
           <span>LabFix</span>
-        </a>
+        </Link>
         <div class="auth-nav-right">
           <span class="auth-nav-text">Don't have an account?</span>
-          <a href="/register" class="auth-signup-btn">Sign Up</a>
+          <Link href="/register" class="auth-signup-btn">Sign Up</Link>
         </div>
       </nav>
     </template>
 
-    <!-- Left panel tagline -->
     <template #tagline>
       Sign <span class="auth-highlight">in</span>
     </template>
 
-    <!-- Right panel: login card -->
     <div class="auth-right-section">
       <div class="auth-login-container">
 
@@ -49,7 +48,6 @@ const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? 
           <p class="auth-login-subtitle">Sign in with email address</p>
         </div>
 
-        <!-- Native POST — Laravel handles CSRF, validation, and redirect -->
         <form action="/login" method="POST">
           <input type="hidden" name="_token" :value="csrfToken">
 

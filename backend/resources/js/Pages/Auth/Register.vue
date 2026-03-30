@@ -1,19 +1,12 @@
 <script setup>
-// Register.vue
-// Mirrors: resources/views/auth/registration.blade.php
-// Layout:  AuthLayout.vue
-// Path:    resources/js/Pages/Auth/Register.vue
+// Pages/Auth/Register.vue
+// Path: resources/js/Pages/Auth/Register.vue
 //
-// Uses a native <form> POST to /register — no fetch, no JSON.
-// Laravel's session-based AuthController needs zero changes:
-//   - back()->withErrors() on failed registration → full-page reload back to /register
-//   - redirectBasedOnRole() on success → full-page redirect to dashboard
-//
-// CSRF token is bound from <meta name="csrf-token"> which entry.blade.php outputs.
-//
-// CSS: All classes from public/css/layouts/auth.css — no new styles needed.
-// Note: .auth-right-section.scrollable handles overflow for this taller form.
+// Now a proper Inertia page — served via Inertia::render('Auth/Register').
+// All navigation uses Inertia <Link>. No Vue Router imports.
+// Native POST form is kept — same reasoning as Login.vue.
 
+import { Link } from '@inertiajs/vue3'
 import AuthLayout from '../../Layouts/AuthLayout.vue'
 
 const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? ''
@@ -22,26 +15,23 @@ const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? 
 <template>
   <AuthLayout>
 
-    <!-- Nav: "Already have an Account? Sign In" -->
     <template #nav>
       <nav class="auth-nav">
-        <a href="/" class="auth-logo">
+        <Link href="/" class="auth-logo">
           <div class="auth-logo-icon"></div>
           <span>LabFix</span>
-        </a>
+        </Link>
         <div class="auth-nav-right">
           <span class="auth-nav-text">Already have an Account?</span>
-          <a href="/login" class="auth-signin-btn">Sign In</a>
+          <Link href="/login" class="auth-signin-btn">Sign In</Link>
         </div>
       </nav>
     </template>
 
-    <!-- Left panel tagline -->
     <template #tagline>
       Sign <span class="auth-highlight">Up</span>
     </template>
 
-    <!-- Right panel: registration card (scrollable for taller form) -->
     <div class="auth-right-section scrollable">
       <div class="auth-registration-container">
 
@@ -49,47 +39,25 @@ const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? 
           <h2 class="auth-form-title">Create your account to get Started</h2>
         </div>
 
-        <!-- Native POST — Laravel handles CSRF, validation, and redirect -->
         <form action="/register" method="POST">
           <input type="hidden" name="_token" :value="csrfToken">
 
-          <!-- First / Last name row -->
           <div class="auth-form-row">
             <div class="auth-form-group">
               <label for="first_name">First Name</label>
-              <input
-                id="first_name"
-                type="text"
-                name="first_name"
-                autocomplete="given-name"
-                required
-              >
+              <input id="first_name" type="text" name="first_name" autocomplete="given-name" required>
             </div>
             <div class="auth-form-group">
               <label for="last_name">Last Name</label>
-              <input
-                id="last_name"
-                type="text"
-                name="last_name"
-                autocomplete="family-name"
-                required
-              >
+              <input id="last_name" type="text" name="last_name" autocomplete="family-name" required>
             </div>
           </div>
 
-          <!-- Email -->
           <div class="auth-form-group">
             <label for="email">Email Address</label>
-            <input
-              id="email"
-              type="email"
-              name="email"
-              autocomplete="email"
-              required
-            >
+            <input id="email" type="email" name="email" autocomplete="email" required>
           </div>
 
-          <!-- Role -->
           <div class="auth-form-group">
             <label for="role">Role</label>
             <select id="role" name="role" required>
@@ -100,31 +68,16 @@ const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? 
             </select>
           </div>
 
-          <!-- Password -->
           <div class="auth-form-group">
             <label for="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              name="password"
-              autocomplete="new-password"
-              required
-            >
+            <input id="password" type="password" name="password" autocomplete="new-password" required>
           </div>
 
-          <!-- Confirm Password -->
           <div class="auth-form-group">
             <label for="password_confirmation">Confirm Password</label>
-            <input
-              id="password_confirmation"
-              type="password"
-              name="password_confirmation"
-              autocomplete="new-password"
-              required
-            >
+            <input id="password_confirmation" type="password" name="password_confirmation" autocomplete="new-password" required>
           </div>
 
-          <!-- Terms checkbox -->
           <div class="auth-checkbox-group">
             <input id="terms" type="checkbox" name="terms" required>
             <label for="terms">I have read the terms and conditions</label>

@@ -6,7 +6,7 @@
 
 <template>
   <div class="app-shell">
-    <RouterView />fwfqffe
+    <RouterView />
   </div>
 </template>
 

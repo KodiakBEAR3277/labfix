@@ -1,47 +1,35 @@
-// ============================================
-// LabFix - Entry Point
 // resources/js/app.js
-// ============================================
 //
-// This file boots BOTH:
-//   1. Vue Router (for public pages: /, /contact, /login, /register)
-//      → served by entry.blade.php via the catch-all route
-//   2. Inertia (for authenticated CRUD pages: /user/*, /profile/*, etc.)
-//      → served by inertia.blade.php via their specific web.php routes
+// Single entry point — Inertia only. Vue Router has been removed.
+// All pages (Landing, Contact, Login, Register, and all authenticated pages)
+// are now served through inertia.blade.php and resolved here.
 //
-// Inertia detects its own root div (#app with data-page attribute).
-// Vue Router detects the absence of that attribute.
-// They do not conflict.
+// Page component resolution uses Vite's import.meta.glob to automatically
+// find any .vue file under resources/js/Pages/. The path Inertia passes
+// from the controller (e.g. 'Landing', 'Auth/Login', 'User/Dashboard')
+// maps directly to the file at Pages/{name}.vue.
 
 import { createApp, h } from 'vue'
 import { createInertiaApp } from '@inertiajs/vue3'
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers'
-import { createRouter, createWebHistory } from 'vue-router'
 
-// ── Inertia pages (authenticated zone) ──────────────────────────────────────
-// resolvePageComponent looks in resources/js/Pages/ automatically.
-// So Inertia::render('User/Dashboard') maps to Pages/User/Dashboard.vue
+createInertiaApp({
+    // Resolve page components from resources/js/Pages/
+    resolve: (name) =>
+        resolvePageComponent(
+            `./Pages/${name}.vue`,
+            import.meta.glob('./Pages/**/*.vue'),
+        ),
 
-const isInertiaPage = document.getElementById('app')?.hasAttribute('data-page')
+    // Mount the app
+    setup({ el, App, props, plugin }) {
+        createApp({ render: () => h(App, props) })
+            .use(plugin)
+            .mount(el)
+    },
 
-if (isInertiaPage) {
-    createInertiaApp({
-        resolve: name =>
-            resolvePageComponent(
-                `./Pages/${name}.vue`,
-                import.meta.glob('./Pages/**/*.vue')
-            ),
-        setup({ el, App, props, plugin }) {
-            createApp({ render: () => h(App, props) })
-                .use(plugin)
-                .mount(el)
-        },
-    })
-} else {
-    // ── Vue Router (public pages) ────────────────────────────────────────────
-    import('./router/index.js').then(({ default: router }) => {
-        import('./App.vue').then(({ default: App }) => {
-            createApp(App).use(router).mount('#app')
-        })
-    })
-}
+    // Optional: sets the document <title> — uses the page's `title` prop if set,
+    // falls back to 'LabFix'. Pages can override via <Head title="..."> from
+    // @inertiajs/vue3 if you add that later.
+    title: (title) => title ? `${title} — LabFix` : 'LabFix',
+})

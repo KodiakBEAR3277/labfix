@@ -1,14 +1,19 @@
 <script setup>
-// Landing.vue
-// Mirrors: resources/views/landing.blade.php
-// Layout:  LandingLayout.vue (which wraps NavLanding)
+// Pages/Landing.vue
+// Path: resources/js/Pages/Landing.vue
 //
-// All class names match your existing landing.css and main.css exactly,
-// so no styling changes are needed — Vite will bundle those CSS files in.
+// Now an Inertia page — served via Inertia::render('Landing') from web.php.
+// LandingLayout is kept as the layout wrapper (it contains NavLanding).
+// All internal <a href> links are now Inertia <Link> components.
+// Hash-scroll links (#features, #about) stay as plain <a> — they are not
+// route navigations, just in-page scrolls.
 
+import { computed } from 'vue'
+import { Link, usePage } from '@inertiajs/vue3'
 import LandingLayout from '../Layouts/LandingLayout.vue'
 
-// Static feature cards data — keeps the template clean
+const user = computed(() => usePage().props.auth.user)
+
 const features = [
   {
     icon: '🎫',
@@ -42,23 +47,21 @@ const features = [
   }
 ]
 
-// Mockup ticket data for the hero visual — mirrors what the blade had
 const mockTickets = [
-  { title: 'PC-03 wonld not boot', lab: 'Lab A', priority: 'High', status: 'In Progress' },
-  { title: 'Projector cable missing', lab: 'Lab B', priority: 'Medium', status: 'Open' },
-  { title: 'Mouse not responding', lab: 'Lab C', priority: 'Low', status: 'Assigned' },
+  { title: 'PC-03 won\'t boot',       lab: 'Lab A', priority: 'High',   status: 'In Progress' },
+  { title: 'Projector cable missing', lab: 'Lab B', priority: 'Medium', status: 'Open'        },
+  { title: 'Mouse not responding',    lab: 'Lab C', priority: 'Low',    status: 'Assigned'    },
 ]
 </script>
 
 <template>
   <LandingLayout>
 
-    <!-- ==================== HERO ==================== -->
+    <!-- HERO -->
     <section class="hero">
       <div class="container">
         <div class="hero-content">
 
-          <!-- Left: Text + CTA -->
           <div class="hero-text">
             <h1>Streamline Your <br>Lab Equipment Issue Tracking</h1>
             <p>
@@ -67,19 +70,18 @@ const mockTickets = [
               transparent ticketing system.
             </p>
             <div class="cta-buttons">
-              <a href="/register" class="btn-primary">Get Started</a>
-              <a href="#features"  class="btn-secondary">Learn More</a>
+              <Link href="/register" class="btn-primary">Get Started</Link>
+              <!-- Hash scroll — plain <a>, not a route change -->
+              <a href="#features" class="btn-secondary">Learn More</a>
             </div>
           </div>
 
-          <!-- Right: Dashboard mockup visual -->
           <div class="hero-visual">
             <div class="dashboard-mockup">
               <div class="mockup-header">
                 <span class="mockup-title">LabFix</span>
                 <span class="status-badge">● Live</span>
               </div>
-
               <div
                 v-for="ticket in mockTickets"
                 :key="ticket.title"
@@ -89,8 +91,6 @@ const mockTickets = [
                 <div class="ticket-meta">{{ ticket.lab }} · {{ ticket.priority }} · {{ ticket.status }}</div>
               </div>
             </div>
-
-            <!-- Decorative floating blobs (matching landing.css animations) -->
             <div class="floating-element floating-1"></div>
             <div class="floating-element floating-2"></div>
             <div class="floating-element floating-3"></div>
@@ -100,7 +100,7 @@ const mockTickets = [
       </div>
     </section>
 
-    <!-- ==================== FEATURES ==================== -->
+    <!-- FEATURES -->
     <section id="features" class="features">
       <div class="feature-container">
         <h2>Everything You Need</h2>
@@ -118,45 +118,30 @@ const mockTickets = [
       </div>
     </section>
 
-    <!-- ==================== ABOUT ==================== -->
-    <!-- min-height: 100vh + flex centering makes this fill the viewport
-         like the hero and features sections do. No new CSS class needed —
-         this section has no dedicated rule in landing.css so inline is safe. -->
+    <!-- ABOUT -->
     <section
       id="about"
       class="features"
-      style="
-        background: transparent;
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      "
+      style="background:transparent;min-height:100vh;display:flex;align-items:center;justify-content:center;"
     >
-      <div class="feature-container" style="text-align: center; max-width: 700px;">
+      <div class="feature-container" style="text-align:center;max-width:700px;">
         <h2>About LabFix</h2>
-        <p style="color: var(--color-text-secondary); font-size: var(--font-size-lg); line-height: var(--line-height-relaxed);">
+        <p style="color:var(--color-text-secondary);font-size:var(--font-size-lg);line-height:var(--line-height-relaxed);">
           LabFix is an academic project built to streamline equipment maintenance
           reporting in computer laboratories. It replaces informal email chains and
           walk-up requests with a structured, trackable workflow — from first report
           to final resolution.
         </p>
-        <div class="cta-buttons" style="justify-content: center; margin-top: 2rem;">
-          <a href="/register" class="btn-primary">Create an Account</a>
-          <a href="/contact" class="btn-secondary">Contact Us</a>
+        <div class="cta-buttons" style="justify-content:center;margin-top:2rem;">
+          <Link href="/register" class="btn-primary">Create an Account</Link>
+          <Link href="/contact"  class="btn-secondary">Contact Us</Link>
         </div>
       </div>
     </section>
 
-    <!-- ==================== FOOTER ==================== -->
+    <!-- FOOTER -->
     <template #footer>
-      <div style="
-        border-top: 1px solid var(--color-border);
-        padding: 2rem;
-        text-align: center;
-        color: var(--color-text-muted);
-        font-size: var(--font-size-sm);
-      ">
+      <div style="border-top:1px solid var(--color-border);padding:2rem;text-align:center;color:var(--color-text-muted);font-size:var(--font-size-sm);">
         © {{ new Date().getFullYear() }} LabFix. Academic Project.
       </div>
     </template>

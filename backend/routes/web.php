@@ -21,10 +21,11 @@ use App\Http\Controllers\Admin\TicketController as AdminTicketController;
 use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\User\KnowledgeBaseController;
+use App\Http\Controllers\User\LabStatusController;
 
 // Public routes
-Route::get('/', fn() => view('entry'))->name('landing');
-Route::get('/contact', fn() => view('entry'))->name('contact');
+Route::get('/', fn() => Inertia::render('Landing'))->name('landing');
+Route::get('/contact', fn() => Inertia::render('Contact'))->name('contact');
 
 // Auth routes
 Route::middleware('guest')->group(function () {
@@ -35,17 +36,6 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
-Route::get('/auth/status', function () {
-    $user = Auth::user();
- 
-    return response()->json([
-        'user' => $user ? [
-            'role' => $user->role,
-            'name' => $user->full_name,
-        ] : null,
-    ]);
-});
 
 // Authenticated routes
 Route::middleware('auth')->group(function () {
@@ -66,28 +56,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('user')->name('user.')->group(function () {
         Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
         Route::resource('reports', ReportController::class);
-        
-        Route::get('/lab-status', function () {
-            $labs = Lab::where('is_active', true)
-                ->with('equipment')
-                ->get()
-                ->map(fn($lab) => [
-                    'id'        => $lab->id,
-                    'name'      => $lab->name,
-                    'code'      => $lab->code,
-                    'location'  => $lab->location,
-                    'capacity'  => $lab->capacity,
-                    'equipment' => $lab->equipment->map(fn($eq) => [
-                        'id'             => $eq->id,
-                        'equipment_code' => $eq->equipment_code,
-                        'type'           => $eq->type,
-                        'status'         => $eq->status,
-                        'notes'          => $eq->notes,
-                    ]),
-                ]);
-        
-            return Inertia::render('User/LabStatus', compact('labs'));
-        })->name('lab-status');
+        Route::get('/lab-status', [LabStatusController::class, 'index'])->name('lab-status');
         Route::get('/knowledge-base', [KnowledgeBaseController::class, 'index'])->name('knowledge-base');
         Route::get('/knowledge-base/{slug}', [KnowledgeBaseController::class, 'show'])->name('knowledge-base.show');
         Route::post('/knowledge-base/{slug}/helpful', [KnowledgeBaseController::class, 'markHelpful'])->name('knowledge-base.helpful');
@@ -145,12 +114,6 @@ Route::middleware('auth')->group(function () {
     });
 });
 
-// Admin Settings
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/admin/settings', [SettingsController::class, 'index'])->name('admin.settings');
-    Route::put('/admin/settings', [SettingsController::class, 'update'])->name('admin.settings.update');
-});
-
 // Profile routes (accessible to all authenticated users)
 Route::prefix('profile')->name('profile.')->middleware('auth')->group(function () {
     Route::get('/', [ProfileController::class, 'show'])->name('show');
@@ -168,7 +131,3 @@ Route::get('/api/labs/{lab}/equipment', function ($labId) {
     
     return response()->json($equipment);
 });
-
-Route::get('/{any}', fn() => view('entry'))
-    ->where('any', '.*')
-    ->name('vue.catchall');

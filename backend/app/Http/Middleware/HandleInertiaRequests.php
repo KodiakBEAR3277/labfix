@@ -8,15 +8,19 @@ use Inertia\Middleware;
 class HandleInertiaRequests extends Middleware
 {
     /**
-     * The root template that is loaded on the first page visit.
-     * Points to the new inertia.blade.php you created.
+     * The root template — all pages now served through inertia.blade.php.
+     * entry.blade.php and Vue Router are no longer used.
      */
     protected $rootView = 'inertia';
 
     /**
-     * Defines the props that are shared by default to all Inertia pages.
-     * auth.user is available in every Vue component via usePage().props.auth.user
-     * This replaces the need for any fetch() call to get user data in navs.
+     * Shared props available in every Inertia page via usePage().props.
+     *
+     * auth.user is now shared for guests too (returns null when not logged in).
+     * This is required because Landing, Contact, Login, and Register are now
+     * Inertia pages — NavLanding reads auth.user to decide whether to show
+     * "Dashboard" or "Sign Up", and it can no longer use a fetch() for this
+     * since there is no separate Vue Router zone anymore.
      */
     public function share(Request $request): array
     {
@@ -32,7 +36,6 @@ class HandleInertiaRequests extends Middleware
                     'role'       => $request->user()->role,
                 ] : null,
             ],
-            // Flash messages — mirrors session('success') / session('error') from blade
             'flash' => [
                 'success' => session('success'),
                 'error'   => session('error'),

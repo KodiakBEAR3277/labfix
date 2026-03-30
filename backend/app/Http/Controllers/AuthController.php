@@ -7,27 +7,26 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use Inertia\Inertia;
 
 class AuthController extends Controller
 {
-    // Show login form
+    // Show login page — now served through Inertia/inertia.blade.php
     public function showLogin()
     {
-        return view('entry');
+        return Inertia::render('Auth/Login');
     }
 
-    // Handle login
+    // Handle login POST — unchanged, session redirect still works with Inertia
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
+            'email'    => ['required', 'email'],
             'password' => ['required'],
         ]);
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-
-            // Redirect based on user role
             return $this->redirectBasedOnRole(Auth::user());
         }
 
@@ -36,31 +35,29 @@ class AuthController extends Controller
         ])->onlyInput('email');
     }
 
-    // Show registration form
+    // Show register page — now served through Inertia/inertia.blade.php
     public function showRegister()
     {
-        return view('entry');
+        return Inertia::render('Auth/Register');
     }
 
-    // Handle registration
+    // Handle register POST — unchanged
     public function register(Request $request)
     {
         $validated = $request->validate([
             'first_name' => ['required', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'confirmed', Password::defaults()],
-            'terms' => ['accepted'],
+            'last_name'  => ['required', 'string', 'max:255'],
+            'email'      => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password'   => ['required', 'confirmed', Password::defaults()],
+            'terms'      => ['accepted'],
         ]);
 
-        // Create user with default 'student' role
-        // Admins can change the role later if needed
         $user = User::create([
             'first_name' => $validated['first_name'],
-            'last_name' => $validated['last_name'],
-            'email' => $validated['email'],
-            'role' => 'student', // Default role for all new registrations
-            'password' => Hash::make($validated['password']),
+            'last_name'  => $validated['last_name'],
+            'email'      => $validated['email'],
+            'role'       => 'student',
+            'password'   => Hash::make($validated['password']),
         ]);
 
         Auth::login($user);
@@ -68,7 +65,7 @@ class AuthController extends Controller
         return $this->redirectBasedOnRole($user);
     }
 
-    // Handle logout
+    // Handle logout POST — unchanged
     public function logout(Request $request)
     {
         Auth::logout();
@@ -78,14 +75,12 @@ class AuthController extends Controller
         return redirect()->route('landing');
     }
 
-    // Redirect user based on their role
     private function redirectBasedOnRole(User $user)
     {
         return match($user->role) {
-            'admin' => redirect()->route('admin.dashboard'),
+            'admin'      => redirect()->route('admin.dashboard'),
             'it-support' => redirect()->route('it.dashboard'),
-            'staff', 'student' => redirect()->route('user.dashboard'),
-            default => redirect()->route('user.dashboard'),
+            default      => redirect()->route('user.dashboard'),
         };
     }
 }

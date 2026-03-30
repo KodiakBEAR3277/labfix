@@ -2,38 +2,21 @@
 // NavLanding.vue
 // Path: resources/js/Components/Nav/NavLanding.vue
 //
-// This nav lives in the Vue Router public zone (not Inertia), so it uses
-// Vue Router's <RouterLink> for navigation within the public SPA — this
-// gives the no-reload experience for /, /contact, etc.
+// Now that Landing and Contact are Inertia pages, auth.user is shared
+// globally by HandleInertiaRequests — no fetch('/auth/status') needed.
+// The /auth/status endpoint has been removed from web.php entirely.
 //
-// Cross-zone links (/login, /register, /user/dashboard etc.) must stay as
-// plain <a href> because they cross into the Inertia zone, where a full
-// browser navigation is required to boot the Inertia app properly.
-// Using RouterLink or Inertia Link across the zone boundary would break routing.
-//
-// Auth check: fetches GET /auth/status with credentials: 'same-origin' so
-// the Laravel session cookie is sent. Without this, Laravel always returns guest.
+// All links use Inertia's <Link> — there is no longer a Vue Router zone
+// to cross. The only plain <a> remaining are hash-scroll anchors (#features,
+// #about) which are not route navigations.
 
-import { ref, onMounted } from 'vue'
-import { RouterLink } from 'vue-router'
+import { computed } from 'vue'
+import { Link, usePage } from '@inertiajs/vue3'
 
-const user = ref(null)
-const loading = ref(true)
+const page = usePage()
 
-onMounted(async () => {
-  try {
-    const res = await fetch('/auth/status', {
-      credentials: 'same-origin',
-      headers: { 'Accept': 'application/json' }
-    })
-    const data = await res.json()
-    user.value = data.user ?? false
-  } catch {
-    user.value = false
-  } finally {
-    loading.value = false
-  }
-})
+// auth.user is null for guests, object for authenticated users
+const user = computed(() => page.props.auth.user)
 
 function dashboardHref(role) {
   switch (role) {
@@ -46,29 +29,25 @@ function dashboardHref(role) {
 
 <template>
   <nav>
-    <!-- RouterLink within the public SPA zone -->
-    <RouterLink to="/" class="logo">LabFix</RouterLink>
+    <Link href="/" class="logo">LabFix</Link>
 
     <div class="nav-menu">
       <a href="/#features" class="nav-link">Features</a>
       <a href="/#about"    class="nav-link">About</a>
-      <!-- /contact is also in the public SPA zone — use RouterLink -->
-      <RouterLink to="/contact" class="nav-link">Contact</RouterLink>
+      <Link href="/contact" class="nav-link">Contact</Link>
     </div>
 
     <div class="nav-menu">
-      <template v-if="loading" />
-
-      <!-- Authenticated: plain <a> to cross into Inertia zone -->
-      <template v-else-if="user">
+      <!-- Authenticated -->
+      <template v-if="user">
         <span class="nav-link">Welcome back!</span>
-        <a :href="dashboardHref(user.role)" class="auth-signup-btn">Dashboard</a>
+        <Link :href="dashboardHref(user.role)" class="auth-signup-btn">Dashboard</Link>
       </template>
 
-      <!-- Guest: plain <a> to cross into Inertia zone -->
+      <!-- Guest -->
       <template v-else>
         <span class="nav-link">Don't have an account?</span>
-        <a href="/register" class="auth-signup-btn">Sign Up</a>
+        <Link href="/register" class="auth-signup-btn">Sign Up</Link>
       </template>
     </div>
   </nav>
