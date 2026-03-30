@@ -1,12 +1,16 @@
 <script setup>
 // Pages/Profile/Show.vue
-// Path:    resources/js/Pages/Profile/Show.vue
+// Path: resources/js/Pages/Profile/Show.vue
+//
+// Three useForm() instances — one per form section.
+// The logout uses router.post() directly since it carries no form data.
+// All submissions are XHR — no full-page reloads anywhere on this page.
 
 import AppLayout from '../../Layouts/AppLayout.vue'
 import NavUser from '../../Components/Nav/NavUser.vue'
 import NavIT from '../../Components/Nav/NavIT.vue'
 import NavAdmin from '../../Components/Nav/NavAdmin.vue'
-import { Link } from '@inertiajs/vue3'
+import { Link, useForm, router } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import { usePage } from '@inertiajs/vue3'
 
@@ -15,8 +19,51 @@ const props = defineProps({
 })
 
 const authUser = computed(() => usePage().props.auth.user)
-const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? ''
 
+// ── Profile info form ──────────────────────────────────────────
+const profileForm = useForm({
+  first_name:      props.user.first_name       ?? '',
+  last_name:       props.user.last_name        ?? '',
+  email:           props.user.email            ?? '',
+  phone:           props.user.phone            ?? '',
+  student_staff_id: props.user.student_staff_id ?? '',
+})
+
+function submitProfile() {
+  profileForm.put('/profile/update')
+}
+
+// ── Password form ──────────────────────────────────────────────
+const passwordForm = useForm({
+  current_password:      '',
+  password:              '',
+  password_confirmation: '',
+})
+
+function submitPassword() {
+  passwordForm.put('/profile/password', {
+    onSuccess: () => passwordForm.reset(),
+    onError:   () => passwordForm.reset('password', 'password_confirmation'),
+  })
+}
+
+// ── Notification preferences form ─────────────────────────────
+const prefsForm = useForm({
+  email_notifications: props.user.email_notifications ?? true,
+})
+
+function submitPrefs() {
+  prefsForm.put('/profile/preferences')
+}
+
+// ── Logout ────────────────────────────────────────────────────
+// router.post() carries no form data — just fires the POST to /logout.
+// Inertia follows Laravel's redirect response client-side.
+function logout() {
+  router.post('/logout')
+}
+
+// ── Helpers ───────────────────────────────────────────────────
 function roleLabel(role) {
   const map = {
     'student':    'Student',
@@ -27,7 +74,6 @@ function roleLabel(role) {
   return map[role] ?? role
 }
 
-// Dashboard back-link based on role
 const dashboardHref = computed(() => {
   switch (authUser.value?.role) {
     case 'admin':      return '/admin/dashboard'
@@ -46,7 +92,6 @@ const dashboardHref = computed(() => {
     </template>
 
     <div class="container">
-      <!-- Link navigates within Inertia zone — no reload -->
       <Link :href="dashboardHref" class="back-btn">← Back to Dashboard</Link>
 
       <div class="page-header">
@@ -56,7 +101,7 @@ const dashboardHref = computed(() => {
 
       <div class="content-layout">
 
-        <!-- Left sidebar -->
+        <!-- ── Left sidebar ── -->
         <div>
           <div class="card" style="text-align:center;">
             <div class="user-avatar-large">{{ user.initials }}</div>
@@ -91,54 +136,60 @@ const dashboardHref = computed(() => {
               </div>
             </div>
 
-            <!--
-              Logout stays as a native POST form — NOT a Link.
-              Inertia's Link only does GET navigations by default.
-              Logout requires a POST to /logout so Laravel can invalidate
-              the session properly; a GET would bypass the CSRF check.
-            -->
-            <form action="/logout" method="POST" style="margin-top:1.5rem;">
-              <input type="hidden" name="_token" :value="csrfToken">
-              <button type="submit" class="btn btn-danger" style="width:100%;">Sign Out</button>
-            </form>
+            <!-- Logout — router.post(), no form data needed -->
+            <button
+              type="button"
+              class="btn btn-danger"
+              style="width:100%;margin-top:1.5rem;"
+              @click="logout"
+            >
+              Sign Out
+            </button>
           </div>
         </div>
 
-        <!-- Right column: forms -->
+        <!-- ── Right column ── -->
         <div style="display:flex;flex-direction:column;gap:1.5rem;">
 
           <!-- Profile information -->
           <div class="card">
             <h2 class="card-title">Profile Information</h2>
-            <form action="/profile/update" method="POST">
-              <input type="hidden" name="_token"  :value="csrfToken">
-              <input type="hidden" name="_method" value="PUT">
+            <form @submit.prevent="submitProfile">
               <div class="form-row">
                 <div class="form-group">
                   <label>First Name</label>
-                  <input type="text" name="first_name" :value="user.first_name" required>
+                  <input v-model="profileForm.first_name" type="text" required>
+                  <span v-if="profileForm.errors.first_name" class="text-danger">{{ profileForm.errors.first_name }}</span>
                 </div>
                 <div class="form-group">
                   <label>Last Name</label>
-                  <input type="text" name="last_name" :value="user.last_name" required>
+                  <input v-model="profileForm.last_name" type="text" required>
+                  <span v-if="profileForm.errors.last_name" class="text-danger">{{ profileForm.errors.last_name }}</span>
                 </div>
               </div>
               <div class="form-group">
                 <label>Email Address</label>
-                <input type="email" name="email" :value="user.email" required>
+                <input v-model="profileForm.email" type="email" required>
+                <span v-if="profileForm.errors.email" class="text-danger">{{ profileForm.errors.email }}</span>
               </div>
               <div class="form-row">
                 <div class="form-group">
                   <label>Phone Number</label>
-                  <input type="tel" name="phone" :value="user.phone ?? ''" placeholder="Optional">
+                  <input v-model="profileForm.phone" type="tel" placeholder="Optional">
                 </div>
                 <div class="form-group">
                   <label>Student / Staff ID</label>
-                  <input type="text" name="student_staff_id" :value="user.student_staff_id ?? ''" placeholder="Optional">
+                  <input v-model="profileForm.student_staff_id" type="text" placeholder="Optional">
                 </div>
               </div>
               <div class="action-buttons">
-                <button type="submit" class="btn btn-primary">Update Profile</button>
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  :disabled="profileForm.processing"
+                >
+                  {{ profileForm.processing ? 'Saving…' : 'Update Profile' }}
+                </button>
               </div>
             </form>
           </div>
@@ -146,23 +197,29 @@ const dashboardHref = computed(() => {
           <!-- Change password -->
           <div class="card">
             <h2 class="card-title">Change Password</h2>
-            <form action="/profile/password" method="POST">
-              <input type="hidden" name="_token"  :value="csrfToken">
-              <input type="hidden" name="_method" value="PUT">
+            <form @submit.prevent="submitPassword">
               <div class="form-group">
                 <label>Current Password</label>
-                <input type="password" name="current_password" required autocomplete="current-password">
+                <input v-model="passwordForm.current_password" type="password" required autocomplete="current-password">
+                <span v-if="passwordForm.errors.current_password" class="text-danger">{{ passwordForm.errors.current_password }}</span>
               </div>
               <div class="form-group">
                 <label>New Password</label>
-                <input type="password" name="password" required autocomplete="new-password">
+                <input v-model="passwordForm.password" type="password" required autocomplete="new-password">
+                <span v-if="passwordForm.errors.password" class="text-danger">{{ passwordForm.errors.password }}</span>
               </div>
               <div class="form-group">
                 <label>Confirm New Password</label>
-                <input type="password" name="password_confirmation" required autocomplete="new-password">
+                <input v-model="passwordForm.password_confirmation" type="password" required autocomplete="new-password">
               </div>
               <div class="action-buttons">
-                <button type="submit" class="btn btn-primary">Update Password</button>
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  :disabled="passwordForm.processing"
+                >
+                  {{ passwordForm.processing ? 'Updating…' : 'Update Password' }}
+                </button>
               </div>
             </form>
           </div>
@@ -170,23 +227,26 @@ const dashboardHref = computed(() => {
           <!-- Notification preferences -->
           <div class="card">
             <h2 class="card-title">Notification Preferences</h2>
-            <form action="/profile/preferences" method="POST">
-              <input type="hidden" name="_token"  :value="csrfToken">
-              <input type="hidden" name="_method" value="PUT">
+            <form @submit.prevent="submitPrefs">
               <div class="toggle-item">
                 <div class="toggle-info">
                   <h4>Email Notifications</h4>
                   <p>Receive email updates when your ticket status changes</p>
                 </div>
                 <input
+                  v-model="prefsForm.email_notifications"
                   type="checkbox"
-                  name="email_notifications"
-                  :checked="user.email_notifications"
                   style="width:auto;accent-color:#2dd4bf;cursor:pointer;"
                 >
               </div>
               <div class="action-buttons" style="margin-top:1rem;">
-                <button type="submit" class="btn btn-primary">Save Preferences</button>
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  :disabled="prefsForm.processing"
+                >
+                  {{ prefsForm.processing ? 'Saving…' : 'Save Preferences' }}
+                </button>
               </div>
             </form>
           </div>
@@ -197,10 +257,9 @@ const dashboardHref = computed(() => {
             <p style="color:#9ca3af;margin-bottom:1rem;font-size:0.9rem;">
               Sign out of your LabFix account on this device.
             </p>
-            <form action="/logout" method="POST">
-              <input type="hidden" name="_token" :value="csrfToken">
-              <button type="submit" class="btn btn-danger">Sign Out</button>
-            </form>
+            <button type="button" class="btn btn-danger" @click="logout">
+              Sign Out
+            </button>
           </div>
 
         </div>

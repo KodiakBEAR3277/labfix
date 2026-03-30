@@ -2,22 +2,31 @@
 // Pages/Auth/Login.vue
 // Path: resources/js/Pages/Auth/Login.vue
 //
-// Now a proper Inertia page — served via Inertia::render('Auth/Login').
-// All navigation uses Inertia <Link>. No Vue Router imports.
+// useForm() from @inertiajs/vue3 replaces the native <form> POST.
+// This means Inertia intercepts the submission as XHR — no full-page reload
+// on either success or failure.
 //
-// The login form remains a native HTML POST to /login.
-// On success Laravel redirects to the dashboard — since everything is now
-// in the same Inertia zone, Inertia handles the redirect response natively
-// and there is no full-page reload. On validation failure, back()->withErrors()
-// also works natively with Inertia and re-renders this page with errors.
+// On success:  Laravel redirects to the dashboard; Inertia follows it client-side.
+// On failure:  back()->withErrors() sends errors back; Inertia populates
+//              form.errors without a reload, preserving the email field value.
 //
-// NOTE: Inertia error handling via usePage().props.errors is available if you
-// want inline validation messages later — that's a separate improvement.
+// form.processing is true while the request is in-flight — used to disable
+// the submit button and prevent double-submissions.
 
-import { Link } from '@inertiajs/vue3'
+import { Link, useForm } from '@inertiajs/vue3'
 import AuthLayout from '../../Layouts/AuthLayout.vue'
 
-const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? ''
+const form = useForm({
+  email:    '',
+  password: '',
+})
+
+function submit() {
+  form.post('/login', {
+    // Clear the password field on any error so the user re-types it
+    onError: () => form.reset('password'),
+  })
+}
 </script>
 
 <template>
@@ -48,31 +57,49 @@ const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? 
           <p class="auth-login-subtitle">Sign in with email address</p>
         </div>
 
-        <form action="/login" method="POST">
-          <input type="hidden" name="_token" :value="csrfToken">
+        <!-- Inline error banner — shown when Laravel sends back withErrors() -->
+        <div
+          v-if="form.errors.email"
+          class="alert alert-danger"
+          style="margin-bottom:1rem;"
+        >
+          {{ form.errors.email }}
+        </div>
+
+        <form @submit.prevent="submit">
 
           <div class="auth-form-group">
             <input
+              v-model="form.email"
               type="email"
-              name="email"
               placeholder="Yourname@gmail.com"
               autocomplete="email"
               required
               autofocus
+              :class="{ 'is-invalid': form.errors.email }"
             >
           </div>
 
           <div class="auth-form-group">
             <input
+              v-model="form.password"
               type="password"
-              name="password"
               placeholder="Password"
               autocomplete="current-password"
               required
+              :class="{ 'is-invalid': form.errors.password }"
             >
           </div>
 
-          <button type="submit" class="auth-submit-btn">Sign In</button>
+          <button
+            type="submit"
+            class="auth-submit-btn"
+            :disabled="form.processing"
+            :style="form.processing ? 'opacity:0.7;cursor:not-allowed;' : ''"
+          >
+            {{ form.processing ? 'Signing in…' : 'Sign In' }}
+          </button>
+
         </form>
 
         <div class="auth-divider">Or continue with</div>

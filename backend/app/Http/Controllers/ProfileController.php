@@ -65,14 +65,10 @@ class ProfileController extends Controller
     // Update notification preferences
     public function updatePreferences(Request $request)
     {
-        $user = Auth::user();
-
-        $user->update([
-            'email_notifications' => $request->has('email_notifications'),
+        Auth::user()->update([
+            'email_notifications' => $request->boolean('email_notifications'),
         ]);
-
-        return redirect()
-            ->route('profile.show')
-            ->with('success', 'Preferences updated successfully!');
+        
+        return redirect()->route('profile.show')->with('success', 'Preferences updated successfully!');
     }
 }
