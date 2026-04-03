@@ -1,14 +1,21 @@
 <script setup>
 // Pages/User/Reports/Create.vue
-// Mirrors: resources/views/user/reports/create.blade.php
-// Path:    resources/js/Pages/User/Reports/Create.vue
+// Path: resources/js/Pages/User/Reports/Create.vue
 //
-// Step navigation mirrors the original blade JS exactly:
-// each step div gets/loses the 'active' class driven by currentStep ref.
-// The CSS already handles display: none / display: block via .form-step / .form-step.active.
+// useForm() replaces the native <form> POST — fixes the 419 CSRF expiry bug
+// that occurred because the native form's token could drift from the Inertia
+// session. useForm() sends CSRF via the X-XSRF-TOKEN header automatically.
+//
+// File attachments are collected into form.attachments as File objects.
+// useForm() detects File objects and serialises as multipart automatically.
+//
+// Step navigation is purely local state — no useForm involvement until submit.
+// The equipment fetch in step 2 stays as a plain fetch() — it's a GET for
+// dropdown data, not a form submission, so useForm is not needed there.
 
 import AppLayout from '../../../Layouts/AppLayout.vue'
 import NavUser from '../../../Components/Nav/NavUser.vue'
+import { Link, useForm } from '@inertiajs/vue3'
 import { ref, computed } from 'vue'
 
 const props = defineProps({
@@ -16,43 +23,39 @@ const props = defineProps({
   maintenance: Object,
 })
 
-// ── Step state ───────────────────────────────────────────────────────────────
+// ── Step state ────────────────────────────────────────────────────────────────
 const currentStep = ref(1)
 const totalSteps  = 5
-
 const progressWidth = computed(() => `${((currentStep.value - 1) / (totalSteps - 1)) * 100}%`)
 
-// Plain synchronous functions — no async, no awaits here
-function nextStep() {
-  if (currentStep.value < totalSteps) currentStep.value++
-}
-function prevStep() {
-  if (currentStep.value > 1) currentStep.value--
-}
+function nextStep() { if (currentStep.value < totalSteps) currentStep.value++ }
+function prevStep()  { if (currentStep.value > 1) currentStep.value-- }
 
-// ── Form data ─────────────────────────────────────────────────────────────────
-const selectedLabId         = ref(null)
+// ── UI state — drives the review step display ─────────────────────────────────
 const selectedLabName       = ref('')
 const equipment             = ref([])
 const equipmentLoading      = ref(false)
-const selectedEquipmentId   = ref('')
 const selectedEquipmentName = ref("General lab issue / Don't know")
-const category              = ref('')
-const title                 = ref('')
-const description           = ref('')
-const files                 = ref([])
+const files                 = ref([])   // File objects for the review display
 
-const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? ''
+// ── useForm — all submission data lives here ──────────────────────────────────
+const form = useForm({
+  lab_id:       null,
+  equipment_id: '',
+  category:     '',
+  title:        '',
+  description:  '',
+  attachments:  [],   // File objects — useForm serialises as multipart
+})
 
-// ── Lab selection — fire-and-forget fetch, no awaiting ────────────────────────
+// ── Lab selection ─────────────────────────────────────────────────────────────
 function selectLab(lab) {
-  selectedLabId.value         = lab.id
-  selectedLabName.value       = lab.name
-  selectedEquipmentId.value   = ''
+  form.lab_id             = lab.id
+  selectedLabName.value   = lab.name
+  form.equipment_id       = ''
   selectedEquipmentName.value = "General lab issue / Don't know"
-  equipment.value             = []
+  equipment.value         = []
 
-  // Fetch equipment in background — result populates the select in step 2
   equipmentLoading.value = true
   fetch(`/api/labs/${lab.id}/equipment`)
     .then(r => r.json())
@@ -63,15 +66,24 @@ function selectLab(lab) {
 
 function selectEquipment(e) {
   const opt = e.target.options[e.target.selectedIndex]
-  selectedEquipmentId.value   = e.target.value
+  form.equipment_id = e.target.value
   selectedEquipmentName.value = e.target.value
     ? opt.text
     : "General lab issue / Don't know"
 }
 
 // ── File handling ─────────────────────────────────────────────────────────────
+const fileInput = ref(null)
+
 function handleFiles(e) {
-  files.value = Array.from(e.target.files)
+  const selected = Array.from(e.target.files ?? [])
+  files.value         = selected   // for review display
+  form.attachments    = selected   // for submission
+}
+
+// ── Submit ────────────────────────────────────────────────────────────────────
+function submit() {
+  form.post('/user/reports')
 }
 
 // ── Category options ──────────────────────────────────────────────────────────
@@ -98,12 +110,12 @@ const categories = [
         <div class="maintenance-icon">🔧</div>
         <h2>System Maintenance</h2>
         <p>{{ maintenance.message }}</p>
-        <a href="/user/dashboard" class="btn btn-primary">Back to Dashboard</a>
+        <Link href="/user/dashboard" class="btn btn-primary">Back to Dashboard</Link>
       </div>
 
       <template v-else>
 
-        <!-- Progress steps — mirrors the blade's data-step divs -->
+        <!-- Progress steps -->
         <div class="progress-steps">
           <div class="progress-line" :style="{ width: progressWidth }"></div>
           <div
@@ -119,13 +131,8 @@ const categories = [
           </div>
         </div>
 
-        <!-- Native POST form -->
-        <form action="/user/reports" method="POST" enctype="multipart/form-data">
-          <input type="hidden" name="_token"       :value="csrfToken">
-          <input type="hidden" name="lab_id"       :value="selectedLabId">
-          <input type="hidden" name="equipment_id" :value="selectedEquipmentId || ''">
-          <input type="hidden" name="category"     :value="category">
-
+        <!-- Single form element — @submit.prevent calls submit() which uses useForm -->
+        <form @submit.prevent="submit">
           <div class="form-container">
 
             <!-- Step 1: Lab -->
@@ -136,7 +143,7 @@ const categories = [
                   v-for="lab in labs"
                   :key="lab.id"
                   class="lab-option"
-                  :class="{ selected: selectedLabId === lab.id }"
+                  :class="{ selected: form.lab_id === lab.id }"
                   @click="selectLab(lab)"
                   style="cursor:pointer;"
                 >
@@ -151,11 +158,9 @@ const categories = [
                 <button
                   type="button"
                   class="btn btn-primary"
-                  :disabled="!selectedLabId"
+                  :disabled="!form.lab_id"
                   @click="nextStep"
-                >
-                  Next Step
-                </button>
+                >Next Step</button>
               </div>
             </div>
 
@@ -193,8 +198,8 @@ const categories = [
                   v-for="cat in categories"
                   :key="cat.value"
                   class="category-option"
-                  :class="{ selected: category === cat.value }"
-                  @click="category = cat.value"
+                  :class="{ selected: form.category === cat.value }"
+                  @click="form.category = cat.value"
                   style="cursor:pointer;"
                 >
                   <div class="category-icon">{{ cat.icon }}</div>
@@ -209,7 +214,7 @@ const categories = [
                 <button
                   type="button"
                   class="btn btn-primary"
-                  :disabled="!category"
+                  :disabled="!form.category"
                   @click="nextStep"
                 >Next Step</button>
               </div>
@@ -222,31 +227,30 @@ const categories = [
                 <label for="issue-title">Issue Title *</label>
                 <input
                   id="issue-title"
-                  v-model="title"
+                  v-model="form.title"
                   type="text"
-                  name="title"
                   placeholder="Brief description of the problem"
                   required
                 >
+                <span v-if="form.errors.title" class="text-danger">{{ form.errors.title }}</span>
               </div>
               <div class="form-group">
                 <label for="issue-desc">Detailed Description *</label>
                 <textarea
                   id="issue-desc"
-                  v-model="description"
-                  name="description"
+                  v-model="form.description"
                   placeholder="Please provide as much detail as possible..."
                   required
                 ></textarea>
                 <p class="help-text">Minimum 10 characters.</p>
+                <span v-if="form.errors.description" class="text-danger">{{ form.errors.description }}</span>
               </div>
               <div class="form-group">
                 <label>Attach Screenshots (Optional)</label>
-                <div class="file-upload" @click="$refs.fileInput.click()">
+                <div class="file-upload" @click="fileInput.click()">
                   <input
                     ref="fileInput"
                     type="file"
-                    name="attachments[]"
                     accept="image/*,application/pdf"
                     multiple
                     style="display:none"
@@ -271,7 +275,7 @@ const categories = [
                 <button
                   type="button"
                   class="btn btn-primary"
-                  :disabled="!title || description.length < 10"
+                  :disabled="!form.title || form.description.length < 10"
                   @click="nextStep"
                 >Review & Submit</button>
               </div>
@@ -291,16 +295,16 @@ const categories = [
               <div class="review-item">
                 <div class="review-label">Problem Category</div>
                 <div class="review-value">
-                  {{ category ? category.charAt(0).toUpperCase() + category.slice(1) : '—' }}
+                  {{ form.category ? form.category.charAt(0).toUpperCase() + form.category.slice(1) : '—' }}
                 </div>
               </div>
               <div class="review-item">
                 <div class="review-label">Issue Title</div>
-                <div class="review-value">{{ title || '—' }}</div>
+                <div class="review-value">{{ form.title || '—' }}</div>
               </div>
               <div class="review-item">
                 <div class="review-label">Description</div>
-                <div class="review-value">{{ description || '—' }}</div>
+                <div class="review-value">{{ form.description || '—' }}</div>
               </div>
               <div class="review-item">
                 <div class="review-label">Attachments</div>
@@ -310,7 +314,13 @@ const categories = [
               </div>
               <div class="button-group">
                 <button type="button" class="btn btn-secondary" @click="prevStep">Back</button>
-                <button type="submit" class="btn btn-primary">Submit Report</button>
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  :disabled="form.processing"
+                >
+                  {{ form.processing ? 'Submitting…' : 'Submit Report' }}
+                </button>
               </div>
             </div>
 

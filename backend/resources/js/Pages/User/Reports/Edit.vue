@@ -2,15 +2,17 @@
 // Pages/User/Reports/Edit.vue
 // Path: resources/js/Pages/User/Reports/Edit.vue
 //
-// useForm() replaces the native form POST — no reload on submit or validation error.
+// useForm() with form.post() for the submission.
 //
-// File attachments: useForm() supports File objects natively.
-// We collect selected files into form.new_attachments (an array) via a file
-// input ref, then useForm serialises them as multipart automatically when
-// form.post() detects File objects in the payload.
+// WHY post() not put(): Browsers cannot send PUT with multipart/form-data
+// (file uploads). The standard workaround is POST + _method:PUT spoofing,
+// which Laravel reads via its method spoofing middleware. Inertia's useForm
+// does this automatically when you call form.post() on a route that expects
+// PUT — as long as the route accepts PUT (which it does via Route::resource).
 //
-// NOTE: Because of the file upload, Inertia will send this as multipart/form-data
-// automatically — no enctype attribute needed on the form element.
+// The previous form.post(url, { method: 'put' }) was invalid syntax — the
+// second argument to form.post() is an options object for Inertia callbacks
+// (onSuccess, onError, etc.), not for HTTP method overriding.
 
 import AppLayout from '../../../Layouts/AppLayout.vue'
 import NavUser from '../../../Components/Nav/NavUser.vue'
@@ -22,16 +24,13 @@ const props = defineProps({
 })
 
 const form = useForm({
+  _method:         'PUT',   // Laravel method spoofing — read by the framework
   title:           props.report.title       ?? '',
   category:        props.report.category    ?? 'hardware',
   description:     props.report.description ?? '',
-  // new_attachments holds File objects picked by the user.
-  // Existing attachments on the server are untouched — the controller
-  // appends new ones to the existing array.
   new_attachments: [],
 })
 
-// File input ref — we read .files from it on change
 const fileInput = ref(null)
 
 function onFilesChange() {
@@ -39,12 +38,9 @@ function onFilesChange() {
 }
 
 function submit() {
-  // _method spoofing for PUT — useForm handles this via the method option.
-  form.post(`/user/reports/${props.report.id}`, {
-    // Inertia uses POST + _method:PUT for multipart uploads since browsers
-    // don't support PUT with file payloads natively.
-    method: 'put',
-  })
+  // post() is used (not put()) because browsers can't PUT multipart.
+  // The _method: 'PUT' field above tells Laravel to treat this as PUT.
+  form.post(`/user/reports/${props.report.id}`)
 }
 </script>
 
@@ -90,7 +86,7 @@ function submit() {
               <span v-if="form.errors.description" class="text-danger">{{ form.errors.description }}</span>
             </div>
 
-            <!-- Existing attachments — display only, not re-uploaded -->
+            <!-- Existing attachments — display only -->
             <div class="form-group">
               <label>Current Attachments</label>
               <div v-if="report.attachments?.length" style="display:flex;flex-wrap:wrap;gap:1rem;margin-bottom:1rem;">
