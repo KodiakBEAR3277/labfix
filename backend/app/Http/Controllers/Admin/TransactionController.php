@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\TicketTransaction;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class TransactionController extends Controller
 {
@@ -13,7 +14,6 @@ class TransactionController extends Controller
     {
         $query = TicketTransaction::with(['ticket', 'user']);
 
-        // Search filter
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -30,40 +30,40 @@ class TransactionController extends Controller
             });
         }
 
-        // Action filter
         if ($request->filled('action') && $request->action !== 'all') {
             $query->where('action', $request->action);
         }
 
-        // User filter
         if ($request->filled('user') && $request->user !== 'all') {
             $query->where('user_id', $request->user);
         }
 
-        // Date filter
         if ($request->filled('date_from')) {
             $query->whereDate('created_at', '>=', $request->date_from);
         }
+
         if ($request->filled('date_to')) {
             $query->whereDate('created_at', '<=', $request->date_to);
         }
 
         $transactions = $query->latest('created_at')->paginate(50)->withQueryString();
 
-        // Stats
         $stats = [
-            'total' => TicketTransaction::count(),
-            'today' => TicketTransaction::whereDate('created_at', today())->count(),
-            'this_week' => TicketTransaction::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
+            'total'      => TicketTransaction::count(),
+            'today'      => TicketTransaction::whereDate('created_at', today())->count(),
+            'this_week'  => TicketTransaction::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
             'this_month' => TicketTransaction::whereMonth('created_at', now()->month)->count(),
         ];
 
-        // Get all users for filter
-        $users = User::orderBy('first_name')->get();
-
-        // Get unique actions for filter
+        $users   = User::orderBy('first_name')->get(['id', 'first_name', 'last_name']);
         $actions = TicketTransaction::select('action')->distinct()->pluck('action');
 
-        return view('admin.transactions.index', compact('transactions', 'stats', 'users', 'actions'));
+        return Inertia::render('Admin/Transactions/Index', [
+            'transactions' => $transactions,
+            'stats'        => $stats,
+            'users'        => $users,
+            'actions'      => $actions,
+            'filters'      => $request->only(['search', 'action', 'user', 'date_from', 'date_to']),
+        ]);
     }
 }

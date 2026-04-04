@@ -87,7 +87,8 @@ Route::middleware('auth')->group(function () {
     // Admin routes - Full ticket management
     Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
-        Route::get('/settings', fn() => view('admin.settings'))->name('settings');
+        Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
+        Route::post('/settings/update', [SettingsController::class, 'update'])->name('settings.update');
         
         // User management
         Route::resource('users', AdminUserController::class);
