@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Report;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class AssignmentController extends Controller
 {
@@ -41,7 +42,7 @@ class AssignmentController extends Controller
                 ->count(),
         ];
 
-        return view('it.assignments.index', compact('tickets', 'stats'));
+        return Inertia::render('IT/Assignments/Index', compact('tickets', 'stats'));
     }
 
     // Show single assignment detail (VIEW ONLY)
@@ -51,17 +52,17 @@ class AssignmentController extends Controller
             ->with(['reporter', 'equipment.lab', 'transactions.user'])
             ->findOrFail($id);
 
-        return view('it.assignments.show', compact('ticket'));
+        return Inertia::render('IT/Assignments/Show', compact('ticket'));
     }
 
     // Show edit form for assignment (UPDATE STATUS ONLY)
     public function edit($id)
     {
         $ticket = Report::where('assigned_to', Auth::id())
-            ->with(['reporter', 'equipment.lab'])
+            ->with(['reporter', 'equipment.lab', 'transactions'])
             ->findOrFail($id);
 
-        return view('it.assignments.edit', compact('ticket'));
+        return Inertia::render('IT/Assignments/Edit', compact('ticket'));
     }
 
     // Update assignment (STATUS/PRIORITY ONLY - No reassignment)

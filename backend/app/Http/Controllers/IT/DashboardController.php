@@ -5,6 +5,7 @@ namespace App\Http\Controllers\IT;
 use App\Http\Controllers\Controller;
 use App\Models\Report;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
@@ -40,7 +41,32 @@ class DashboardController extends Controller
             'team_satisfaction' => $this->calculateTeamSatisfaction(),
         ];
 
-        return view('it.dashboard', compact('recentTickets', 'priorityAlerts', 'stats'));
+        // Unassigned open tickets count (for quick-actions sidebar)
+        $unassignedCount = Report::whereNull('assigned_to')->open()->count();
+
+        // Recent resolved — shape for Vue (ticket_number + human-readable time)
+        $recentResolved = Report::with(['transactions' => function($query) {
+                $query->where('action', 'status_changed')
+                      ->where('new_value', 'resolved')
+                      ->latest('created_at')
+                      ->take(1);
+            }])
+            ->get()
+            ->filter(fn($t) => $t->transactions->isNotEmpty())
+            ->take(3)
+            ->map(fn($t) => [
+                'ticket_number' => $t->ticket_number,
+                'resolved_at'   => $t->transactions->first()->created_at->diffForHumans(),
+            ])
+            ->values();
+
+        return Inertia::render('IT/Dashboard', compact(
+            'recentTickets',
+            'priorityAlerts',
+            'stats',
+            'unassignedCount',
+            'recentResolved',
+        ));
     }
 
     private function calculateAverageResponseTime()
@@ -59,7 +85,6 @@ class DashboardController extends Controller
         $countWithAssignment = 0;
         
         foreach ($recentTickets as $ticket) {
-            // Find the assignment transaction
             $assignedTransaction = $ticket->transactions->where('action', 'assigned')->first();
             
             if ($assignedTransaction) {
@@ -79,7 +104,6 @@ class DashboardController extends Controller
 
     private function calculateTeamSatisfaction()
     {
-        // Get tickets resolved this month
         $resolvedThisMonth = Report::where('status', 'resolved')
             ->whereHas('transactions', function($query) {
                 $query->where('action', 'status_changed')
