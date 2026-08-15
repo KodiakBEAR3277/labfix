@@ -130,12 +130,6 @@ export default function LoginScreen() {
           </TouchableOpacity>
         </Link>
         <View style={s.navRight}>
-          <Text style={s.navHint}>Don't have an account?</Text>
-          <Link href="/register" asChild>
-            <TouchableOpacity style={s.navBtn}>
-              <Text style={s.navBtnText}>Sign Up</Text>
-            </TouchableOpacity>
-          </Link>
         </View>
       </View>
 

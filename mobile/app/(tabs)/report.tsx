@@ -47,7 +47,7 @@ import {
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { colors, spacing, radius, font } from '@/constants/theme';
 import { loadAuth } from '@/utils/auth';
 import { apiUrl } from '@/constants/api';
@@ -296,6 +296,30 @@ export default function ReportScreen() {
     title:        '',
     description:  '',
   });
+
+  useFocusEffect(
+    useCallback(() => {
+      // 1. Reset step wizard back to the beginning
+      setStep(1);
+      
+      // 2. Clear API dependent data and local visual state labels
+      setEquipment([]);
+      setSelectedLabName('');
+      setSelectedEquipName("General lab issue / Don't know");
+      
+      // 3. Clear any validation errors left over from the last attempt
+      setErrors({});
+
+      // 4. Reset the form fields back to empty/null values
+      setForm({
+        lab_id: null,
+        equipment_id: '',
+        category: '',
+        title: '',
+        description: '',
+      });
+    }, [])
+  );
 
   // Slide animation between steps
   const slideAnim = useRef(new Animated.Value(0)).current;

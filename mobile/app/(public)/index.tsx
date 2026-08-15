@@ -114,10 +114,10 @@ export default function LandingScreen() {
       <View style={s.nav}>
         <Text style={s.navLogo}>LabFix</Text>
         <View style={s.navRight}>
-          <Text style={s.navHint}>New here?</Text>
+          <Text style={s.navHint}>Welcome Back</Text>
           <Link href="/login" asChild>
             <TouchableOpacity style={s.navBtn}>
-              <Text style={s.navBtnText}>Sign Up</Text>
+              <Text style={s.navBtnText}>Sign In</Text>
             </TouchableOpacity>
           </Link>
         </View>
@@ -156,7 +156,7 @@ export default function LandingScreen() {
 
           {/* CTA buttons */}
           <View style={s.ctaRow}>
-            <Link href="/register" asChild>
+            <Link href="/login" asChild>
               <TouchableOpacity style={s.btnPrimary}>
                 <Text style={s.btnPrimaryText}>Get Started</Text>
               </TouchableOpacity>
@@ -247,7 +247,7 @@ export default function LandingScreen() {
             trackable workflow — from first report to final resolution.
           </Text>
           <View style={s.ctaRow}>
-            <Link href="/register" asChild>
+            <Link href="/login" asChild>
               <TouchableOpacity style={s.btnPrimary}>
                 <Text style={s.btnPrimaryText}>Create an Account</Text>
               </TouchableOpacity>

@@ -88,6 +88,7 @@ function deleteUser() {
               </div>
             </div>
           </div>
+          
           <div class="card" style="margin-top:1.5rem;">
             <h3 class="card-title">Quick Actions</h3>
             <div style="display:flex;flex-direction:column;gap:0.75rem;">

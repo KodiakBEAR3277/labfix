@@ -12,7 +12,15 @@ export default defineConfig({
         tailwindcss(),
         vue(),
     ],
-    
+    // 1. Add the server block to expose Vite to your local network
+    server: {
+        host: '192.168.1.11', 
+        port: 5173,
+        hmr: {
+            host: '192.168.1.11',
+        },
+        cors: true,
+    },
     resolve: {
         alias: {
             // Lets you write: import NavLanding from '@/Components/Nav/NavLanding.vue'
