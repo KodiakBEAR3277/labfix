@@ -5,17 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Traits\BelongsToInstitution;
 
 class TicketTransaction extends Model
 {
-    use HasFactory;
+    use HasFactory, BelongsToInstitution;
 
     public $timestamps = false; // Only created_at, no updated_at
-    
+
     const CREATED_AT = 'created_at';
     const UPDATED_AT = null;
 
     protected $fillable = [
+        'institution_id',
         'ticket_id',
         'user_id',
         'action',

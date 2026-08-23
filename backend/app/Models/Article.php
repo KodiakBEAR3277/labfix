@@ -6,12 +6,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
+use App\Traits\BelongsToInstitution;
 
 class Article extends Model
 {
-    use HasFactory;
+    use HasFactory, BelongsToInstitution;
 
     protected $fillable = [
+        'institution_id',
         'author_id',
         'title',
         'slug',
@@ -38,7 +40,10 @@ class Article extends Model
         return $this->belongsTo(User::class, 'author_id');
     }
 
-    // Auto-generate slug from title
+    // Auto-generate slug from title. The uniqueness check below is
+    // automatically institution-scoped now — parent::boot() registers
+    // BelongsToInstitution's own creating hook first, so institution_id
+    // is already stamped on $article by the time this closure runs.
     public static function boot()
     {
         parent::boot();
@@ -46,7 +51,7 @@ class Article extends Model
         static::creating(function ($article) {
             if (empty($article->slug)) {
                 $article->slug = Str::slug($article->title);
-                
+
                 // Ensure unique slug
                 $originalSlug = $article->slug;
                 $count = 1;

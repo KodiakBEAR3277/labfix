@@ -6,12 +6,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Traits\BelongsToInstitution;
 
 class Equipment extends Model
 {
-    use HasFactory;
+    use HasFactory, BelongsToInstitution;
 
     protected $fillable = [
+        'institution_id',
         'lab_id',
         'equipment_code',
         'type',
@@ -45,11 +47,11 @@ class Equipment extends Model
     public function updateStatusFromReports(): void
     {
         $openReports = $this->activeReports()->count();
-        
+
         if ($openReports > 0) {
             // Check if any high priority reports
             $highPriorityReports = $this->activeReports()->where('priority', 'high')->count();
-            
+
             if ($highPriorityReports > 0) {
                 $this->update(['status' => 'has-issue']);
             } else {

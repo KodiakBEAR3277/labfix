@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 
 class SettingsController extends Controller
@@ -51,7 +50,9 @@ class SettingsController extends Controller
             }
         }
 
-        Cache::flush();
+        // Setting::set() already forgets each key's own cache entry above —
+        // no blanket Cache::flush() here anymore, since that would wipe
+        // cached data platform-wide, across every institution, not just this one.
 
         return redirect()
             ->route('admin.settings')

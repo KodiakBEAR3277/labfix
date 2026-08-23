@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Institution;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
@@ -41,28 +44,64 @@ class AuthController extends Controller
         return Inertia::render('Auth/Register');
     }
 
-    // Handle register POST — unchanged
+    // Handle register POST — branches on institution mode:
+    //   'join'   → pick an existing, active institution, becomes a student there
+    //   'create' → registers a brand-new institution, becomes its first admin
     public function register(Request $request)
     {
         $validated = $request->validate([
-            'first_name' => ['required', 'string', 'max:255'],
-            'last_name'  => ['required', 'string', 'max:255'],
-            'email'      => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password'   => ['required', 'confirmed', Password::defaults()],
-            'terms'      => ['accepted'],
+            'mode'                      => ['required', 'in:join,create'],
+            'institution_id'            => ['required_if:mode,join', 'nullable', 'exists:institutions,id'],
+            'institution_name'          => ['required_if:mode,create', 'nullable', 'string', 'max:255'],
+            'institution_contact_email' => ['nullable', 'string', 'email', 'max:255'],
+            'first_name'                => ['required', 'string', 'max:255'],
+            'last_name'                 => ['required', 'string', 'max:255'],
+            'email'                     => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password'                  => ['required', 'confirmed', Password::defaults()],
+            'terms'                     => ['accepted'],
         ]);
 
-        $user = User::create([
-            'first_name' => $validated['first_name'],
-            'last_name'  => $validated['last_name'],
-            'email'      => $validated['email'],
-            'role'       => 'student',
-            'password'   => Hash::make($validated['password']),
-        ]);
+        if ($validated['mode'] === 'join') {
+            $institution = Institution::findOrFail($validated['institution_id']);
+
+            if (!$institution->is_active) {
+                return back()
+                    ->withErrors(['institution_id' => 'This institution is not currently accepting new accounts.'])
+                    ->onlyInput('email', 'first_name', 'last_name');
+            }
+
+            $user = $this->createUser($validated, $institution->id, 'student');
+        } else {
+            // Institution, its default settings, and its first admin are all
+            // created together — if any step fails, none should be left
+            // half-created.
+            $user = DB::transaction(function () use ($validated) {
+                $institution = Institution::create([
+                    'name'          => $validated['institution_name'],
+                    'contact_email' => $validated['institution_contact_email'] ?: $validated['email'],
+                ]);
+
+                Setting::seedDefaultsFor($institution->id);
+
+                return $this->createUser($validated, $institution->id, 'admin');
+            });
+        }
 
         Auth::login($user);
 
         return $this->redirectBasedOnRole($user);
+    }
+
+    private function createUser(array $validated, int $institutionId, string $role): User
+    {
+        return User::create([
+            'institution_id' => $institutionId,
+            'first_name'     => $validated['first_name'],
+            'last_name'      => $validated['last_name'],
+            'email'          => $validated['email'],
+            'role'           => $role,
+            'password'       => Hash::make($validated['password']),
+        ]);
     }
 
     // Handle logout POST — unchanged

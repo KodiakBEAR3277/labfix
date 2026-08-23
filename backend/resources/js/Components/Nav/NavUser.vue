@@ -3,13 +3,6 @@
 // Path: resources/js/Components/Nav/NavUser.vue
 //
 // Uses Inertia's <Link> component instead of <a href> for all internal navigation.
-// This gives the full SPA "no full-page reload" experience — Inertia intercepts
-// the click, fetches only the new page's props via XHR, and swaps the component
-// without a browser reload.
-//
-// usePage().url is Inertia's reactive current URL — more reliable than
-// window.location.pathname because it updates instantly after navigation
-// without needing a page reload for the active class to reflect correctly.
 
 import { computed } from 'vue'
 import { Link, usePage } from '@inertiajs/vue3'
@@ -17,8 +10,8 @@ import { Link, usePage } from '@inertiajs/vue3'
 const page = usePage()
 
 const user = computed(() => page.props.auth.user)
+const institution = computed(() => user.value?.institution)
 
-// Inertia's reactive URL — updates immediately after each navigation
 const currentUrl = computed(() => page.url)
 
 function isActive(path) {
@@ -33,7 +26,9 @@ function isActivePrefix(prefix, exclude = null) {
 
 <template>
   <nav>
-    <Link href="/user/dashboard" class="logo">LabFix</Link>
+    <Link href="/user/dashboard" class="logo">
+      LabFix<span v-if="institution" style="font-size:0.65rem;color:#9ca3af;font-weight:400;margin-left:0.4rem;">· {{ institution.name }}</span>
+    </Link>
 
     <div class="nav-menu">
       <Link
@@ -76,7 +71,6 @@ function isActivePrefix(prefix, exclude = null) {
         Lab Status
       </Link>
 
-      <!-- Profile avatar — also a Link -->
       <Link href="/profile" class="user-profile">
         <div class="user-avatar">{{ user?.initials ?? 'U' }}</div>
         <span>{{ user?.first_name ?? 'User' }} {{ user?.last_name ?? '' }}</span>

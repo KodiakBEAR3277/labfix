@@ -22,6 +22,7 @@ use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\User\KnowledgeBaseController;
 use App\Http\Controllers\User\LabStatusController;
+use App\Models\Institution;
 
 // Public routes
 Route::get('/', fn() => Inertia::render('Landing'))->name('landing');
@@ -131,4 +132,21 @@ Route::get('/api/labs/{lab}/equipment', function ($labId) {
         ->get(['id', 'equipment_code', 'status']);
     
     return response()->json($equipment);
+});
+
+// API route for institution search during registration
+Route::get('/api/institutions/search', function () {
+    $query = trim((string) request()->query('q', ''));
+
+    if ($query === '') {
+        return response()->json([]);
+    }
+
+    $institutions = Institution::where('is_active', true)
+        ->where('name', 'like', "%{$query}%")
+        ->orderBy('name')
+        ->limit(10)
+        ->get(['id', 'name']);
+
+    return response()->json($institutions);
 });

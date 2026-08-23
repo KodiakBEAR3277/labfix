@@ -6,18 +6,21 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Traits\BelongsToInstitution;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, HasApiTokens;
+    use HasFactory, Notifiable, HasApiTokens, BelongsToInstitution;
 
     protected $fillable = [
+        'institution_id',
         'first_name',
         'last_name',
         'email',
         'password',
         'role',
         'is_active',
+        'is_superadmin',
         'email_notifications',
         'can_submit_tickets',
         'phone',
@@ -35,6 +38,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'is_superadmin' => 'boolean',
             'email_notifications' => 'boolean',
             'can_submit_tickets' => 'boolean',
         ];
@@ -74,5 +78,12 @@ class User extends Authenticatable
     public function isStudent(): bool
     {
         return $this->role === 'student';
+    }
+
+    // Platform-level oversight account, not tied to any one institution.
+    // Not wired into scoping behavior yet — see BelongsToInstitution.
+    public function isSuperAdmin(): bool
+    {
+        return (bool) $this->is_superadmin;
     }
 }

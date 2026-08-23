@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Lab;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class LabController extends Controller
@@ -32,12 +34,15 @@ class LabController extends Controller
         return redirect()->route('admin.labs.index');
     }
 
-    // Store new lab — business logic untouched
+    // Store new lab — business logic untouched, code uniqueness now scoped per institution
     public function store(Request $request)
     {
         $validated = $request->validate([
             'name'        => ['required', 'string', 'max:255'],
-            'code'        => ['required', 'string', 'max:50', 'unique:labs,code'],
+            'code'        => [
+                'required', 'string', 'max:50',
+                Rule::unique('labs')->where('institution_id', Auth::user()->institution_id),
+            ],
             'location'    => ['nullable', 'string', 'max:255'],
             'capacity'    => ['required', 'integer', 'min:1'],
             'description' => ['nullable', 'string'],
@@ -58,14 +63,17 @@ class LabController extends Controller
         return response()->json($lab);
     }
 
-    // Update lab — business logic untouched
+    // Update lab — business logic untouched, code uniqueness now scoped per institution
     public function update(Request $request, $id)
     {
         $lab = Lab::findOrFail($id);
 
         $validated = $request->validate([
             'name'        => ['required', 'string', 'max:255'],
-            'code'        => ['required', 'string', 'max:50', 'unique:labs,code,' . $id],
+            'code'        => [
+                'required', 'string', 'max:50',
+                Rule::unique('labs')->where('institution_id', Auth::user()->institution_id)->ignore($id),
+            ],
             'location'    => ['nullable', 'string', 'max:255'],
             'capacity'    => ['required', 'integer', 'min:1'],
             'description' => ['nullable', 'string'],

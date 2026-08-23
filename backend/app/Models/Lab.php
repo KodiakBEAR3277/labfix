@@ -5,12 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Traits\BelongsToInstitution;
 
 class Lab extends Model
 {
-    use HasFactory;
+    use HasFactory, BelongsToInstitution;
 
     protected $fillable = [
+        'institution_id',
         'name',
         'code',
         'location',
@@ -53,7 +55,7 @@ class Lab extends Model
     {
         $total = $this->equipment()->count();
         if ($total === 0) return false;
-        
+
         $operational = $this->operational_count;
         return ($operational / $total) >= 0.5;
     }

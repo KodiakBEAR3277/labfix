@@ -12,6 +12,7 @@ import { Link, usePage } from '@inertiajs/vue3'
 const page = usePage()
 
 const user = computed(() => page.props.auth.user)
+const institution = computed(() => user.value?.institution)
 
 const currentUrl = computed(() => page.url)
 
@@ -27,7 +28,9 @@ function isActivePrefix(prefix, exclude = null) {
 
 <template>
   <nav>
-    <Link href="/it/dashboard" class="logo">LabFix</Link>
+    <Link href="/it/dashboard" class="logo">
+      LabFix<span v-if="institution" style="font-size:0.65rem;color:#9ca3af;font-weight:400;margin-left:0.4rem;">· {{ institution.name }}</span>
+    </Link>
 
     <div class="nav-menu">
       <Link

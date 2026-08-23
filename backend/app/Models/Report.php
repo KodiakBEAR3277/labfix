@@ -7,16 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Traits\BelongsToInstitution;
 
 class Report extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, BelongsToInstitution;
 
     protected $fillable = [
+        'institution_id',
         'ticket_number',
         'user_id',
         'assigned_to',
-        'lab_location',
         'equipment_id',
         'category',
         'title',
@@ -55,20 +56,20 @@ class Report extends Model
     public static function generateTicketNumber(): string
     {
         $format = \App\Models\Setting::get('ticket_number_format', 'format_1');
-        
+
         $year = date('Y');
         $month = date('m');
         $day = date('d');
-        
+
         // Get the last ticket number for this year to increment
         $lastTicket = self::whereYear('created_at', $year)
             ->orderBy('id', 'desc')
             ->first();
-        
+
         // Extract the last 4-digit number and increment
         $number = $lastTicket ? (int) substr($lastTicket->ticket_number, -4) + 1 : 1;
         $paddedNumber = str_pad($number, 4, '0', STR_PAD_LEFT);
-        
+
         return match($format) {
             'format_1' => "TKT-{$year}-{$paddedNumber}",              // TKT-2025-0001
             'format_2' => "TKT{$year}{$paddedNumber}",                // TKT20250001
