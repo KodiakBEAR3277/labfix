@@ -25,11 +25,14 @@ button[type="submit"] {
 /* ============================================
    PRIMARY BUTTON
    Main action buttons
+   Text is hardcoded white on purpose — this sits on the teal gradient
+   regardless of theme, so it should never follow --color-text-primary
+   (which now means dark page text, not "whatever's white").
    ============================================ */
 
 .btn-primary {
     background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
-    color: var(--color-text-primary);
+    color: #ffffff;
     box-shadow: var(--shadow-primary);
 }
 
@@ -49,7 +52,7 @@ button[type="submit"] {
 
 .btn-secondary {
     background: var(--color-surface-raised);
-    color: var(--color-primary);
+    color: var(--color-primary-dark);
     border: var(--border-width) solid var(--color-border);
 }
 
@@ -77,11 +80,13 @@ button[type="submit"] {
 /* ============================================
    WHITE BUTTON
    Used in selection bars (IT bulk operations)
+   Background is hardcoded white on purpose — "white button" shouldn't
+   depend on what --color-text-primary happens to mean this theme.
    ============================================ */
 
 .btn-white {
-    background: var(--color-text-primary);
-    color: var(--color-primary);
+    background: #ffffff;
+    color: var(--color-primary-dark);
 }
 
 .btn-white:hover {
@@ -101,7 +106,7 @@ button[type="submit"] {
 }
 
 .btn-outline:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.05);
 }
 
 /* ============================================
@@ -114,7 +119,7 @@ button[type="submit"] {
     background: var(--color-primary-light);
     border: var(--border-width) solid var(--color-border);
     border-radius: var(--border-radius-sm);
-    color: var(--color-primary);
+    color: var(--color-primary-dark);
     cursor: pointer;
     font-size: var(--font-size-sm);
     transition: all var(--transition-base);
@@ -139,7 +144,7 @@ button[type="submit"] {
 .filter-btn {
     padding: 0.5rem 1rem;
     background: var(--color-primary-light);
-    color: var(--color-primary);
+    color: var(--color-primary-dark);
     border: var(--border-width) solid var(--color-border);
     border-radius: var(--border-radius-md);
     cursor: pointer;
@@ -171,13 +176,13 @@ button[type="submit"] {
 
 .tab:hover {
     background: var(--color-surface-active);
-    color: var(--color-primary);
+    color: var(--color-primary-dark);
 }
 
 .tab.active {
     background: var(--color-surface-active);
     border-color: var(--color-primary);
-    color: var(--color-primary);
+    color: var(--color-primary-dark);
 }
 
 /* ============================================
@@ -190,7 +195,7 @@ button[type="submit"] {
     background: var(--color-primary-light);
     border: var(--border-width) solid var(--color-border);
     border-radius: var(--border-radius-sm);
-    color: var(--color-primary);
+    color: var(--color-primary-dark);
     cursor: pointer;
     font-size: var(--font-size-sm);
     transition: all var(--transition-base);
@@ -211,7 +216,7 @@ button[type="submit"] {
     display: inline-flex;
     align-items: center;
     gap: var(--spacing-sm);
-    color: var(--color-primary);
+    color: var(--color-primary-dark);
     text-decoration: none;
     margin-bottom: var(--spacing-lg);
     transition: all var(--transition-base);
@@ -225,6 +230,7 @@ button[type="submit"] {
 /* ============================================
    ALERT ACTION BUTTON
    High-priority alert actions (IT Dashboard)
+   Text hardcoded white — sits on --color-danger regardless of theme.
    ============================================ */
 
 .alert-action {
@@ -232,7 +238,7 @@ button[type="submit"] {
     background: var(--color-danger);
     border: none;
     border-radius: var(--border-radius-sm);
-    color: var(--color-text-primary);
+    color: #ffffff;
     font-weight: var(--font-weight-semibold);
     cursor: pointer;
     transition: all var(--transition-base);
@@ -266,11 +272,12 @@ button[type="submit"] {
 
 /* ============================================
    MODAL ACTION BUTTONS
+   Text hardcoded white — sits on the teal gradient regardless of theme.
    ============================================ */
 
 .btn-save {
     background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
-    color: var(--color-text-primary);
+    color: #ffffff;
 }
 
 .btn-save:hover {
@@ -290,7 +297,7 @@ button[type="submit"] {
 
 .btn-confirm {
     background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
-    color: var(--color-text-primary);
+    color: #ffffff;
 }
 
 /* ============================================

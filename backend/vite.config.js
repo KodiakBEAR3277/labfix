@@ -14,10 +14,10 @@ export default defineConfig({
     ],
     // 1. Add the server block to expose Vite to your local network
     server: {
-        host: '172.17.0.165', 
+        host: '192.168.1.12', 
         port: 5173,
         hmr: {
-            host: '172.17.0.165',
+            host: '192.168.1.12',
         },
         cors: true,
     },

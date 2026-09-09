@@ -17,7 +17,7 @@
 // 10.0.2.2 is the Android emulator alias for localhost.
 // iOS simulator can use localhost directly.
 export const API_BASE =
-  process.env.EXPO_PUBLIC_API_URL ?? 'http://172.17.0.165:8000';
+  process.env.EXPO_PUBLIC_API_URL ?? 'http://192.168.1.12:8000';
 
 /** Convenience helper — returns full URL for an API path */
 export const apiUrl = (path: string) =>

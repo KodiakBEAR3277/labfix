@@ -20,9 +20,10 @@ const user = computed(() => page.props.auth.user)
 
 function dashboardHref(role) {
   switch (role) {
-    case 'admin':      return '/admin/dashboard'
-    case 'it-support': return '/it/dashboard'
-    default:           return '/user/dashboard'
+    case 'superadmin':  return '/superadmin/institutions'
+    case 'admin':       return '/admin/dashboard'
+    case 'it-support':  return '/it/dashboard'
+    default:            return '/user/dashboard'
   }
 }
 </script>

@@ -1,6 +1,11 @@
 /* ============================================
    LabFix - Navigation Component
    File: css/components/navigation.css
+
+   Note: the nav bar itself (--color-backdrop) stays a dark bar in both
+   themes by design. Text inside it is hardcoded light rather than tied
+   to --color-text-primary/secondary, since those now mean "dark text for
+   a light page" and would go dark-on-dark here otherwise.
    ============================================ */
 
 /* ============================================
@@ -49,7 +54,7 @@ nav {
 }
 
 .nav-link {
-    color: var(--color-text-secondary);
+    color: rgba(255, 255, 255, 0.75);
     text-decoration: none;
     transition: color var(--transition-base);
     font-weight: var(--font-weight-medium);
@@ -78,11 +83,12 @@ nav {
     border-radius: 20px;
     cursor: pointer;
     transition: background var(--transition-base);
+    color: rgba(255, 255, 255, 0.9);
 }
 
 .user-profile:hover,
 .user-profile-nav:hover {
-    background: var(--color-surface-hover);
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .user-avatar {
@@ -95,16 +101,18 @@ nav {
     justify-content: center;
     font-weight: var(--font-weight-bold);
     font-size: var(--font-size-sm);
+    color: #ffffff;
     flex-shrink: 0;
 }
 
 /* ============================================
    LOGIN BUTTON (Landing page)
+   Text hardcoded white — sits on the teal gradient regardless of theme.
    ============================================ */
 
 .login-btn {
     background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
-    color: var(--color-text-primary);
+    color: #ffffff;
     padding: 0.75rem 1.5rem;
     border: none;
     border-radius: 50px;
@@ -121,12 +129,14 @@ nav {
 
 /* ============================================
    SIGN UP BUTTON (Login page nav)
+   Text hardcoded white — sits on a solid teal background regardless
+   of theme.
    ============================================ */
 
 .signup-btn,
 .signin-btn {
     background: var(--color-primary);
-    color: var(--color-text-primary);
+    color: #ffffff;
     padding: 0.7rem 1.8rem;
     border-radius: 25px;
     text-decoration: none;

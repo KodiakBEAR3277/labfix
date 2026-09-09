@@ -70,15 +70,17 @@ function roleLabel(role) {
     'staff':      'Staff',
     'it-support': 'IT Support',
     'admin':      'Administrator',
+    'superadmin': 'Superadmin',
   }
   return map[role] ?? role
 }
 
 const dashboardHref = computed(() => {
   switch (authUser.value?.role) {
-    case 'admin':      return '/admin/dashboard'
-    case 'it-support': return '/it/dashboard'
-    default:           return '/user/dashboard'
+    case 'superadmin': return '/superadmin/institutions'
+    case 'admin':       return '/admin/dashboard'
+    case 'it-support':  return '/it/dashboard'
+    default:            return '/user/dashboard'
   }
 })
 </script>
@@ -88,7 +90,15 @@ const dashboardHref = computed(() => {
     <template #nav>
       <NavAdmin v-if="authUser.role === 'admin'" />
       <NavIT    v-else-if="authUser.role === 'it-support'" />
-      <NavUser  v-else />
+      <nav
+        v-else-if="authUser.role === 'superadmin'"
+        style="display:flex;justify-content:space-between;align-items:center;padding:1rem 2rem;"
+      >
+        <Link href="/superadmin/institutions" class="logo">
+          LabFix<span style="font-size:0.7rem;color:#9ca3af;font-weight:400;margin-left:0.5rem;">· Platform Oversight</span>
+        </Link>
+      </nav>
+      <NavUser v-else />
     </template>
 
     <div class="container">

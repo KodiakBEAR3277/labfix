@@ -53,10 +53,12 @@
 
 /* ============================================
    MODAL HEADER
+   Uses the darker teal variant — the modal card is light, and the base
+   --color-primary doesn't have enough contrast as text on a light surface.
    ============================================ */
 
 .modal-header {
-    color: var(--color-primary);
+    color: var(--color-primary-dark);
     font-size: var(--font-size-2xl);
     margin-bottom: var(--spacing-lg);
     font-weight: var(--font-weight-semibold);
@@ -101,7 +103,7 @@
 }
 
 .modal::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.08);
     border-radius: 4px;
 }
 

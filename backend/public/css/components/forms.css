@@ -32,7 +32,7 @@
 }
 
 .section-title {
-    color: var(--color-primary);
+    color: var(--color-primary-dark);
     font-size: var(--font-size-lg);
     font-weight: var(--font-weight-semibold);
     margin-bottom: var(--spacing-md);
@@ -41,10 +41,10 @@
 }
 
 .form-container {
-    background: linear-gradient(145deg, #2a2a2a 0%, #1e1e1e 100%);
+    background: linear-gradient(145deg, var(--color-bg-card) 0%, var(--color-bg-card-alt) 100%);
     border-radius: 15px;
     padding: 2.5rem;
-    border: 1px solid rgba(45, 212, 191, 0.3);
+    border: var(--border-width) solid var(--color-border);
 }
 
 .form-step {
@@ -62,54 +62,9 @@
 }
 
 .form-step h2 {
-    color: #2dd4bf;
+    color: var(--color-primary-dark);
     margin-bottom: 1.5rem;
     font-size: 1.5rem;
-}
-
-.form-group {
-    margin-bottom: 1.5rem;
-}
-
-label {
-    display: block;
-    color: #d1d5db;
-    font-size: 0.95rem;
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-}
-
-select, input, textarea {
-    width: 100%;
-    padding: 1rem;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(45, 212, 191, 0.3);
-    border-radius: 10px;
-    color: #ffffff;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    outline: none;
-    font-family: inherit;
-}
-
-select {
-    cursor: pointer;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%232dd4bf' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 1rem center;
-    padding-right: 2.5rem;
-}
-
-select:focus, input:focus, textarea:focus {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: #2dd4bf;
-    box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.1);
-}
-
-textarea {
-    resize: vertical;
-    min-height: 120px;
 }
 
 /* ============================================
@@ -122,7 +77,8 @@ input[type="password"],
 input[type="tel"],
 input[type="number"],
 input[type="url"],
-input[type="search"] {
+input[type="search"],
+input[type="date"] {
     width: 100%;
     padding: 0.9rem 1rem;
     background: var(--color-surface-raised);
@@ -136,7 +92,7 @@ input[type="search"] {
 }
 
 input::placeholder {
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(17, 24, 39, 0.4);
 }
 
 input:focus {
@@ -167,7 +123,7 @@ select {
     font-family: var(--font-family-base);
     cursor: pointer;
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%232dd4bf' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%230d9488' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0.8rem center;
     padding-right: 2.5rem;
@@ -204,7 +160,7 @@ textarea {
 }
 
 textarea::placeholder {
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(17, 24, 39, 0.4);
 }
 
 textarea:focus {
@@ -265,11 +221,11 @@ input[type="checkbox"] {
     margin: 0;
     font-size: var(--font-size-sm);
     cursor: pointer;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--color-text-secondary);
 }
 
 .checkbox-group a {
-    color: var(--color-primary);
+    color: var(--color-primary-dark);
     text-decoration: none;
 }
 
@@ -288,13 +244,17 @@ input[type="checkbox"] {
 /* ============================================
    TOGGLE SWITCH
    Used in: Admin settings, user management
+   Track (off-state) is a dark-based tint so it reads as a visible track
+   against a light page — a white-based tint would nearly disappear.
+   The knob stays hardcoded white regardless of theme, same reasoning
+   as .btn-white.
    ============================================ */
 
 .toggle-switch {
     position: relative;
     width: 50px;
     height: 26px;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.15);
     border-radius: 13px;
     cursor: pointer;
     transition: background var(--transition-base);
@@ -311,7 +271,7 @@ input[type="checkbox"] {
     left: 3px;
     width: 20px;
     height: 20px;
-    background: var(--color-text-primary);
+    background: #ffffff;
     border-radius: var(--border-radius-full);
     transition: transform var(--transition-base);
 }
@@ -400,7 +360,7 @@ input[type="checkbox"] {
 .upload-icon {
     font-size: 3rem;
     margin-bottom: var(--spacing-md);
-    color: var(--color-primary);
+    color: var(--color-primary-dark);
 }
 
 /* ============================================
@@ -411,33 +371,4 @@ input[type="checkbox"] {
     .form-row {
         grid-template-columns: 1fr;
     }
-}
-
-/* ============================================
-   KNOWLEDGE BASE HERO SECTION
-   Used in: user KB page
-   ============================================ */
-
-.kb-hero {
-    background: linear-gradient(145deg, #2a2a2a 0%, #1e1e1e 100%);
-    border-radius: 15px;
-    padding: 3rem;
-    margin-bottom: 3rem;
-    border: 1px solid rgba(45, 212, 191, 0.3);
-    text-align: center;
-}
-
-.kb-hero h1 {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-    background: linear-gradient(135deg, #ffffff 0%, #2dd4bf 100%);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.kb-hero p {
-    color: #9ca3af;
-    font-size: 1.1rem;
-    margin-bottom: 2rem;
 }

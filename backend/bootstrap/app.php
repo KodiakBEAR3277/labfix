@@ -5,6 +5,8 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use App\Http\Middleware\CheckRole;
 use App\Http\Middleware\CheckMaintenanceMode;
+use App\Http\Middleware\EnsureIsSuperAdmin;
+use App\Http\Middleware\EnsureInstitutionIsActive;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -17,8 +19,10 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => CheckRole::class,
             'maintenance.check' => CheckMaintenanceMode::class,
+            'superadmin' => EnsureIsSuperAdmin::class,
         ]);
         $middleware->web(append: [
+            EnsureInstitutionIsActive::class,
             \App\Http\Middleware\HandleInertiaRequests::class,
         ]);
     })

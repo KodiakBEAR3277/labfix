@@ -3,6 +3,15 @@
    File: css/layouts/auth.css
    
    Used by: login and registration pages
+
+   Note: this page is intentionally dark regardless of the app's overall
+   theme — a background photo with a dark overlay, frosted dark glass
+   panels. Text inside those panels is hardcoded light rather than tied
+   to --color-text-primary/secondary, since those now mean "dark text for
+   a light page" and would go dark-on-dark here otherwise. The one
+   exception is native <option> elements inside <select>, which the
+   browser renders as its own light popup regardless of this page's
+   styling, so that one correctly stays on the theme variables.
    ============================================ */
 
 /* ============================================
@@ -68,7 +77,7 @@
     display: flex;
     align-items: center;
     gap: var(--spacing-sm);
-    color: var(--color-text-primary);
+    color: #ffffff;
     font-size: var(--font-size-2xl);
     font-weight: var(--font-weight-bold);
     text-decoration: none;
@@ -89,7 +98,7 @@
 }
 
 .auth-nav-link {
-    color: var(--color-text-primary);
+    color: #ffffff;
     text-decoration: none;
     font-weight: var(--font-weight-medium);
     transition: color var(--transition-base);
@@ -113,7 +122,7 @@
 .auth-signup-btn,
 .auth-signin-btn {
     background: var(--color-primary);
-    color: var(--color-text-primary);
+    color: #ffffff;
     padding: 0.7rem 1.8rem;
     border-radius: 25px;
     text-decoration: none;
@@ -169,14 +178,14 @@
 .auth-brand-name {
     font-size: 5rem;
     font-weight: var(--font-weight-bold);
-    color: var(--color-text-primary);
+    color: #ffffff;
     line-height: 1;
     margin-bottom: var(--spacing-lg);
 }
 
 .auth-brand-tagline {
     font-size: var(--font-size-4xl);
-    color: var(--color-text-primary);
+    color: #ffffff;
     font-weight: var(--font-weight-medium);
 }
 
@@ -243,7 +252,7 @@
 
 .auth-login-title {
     font-size: var(--font-size-5xl);
-    color: var(--color-text-primary);
+    color: #ffffff;
     margin-bottom: var(--spacing-sm);
 }
 
@@ -314,7 +323,7 @@
     background: rgba(255, 255, 255, 0.05);
     border: var(--border-width) solid var(--color-border);
     border-radius: var(--border-radius-lg);
-    color: var(--color-text-primary);
+    color: #ffffff;
     font-size: var(--font-size-md);
     transition: all var(--transition-base);
     outline: none;
@@ -341,6 +350,9 @@
     padding-right: 2.5rem;
 }
 
+/* Native <option> popup — this is rendered by the browser as its own
+   light UI regardless of the dark glass panel around it, so it correctly
+   stays on the theme variables (light background, dark text). */
 .auth-form-group select option {
     background: var(--color-bg-card-alt);
     color: var(--color-text-primary);
@@ -389,7 +401,7 @@
     background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
     border: none;
     border-radius: var(--border-radius-lg);
-    color: var(--color-text-primary);
+    color: #ffffff;
     font-size: var(--font-size-lg);
     font-weight: var(--font-weight-bold);
     cursor: pointer;
@@ -443,7 +455,7 @@
     background: rgba(255, 255, 255, 0.05);
     border: var(--border-width) solid var(--color-border);
     border-radius: var(--border-radius-lg);
-    color: var(--color-text-primary);
+    color: #ffffff;
     font-size: var(--font-size-base);
     font-weight: var(--font-weight-medium);
     cursor: pointer;

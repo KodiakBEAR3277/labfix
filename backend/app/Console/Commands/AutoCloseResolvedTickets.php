@@ -28,7 +28,7 @@ class AutoCloseResolvedTickets extends Command
     public function handle()
     {
         $systemUserId = User::withoutGlobalScope('institution')
-            ->where('is_superadmin', true)
+            ->where('role', 'superadmin')
             ->value('id');
 
         if (!$systemUserId) {

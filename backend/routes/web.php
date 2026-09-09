@@ -23,6 +23,8 @@ use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\User\KnowledgeBaseController;
 use App\Http\Controllers\User\LabStatusController;
 use App\Models\Institution;
+use App\Http\Controllers\SuperAdmin\InstitutionController as SuperAdminInstitutionController;
+
 
 // Public routes
 Route::get('/', fn() => Inertia::render('Landing'))->name('landing');
@@ -38,6 +40,8 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+
+
 // Authenticated routes
 Route::middleware('auth')->group(function () {
     
@@ -46,12 +50,18 @@ Route::middleware('auth')->group(function () {
         $user = Auth::user();
         
         return match($user->role) {
+            'superadmin' => redirect()->route('superadmin.institutions.index'),
             'admin' => redirect()->route('admin.dashboard'),
             'it-support' => redirect()->route('it.dashboard'),
             'staff', 'student' => redirect()->route('user.dashboard'),
             default => redirect()->route('user.dashboard'),
         };
     })->name('dashboard');
+
+    Route::prefix('superadmin')->name('superadmin.')->middleware(['auth', 'superadmin'])->group(function () {
+        Route::get('/institutions', [SuperAdminInstitutionController::class, 'index'])->name('institutions.index');
+        Route::post('/institutions/{institution}/toggle-status', [SuperAdminInstitutionController::class, 'toggleStatus'])->name('institutions.toggle-status');
+    });
 
     // User routes
     Route::prefix('user')->name('user.')->group(function () {

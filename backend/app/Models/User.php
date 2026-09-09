@@ -20,7 +20,6 @@ class User extends Authenticatable
         'password',
         'role',
         'is_active',
-        'is_superadmin',
         'email_notifications',
         'can_submit_tickets',
         'phone',
@@ -38,7 +37,6 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
-            'is_superadmin' => 'boolean',
             'email_notifications' => 'boolean',
             'can_submit_tickets' => 'boolean',
         ];
@@ -81,9 +79,11 @@ class User extends Authenticatable
     }
 
     // Platform-level oversight account, not tied to any one institution.
-    // Not wired into scoping behavior yet — see BelongsToInstitution.
+    // Its role is literally 'superadmin' — a distinct value from 'admin' —
+    // so it's automatically excluded from every existing role:admin gated
+    // route without needing a separate check layered on top.
     public function isSuperAdmin(): bool
     {
-        return (bool) $this->is_superadmin;
+        return $this->role === 'superadmin';
     }
 }

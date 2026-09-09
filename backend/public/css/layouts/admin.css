@@ -24,13 +24,14 @@
 .user-profile-nav .user-avatar {
     width: 32px;
     height: 32px;
-    background: linear-gradient(135deg, #2dd4bf, #14b8a6);
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: bold;
     font-size: 0.85rem;
+    color: #ffffff;
 }
 
 /* ============================================
@@ -39,8 +40,8 @@
 
 .btn-primary {
     padding: 0.9rem 1.8rem;
-    background: linear-gradient(135deg, #2dd4bf 0%, #14b8a6 100%);
-    color: white;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    color: #ffffff;
     border: none;
     border-radius: 8px;
     font-weight: 600;
@@ -63,7 +64,7 @@
     background: rgba(45, 212, 191, 0.1);
     border: 1px solid rgba(45, 212, 191, 0.3);
     border-radius: 6px;
-    color: #2dd4bf;
+    color: var(--color-primary-dark);
     cursor: pointer;
     font-size: 0.85rem;
     transition: all 0.3s ease;
@@ -72,7 +73,7 @@
 
 .action-btn:hover {
     background: rgba(45, 212, 191, 0.2);
-    border-color: #2dd4bf;
+    border-color: var(--color-primary);
 }
 
 /* ============================================
@@ -136,7 +137,7 @@
 .user-avatar-large {
     width: 120px;
     height: 120px;
-    background: linear-gradient(135deg, #2dd4bf, #14b8a6);
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
     border-radius: 50%;
     margin: 0 auto 1.5rem;
     display: flex;
@@ -144,18 +145,19 @@
     justify-content: center;
     font-size: 3rem;
     font-weight: bold;
+    color: #ffffff;
 }
 
 /* User Name and Email (in sidebar card) */
 .user-name {
     font-size: 1.5rem;
-    color: #ffffff;
+    color: var(--color-text-primary);
     margin-bottom: 0.5rem;
     text-align: center;
 }
 
 .user-email {
-    color: #9ca3af;
+    color: var(--color-text-muted);
     margin-bottom: 1.5rem;
     text-align: center;
 }
@@ -176,19 +178,19 @@
 
 .activity-log .activity-item {
     padding: 1rem;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--color-surface-raised);
     border-radius: 8px;
     margin-bottom: 0.75rem;
 }
 
 .activity-date {
-    color: #9ca3af;
+    color: var(--color-text-muted);
     font-size: 0.85rem;
     margin-bottom: 0.25rem;
 }
 
 .activity-text {
-    color: #d1d5db;
+    color: var(--color-text-secondary);
 }
 
 /* ============================================
@@ -225,7 +227,7 @@
     left: 0;
     width: 4px;
     height: 100%;
-    background: linear-gradient(180deg, #2dd4bf, #14b8a6);
+    background: linear-gradient(180deg, var(--color-primary), var(--color-primary-dark));
 }
 
 /* ============================================
@@ -237,7 +239,7 @@
     background: rgba(45, 212, 191, 0.1);
     border: 1px solid rgba(45, 212, 191, 0.3);
     border-radius: 6px;
-    color: #2dd4bf;
+    color: var(--color-primary-dark);
     cursor: pointer;
     font-size: 0.85rem;
     transition: all 0.3s ease;
@@ -246,7 +248,7 @@
 
 .btn-add:hover {
     background: rgba(45, 212, 191, 0.2);
-    border-color: #2dd4bf;
+    border-color: var(--color-primary);
 }
 
 /* ============================================
@@ -264,10 +266,10 @@
 
 .filter-bar .tab {
     padding: 0.7rem 1.2rem;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--color-surface-raised);
     border: 1px solid rgba(45, 212, 191, 0.3);
     border-radius: 8px;
-    color: #d1d5db;
+    color: var(--color-text-secondary);
     cursor: pointer;
     transition: all 0.3s ease;
     font-weight: 500;
@@ -276,8 +278,8 @@
 .filter-bar .tab:hover,
 .filter-bar .tab.active {
     background: rgba(45, 212, 191, 0.2);
-    border-color: #2dd4bf;
-    color: #2dd4bf;
+    border-color: var(--color-primary);
+    color: var(--color-primary-dark);
 }
 
 /* ============================================
@@ -286,10 +288,10 @@
 
 .page-btn {
     padding: 0.6rem 1rem;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--color-surface-raised);
     border: 1px solid rgba(45, 212, 191, 0.3);
     border-radius: 6px;
-    color: #d1d5db;
+    color: var(--color-text-secondary);
     cursor: pointer;
     transition: all 0.3s ease;
 }
@@ -297,8 +299,8 @@
 .page-btn:hover,
 .page-btn.active {
     background: rgba(45, 212, 191, 0.2);
-    border-color: #2dd4bf;
-    color: #2dd4bf;
+    border-color: var(--color-primary);
+    color: var(--color-primary-dark);
 }
 
 .page-btn:disabled {
@@ -311,8 +313,8 @@
    ============================================ */
 
 .btn-save {
-    background: linear-gradient(135deg, #2dd4bf 0%, #14b8a6 100%);
-    color: white;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    color: #ffffff;
     padding: 0.9rem;
     border-radius: 8px;
     font-weight: 600;
@@ -327,8 +329,8 @@
 }
 
 .btn-cancel {
-    background: rgba(255, 255, 255, 0.05);
-    color: #d1d5db;
+    background: var(--color-surface-raised);
+    color: var(--color-text-secondary);
     border: 1px solid rgba(45, 212, 191, 0.3);
     padding: 0.9rem;
     border-radius: 8px;
@@ -338,7 +340,7 @@
 }
 
 .btn-cancel:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--color-surface-hover);
 }
 
 /* ============================================
