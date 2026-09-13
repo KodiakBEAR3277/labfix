@@ -6,7 +6,7 @@
  * 5-step flow:
  *   Step 1 — Lab Location    (tap a lab card to select)
  *   Step 2 — Equipment       (dropdown, fetched from GET /api/labs/{id}/equipment)
- *   Step 3 — Problem Type    (category grid)
+ *   Step 3 — Problem Type    (category grid) — also where voice dictation starts
  *   Step 4 — Description     (title + description text inputs)
  *   Step 5 — Review & Submit (summary card, then POST /api/tickets)
  *
@@ -14,6 +14,15 @@
  *   GET  /api/labs                    → list of active labs (auth required)
  *   GET  /api/labs/{id}/equipment     → equipment for selected lab
  *   POST /api/tickets                 → create ticket
+ *   POST /api/reports/voice-extract   → transcript in, {title, description, category} out
+ *
+ * Voice dictation:
+ *   Lives entirely on Step 3, since lab_id is required to submit and voice
+ *   was scoped to category/title/description only — dictation can never
+ *   happen before a lab is chosen. Flow: tap mic → speak → stop → review
+ *   the transcript (editable) → confirm → backend extracts fields →
+ *   form is pre-filled → jumps to Step 4 so the user sees and can further
+ *   edit the actual title/description fields before continuing normally.
  *
  * Maintenance mode:
  *   If GET /api/dashboard returns a maintenance flag (or a dedicated endpoint),
@@ -45,9 +54,14 @@ import {
   Easing,
   KeyboardAvoidingView,
   Platform,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
+import {
+  ExpoSpeechRecognitionModule,
+  useSpeechRecognitionEvent,
+} from 'expo-speech-recognition';
 import { colors, spacing, radius, font } from '@/constants/theme';
 import { loadAuth } from '@/utils/auth';
 import { apiUrl } from '@/constants/api';
@@ -91,6 +105,8 @@ type FieldErrors = {
   description?: string;
   general?:     string;
 };
+
+type VoicePhase = 'ready' | 'listening' | 'review' | 'extracting';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -271,6 +287,120 @@ function StepNav({
   );
 }
 
+// Voice dictation bottom sheet — handles all four phases of the flow:
+// ready → listening → review (editable transcript) → extracting
+function VoiceCaptureModal({
+  visible,
+  phase,
+  liveTranscript,
+  editableTranscript,
+  onChangeTranscript,
+  error,
+  onStart,
+  onStop,
+  onConfirm,
+  onRetry,
+  onClose,
+}: {
+  visible: boolean;
+  phase: VoicePhase;
+  liveTranscript: string;
+  editableTranscript: string;
+  onChangeTranscript: (text: string) => void;
+  error: string;
+  onStart: () => void;
+  onStop: () => void;
+  onConfirm: () => void;
+  onRetry: () => void;
+  onClose: () => void;
+}) {
+  return (
+    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+      <View style={vm.overlay}>
+        <View style={vm.sheet}>
+          <View style={vm.header}>
+            <Text style={vm.headerTitle}>Dictate Your Report</Text>
+            <TouchableOpacity onPress={onClose}>
+              <Text style={vm.closeText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+
+          {!!error && (
+            <View style={vm.errorBox}>
+              <Text style={vm.errorText}>{error}</Text>
+            </View>
+          )}
+
+          {phase === 'ready' && (
+            <View style={vm.centerBlock}>
+              <Text style={vm.helpText}>
+                Tap the mic and describe the problem — what's wrong, where it is,
+                and anything you've already tried.
+              </Text>
+              <TouchableOpacity style={vm.micBtn} onPress={onStart} activeOpacity={0.85}>
+                <Text style={vm.micIcon}>🎙️</Text>
+              </TouchableOpacity>
+              <Text style={vm.micHint}>Tap to start</Text>
+            </View>
+          )}
+
+          {phase === 'listening' && (
+            <View style={vm.centerBlock}>
+              <View style={vm.listeningDot} />
+              <Text style={vm.listeningLabel}>Listening…</Text>
+              <ScrollView style={vm.transcriptBox}>
+                <Text style={vm.transcriptText}>
+                  {liveTranscript || 'Start speaking…'}
+                </Text>
+              </ScrollView>
+              <TouchableOpacity style={vm.stopBtn} onPress={onStop} activeOpacity={0.85}>
+                <Text style={vm.stopBtnText}>Stop</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {phase === 'review' && (
+            <View style={vm.reviewBlock}>
+              <Text style={vm.helpText}>
+                Here's what we heard. Fix anything that's wrong before continuing.
+              </Text>
+              <TextInput
+                style={vm.reviewInput}
+                value={editableTranscript}
+                onChangeText={onChangeTranscript}
+                multiline
+                textAlignVertical="top"
+                placeholder="Your transcript will appear here"
+                placeholderTextColor={colors.textDisabled}
+              />
+              <View style={vm.reviewActions}>
+                <TouchableOpacity style={vm.retryBtn} onPress={onRetry} activeOpacity={0.8}>
+                  <Text style={vm.retryBtnText}>Try Again</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[vm.useBtn, !editableTranscript.trim() && vm.useBtnDisabled]}
+                  onPress={onConfirm}
+                  disabled={!editableTranscript.trim()}
+                  activeOpacity={0.85}
+                >
+                  <Text style={vm.useBtnText}>Use This</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+
+          {phase === 'extracting' && (
+            <View style={vm.centerBlock}>
+              <ActivityIndicator size="large" color={colors.primary} />
+              <Text style={vm.helpText}>Filling in your ticket details…</Text>
+            </View>
+          )}
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function ReportScreen() {
@@ -297,16 +427,26 @@ export default function ReportScreen() {
     description:  '',
   });
 
+  // ── Voice dictation state ──────────────────────────────────────────────────
+  const [voiceModalVisible,   setVoiceModalVisible]   = useState(false);
+  const [voicePhase,          setVoicePhase]          = useState<VoicePhase>('ready');
+  const [liveTranscript,      setLiveTranscript]      = useState('');
+  const [editableTranscript,  setEditableTranscript]  = useState('');
+  const [voiceError,          setVoiceError]          = useState('');
+  // Ref mirrors liveTranscript so the 'end' event always reads the latest
+  // value even if the event fires before this render's state has settled.
+  const liveTranscriptRef = useRef('');
+
   useFocusEffect(
     useCallback(() => {
       // 1. Reset step wizard back to the beginning
       setStep(1);
-      
+
       // 2. Clear API dependent data and local visual state labels
       setEquipment([]);
       setSelectedLabName('');
       setSelectedEquipName("General lab issue / Don't know");
-      
+
       // 3. Clear any validation errors left over from the last attempt
       setErrors({});
 
@@ -318,6 +458,13 @@ export default function ReportScreen() {
         title: '',
         description: '',
       });
+
+      // 5. Close out any in-progress dictation from a previous visit
+      setVoiceModalVisible(false);
+      setVoicePhase('ready');
+      setLiveTranscript('');
+      setEditableTranscript('');
+      setVoiceError('');
     }, [])
   );
 
@@ -428,6 +575,119 @@ export default function ReportScreen() {
       e.description = 'Description must be at least 10 characters.';
     setErrors(e);
     return Object.keys(e).length === 0;
+  }
+
+  // ── Voice dictation ───────────────────────────────────────────────────────
+
+  function openVoiceModal() {
+    setVoiceModalVisible(true);
+    setVoicePhase('ready');
+    setVoiceError('');
+    setLiveTranscript('');
+    setEditableTranscript('');
+    liveTranscriptRef.current = '';
+  }
+
+  function closeVoiceModal() {
+    if (voicePhase === 'listening') {
+      ExpoSpeechRecognitionModule.stop();
+    }
+    setVoiceModalVisible(false);
+  }
+
+  async function startVoiceCapture() {
+    setVoiceError('');
+    try {
+      const result = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
+      if (!result.granted) {
+        setVoiceError(
+          'Microphone access is needed for dictation. You can close this and type your report instead.'
+        );
+        return;
+      }
+    } catch {
+      setVoiceError('Could not access the microphone. You can close this and type your report instead.');
+      return;
+    }
+
+    liveTranscriptRef.current = '';
+    setLiveTranscript('');
+    setVoicePhase('listening');
+
+    ExpoSpeechRecognitionModule.start({
+      lang: 'en-US',
+      interimResults: true,
+      continuous: false,
+    });
+  }
+
+  function stopVoiceCapture() {
+    ExpoSpeechRecognitionModule.stop();
+  }
+
+  function retryVoiceCapture() {
+    setEditableTranscript('');
+    setLiveTranscript('');
+    liveTranscriptRef.current = '';
+    setVoiceError('');
+    setVoicePhase('ready');
+  }
+
+  useSpeechRecognitionEvent('result', (event) => {
+    const text = event.results?.[0]?.transcript ?? '';
+    liveTranscriptRef.current = text;
+    setLiveTranscript(text);
+  });
+
+  useSpeechRecognitionEvent('end', () => {
+    setVoicePhase((phase) => {
+      if (phase !== 'listening') return phase;
+      setEditableTranscript(liveTranscriptRef.current);
+      return 'review';
+    });
+  });
+
+  useSpeechRecognitionEvent('error', () => {
+    setVoiceError('Could not hear you clearly. You can try again or type your report manually.');
+    setVoicePhase('ready');
+  });
+
+  async function confirmTranscriptAndExtract() {
+    if (!token || !editableTranscript.trim()) return;
+
+    setVoicePhase('extracting');
+    setVoiceError('');
+
+    try {
+      const res = await fetch(apiUrl('reports/voice-extract'), {
+        method:  'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept':        'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ transcript: editableTranscript.trim() }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setForm((f) => ({
+          ...f,
+          category:    (data.category as Category['value']) || f.category,
+          title:       data.title ?? f.title,
+          description: data.description ?? f.description,
+        }));
+        setVoiceModalVisible(false);
+        setStep(4);
+      } else {
+        setVoiceError(data?.message ?? 'Could not process that. You can try again or type your report manually.');
+        setVoicePhase('review');
+      }
+    } catch {
+      setVoiceError('Could not reach the server. Check your connection.');
+      setVoicePhase('review');
+    }
   }
 
   // ── Submit ────────────────────────────────────────────────────────────────
@@ -739,6 +999,23 @@ export default function ReportScreen() {
                 <Text style={s.stepHeading}>What type of problem?</Text>
                 <Text style={s.stepSub}>Select the category that best describes your issue</Text>
 
+                {/* Voice dictation entry point — only place it can live,
+                    since lab_id (steps 1–2) is already chosen by this point */}
+                <TouchableOpacity
+                  style={s.voiceEntryBtn}
+                  onPress={openVoiceModal}
+                  activeOpacity={0.8}
+                >
+                  <Text style={s.voiceEntryIcon}>🎙️</Text>
+                  <View style={{ flex: 1 }}>
+                    <Text style={s.voiceEntryTitle}>Dictate instead</Text>
+                    <Text style={s.voiceEntrySub}>
+                      Speak your issue and we'll fill in the category, title, and description
+                    </Text>
+                  </View>
+                  <Text style={s.voiceEntryArrow}>→</Text>
+                </TouchableOpacity>
+
                 <View style={s.catGrid}>
                   {CATEGORIES.map((cat) => {
                     const selected = form.category === cat.value;
@@ -911,12 +1188,6 @@ export default function ReportScreen() {
                       IT support will review and assign a technician
                     </Text>
                   </View>
-                  <View style={s.nextStep}>
-                    <View style={[s.nextStepDot, { marginTop: 5 }]} />
-                    <Text style={s.nextStepText}>
-                      You'll be notified as your ticket progresses
-                    </Text>
-                  </View>
                 </View>
 
                 {/* Server error shown here if submit fails */}
@@ -940,6 +1211,20 @@ export default function ReportScreen() {
           </Animated.View>
         </KeyboardAvoidingView>
       )}
+
+      <VoiceCaptureModal
+        visible={voiceModalVisible}
+        phase={voicePhase}
+        liveTranscript={liveTranscript}
+        editableTranscript={editableTranscript}
+        onChangeTranscript={setEditableTranscript}
+        error={voiceError}
+        onStart={startVoiceCapture}
+        onStop={stopVoiceCapture}
+        onConfirm={confirmTranscriptAndExtract}
+        onRetry={retryVoiceCapture}
+        onClose={closeVoiceModal}
+      />
     </SafeAreaView>
   );
 }
@@ -1196,6 +1481,36 @@ const s = StyleSheet.create({
     color: colors.textMuted,
     textAlign: 'center',
     paddingVertical: spacing.md,
+  },
+
+  // ── Voice dictation entry (Step 3) ────────────────────────────────────────
+  voiceEntryBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.primaryLight,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    padding: spacing.md,
+    marginBottom: spacing.lg,
+  },
+  voiceEntryIcon: {
+    fontSize: 24,
+  },
+  voiceEntryTitle: {
+    fontSize: font.sm,
+    fontWeight: font.bold,
+    color: colors.primary,
+  },
+  voiceEntrySub: {
+    fontSize: font.xs,
+    color: colors.textMuted,
+    marginTop: 1,
+  },
+  voiceEntryArrow: {
+    fontSize: font.lg,
+    color: colors.primary,
   },
 
   // ── Category grid ─────────────────────────────────────────────────────────
@@ -1465,6 +1780,173 @@ const s = StyleSheet.create({
     opacity: 0.45,
   },
   nextBtnText: {
+    fontSize: font.base,
+    fontWeight: font.bold,
+    color: '#fff',
+  },
+});
+
+// ─── Voice modal styles ─────────────────────────────────────────────────────
+
+const vm = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'flex-end',
+  },
+  sheet: {
+    backgroundColor: colors.bgPrimary,
+    borderTopLeftRadius: radius.xxl,
+    borderTopRightRadius: radius.xxl,
+    padding: spacing.lg,
+    minHeight: 380,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderBottomWidth: 0,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.lg,
+  },
+  headerTitle: {
+    fontSize: font.lg,
+    fontWeight: font.bold,
+    color: colors.textPrimary,
+  },
+  closeText: {
+    fontSize: font.sm,
+    color: colors.textMuted,
+    fontWeight: font.medium,
+  },
+  errorBox: {
+    backgroundColor: colors.dangerBg,
+    borderWidth: 1,
+    borderColor: colors.dangerBorder,
+    borderRadius: radius.md,
+    padding: spacing.sm + 2,
+    marginBottom: spacing.md,
+  },
+  errorText: {
+    color: '#fca5a5',
+    fontSize: font.sm,
+    lineHeight: 19,
+  },
+  centerBlock: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.md,
+    paddingVertical: spacing.xl,
+  },
+  helpText: {
+    fontSize: font.sm,
+    color: colors.textMuted,
+    textAlign: 'center',
+    lineHeight: 20,
+    paddingHorizontal: spacing.md,
+  },
+  micBtn: {
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+  micIcon: {
+    fontSize: 36,
+  },
+  micHint: {
+    fontSize: font.sm,
+    color: colors.textMuted,
+  },
+  listeningDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: colors.danger,
+  },
+  listeningLabel: {
+    fontSize: font.base,
+    fontWeight: font.semibold,
+    color: colors.textPrimary,
+  },
+  transcriptBox: {
+    maxHeight: 140,
+    width: '100%',
+    backgroundColor: colors.bgCard,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: spacing.md,
+  },
+  transcriptText: {
+    fontSize: font.base,
+    color: colors.textPrimary,
+    lineHeight: 22,
+  },
+  stopBtn: {
+    backgroundColor: colors.dangerBg,
+    borderWidth: 1,
+    borderColor: colors.dangerBorder,
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.sm + 4,
+  },
+  stopBtnText: {
+    fontSize: font.base,
+    fontWeight: font.bold,
+    color: colors.danger,
+  },
+  reviewBlock: {
+    gap: spacing.md,
+  },
+  reviewInput: {
+    backgroundColor: colors.bgCard,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    padding: spacing.md,
+    color: colors.textPrimary,
+    fontSize: font.base,
+    minHeight: 140,
+    lineHeight: 22,
+  },
+  reviewActions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  retryBtn: {
+    flex: 1,
+    backgroundColor: colors.bgCard,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.lg,
+    paddingVertical: spacing.sm + 4,
+    alignItems: 'center',
+  },
+  retryBtnText: {
+    fontSize: font.base,
+    fontWeight: font.semibold,
+    color: colors.textSecondary,
+  },
+  useBtn: {
+    flex: 2,
+    backgroundColor: colors.primary,
+    borderRadius: radius.lg,
+    paddingVertical: spacing.sm + 4,
+    alignItems: 'center',
+  },
+  useBtnDisabled: {
+    opacity: 0.45,
+  },
+  useBtnText: {
     fontSize: font.base,
     fontWeight: font.bold,
     color: '#fff',
