@@ -11,6 +11,12 @@
  *
  * Only "Contact" is a separate route (/contact).
  *
+ * Note: "Features" and "About" are NOT registered as Tabs.Screen entries
+ * here on purpose — PublicTabBar keeps its own independent tab list and
+ * never navigates to them as real routes, it only fires a scroll event.
+ * Registering them as screens with no backing file was causing Expo
+ * Router's "No route named X exists" warnings on every load.
+ *
  * Architecture note:
  *   We use a custom tab bar component (PublicTabBar) instead of the default
  *   Expo Router Tabs so we can fire scroll events for the in-page sections
@@ -33,21 +39,6 @@ export default function PublicLayout() {
       <Tabs.Screen
         name="index"
         options={{ title: 'Home' }}
-      />
-
-      {/*
-        These two are "virtual" tabs — they don't render separate screens.
-        Tapping them fires a scroll event that the Landing screen listens to.
-        We define them so the tab bar knows they exist, but we redirect back
-        to index immediately in their respective files.
-      */}
-      <Tabs.Screen
-        name="features"
-        options={{ title: 'Features' }}
-      />
-      <Tabs.Screen
-        name="about"
-        options={{ title: 'About' }}
       />
 
       {/* Contact tab — renders app/(public)/contact.tsx */}
