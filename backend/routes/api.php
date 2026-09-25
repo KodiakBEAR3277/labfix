@@ -35,24 +35,34 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     
     // Ticket endpoints
-    Route::get('/tickets', function() {
+    Route::get('/tickets', function (Request $request) {
         $user = auth()->user();
-        
-        // Return tickets based on role
-        if ($user->role === 'admin') {
-            $tickets = \App\Models\Report::with(['reporter', 'assignedTo', 'equipment.lab'])->get();
-        } elseif ($user->role === 'it-support') {
-            $tickets = \App\Models\Report::where('assigned_to', $user->id)
-                ->orWhereNull('assigned_to')
-                ->with(['reporter', 'equipment.lab'])
-                ->get();
-        } else {
-            $tickets = \App\Models\Report::where('user_id', $user->id)
-                ->with(['assignedTo', 'equipment.lab'])
-                ->get();
+
+        $query = match ($user->role) {
+            'admin'      => \App\Models\Report::query(),
+            'it-support' => \App\Models\Report::where(function ($q) use ($user) {
+                                $q->where('assigned_to', $user->id)->orWhereNull('assigned_to');
+                            }),
+            default      => \App\Models\Report::where('user_id', $user->id),
+        };
+
+        $query->with(['reporter', 'assignedTo', 'equipment.lab']);
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('ticket_number', 'like', "%{$search}%")
+                ->orWhere('title', 'like', "%{$search}%");
+            });
         }
-        
-        return response()->json($tickets);
+
+        if ($request->filled('status') && $request->status !== 'all') {
+            if ($request->status === 'active')       $query->open();
+            elseif ($request->status === 'resolved') $query->closed();
+            else                                      $query->where('status', $request->status);
+        }
+
+        return response()->json($query->latest()->paginate(10));
     });
     
     Route::get('/tickets/{id}', function($id) {
@@ -86,6 +96,35 @@ Route::middleware('auth:sanctum')->group(function () {
             'message' => 'Ticket created successfully',
             'ticket' => $ticket->load(['equipment.lab'])
         ], 201);
+    });
+
+    Route::get('/dashboard', function () {
+        $user = auth()->user();
+
+        $recentTickets = \App\Models\Report::where('user_id', $user->id)
+            ->with('equipment.lab')
+            ->latest()
+            ->take(5)
+            ->get();
+
+        $stats = [
+            'active'              => \App\Models\Report::where('user_id', $user->id)->open()->count(),
+            'resolved_this_month' => \App\Models\Report::where('user_id', $user->id)
+                ->where('status', 'resolved')
+                ->whereHas('transactions', function ($query) {
+                    $query->where('action', 'status_changed')
+                        ->where('new_value', 'resolved')
+                        ->whereMonth('created_at', now()->month);
+                })
+                ->count(),
+            'total' => \App\Models\Report::where('user_id', $user->id)->count(),
+        ];
+
+        return response()->json([
+            'role'           => $user->role,
+            'stats'          => $stats,
+            'recent_tickets' => $recentTickets,
+        ]);
     });
 
     // Voice dictation audit log — fired after each field-level dictation
