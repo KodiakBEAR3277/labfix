@@ -499,7 +499,7 @@ const s = StyleSheet.create({
   brandIconText: { fontSize: 26 },
   brandSub: {
     fontSize: font.sm,
-    color: colors.textMuted,
+    color: '#9ca3af', // frozen dark-card text
   },
   brandSubAccent: {
     color: colors.primary,
@@ -519,7 +519,7 @@ const s = StyleSheet.create({
   cardTitle: {
     fontSize: font.xl3,
     fontWeight: font.bold,
-    color: colors.textPrimary,
+    color: '#ffffff', // frozen dark-card text
     marginBottom: spacing.xs,
     letterSpacing: 1,
     lineHeight: 34,
@@ -527,7 +527,7 @@ const s = StyleSheet.create({
   cardTitleAccent: { color: colors.primary },
   cardSub: {
     fontSize: font.sm,
-    color: colors.textMuted,
+    color: '#9ca3af', // frozen dark-card text
     marginBottom: spacing.lg,
   },
 
@@ -541,18 +541,18 @@ const s = StyleSheet.create({
   fieldGroup: { marginBottom: spacing.md },
   fieldLabel: {
     fontSize: font.sm,
-    color: colors.textSecondary,
+    color: '#d1d5db', // frozen dark-card text
     fontWeight: font.medium,
     marginBottom: spacing.xs,
   },
   input: {
-    backgroundColor: colors.surfaceRaised,
+    backgroundColor: 'rgba(255,255,255,0.05)', // frozen dark-card surface
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radius.lg,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm + 4,
-    color: colors.textPrimary,
+    color: '#ffffff', // frozen dark-card text
     fontSize: font.base,
   },
   inputError: {
@@ -572,7 +572,7 @@ const s = StyleSheet.create({
     borderRadius: radius.full,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs + 2,
-    backgroundColor: colors.surfaceRaised,
+    backgroundColor: 'rgba(255,255,255,0.05)', // frozen dark-card surface
   },
   rolePillActive: {
     borderColor: colors.primary,
@@ -580,7 +580,7 @@ const s = StyleSheet.create({
   },
   rolePillText: {
     fontSize: font.sm,
-    color: colors.textMuted,
+    color: '#9ca3af', // frozen dark-card text
     fontWeight: font.medium,
   },
   rolePillTextActive: {
@@ -602,7 +602,7 @@ const s = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: colors.border,
     borderRadius: radius.sm - 2,
-    backgroundColor: colors.surfaceRaised,
+    backgroundColor: 'rgba(255,255,255,0.05)', // frozen dark-card surface
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 1,
@@ -663,7 +663,7 @@ const s = StyleSheet.create({
   },
   dividerText: {
     fontSize: font.sm,
-    color: colors.textMuted,
+    color: '#9ca3af', // frozen dark-card text
   },
 
   // ── Social ────────────────────────────────────────────────────────────────
@@ -673,7 +673,7 @@ const s = StyleSheet.create({
   },
   socialBtn: {
     flex: 1,
-    backgroundColor: colors.surfaceRaised,
+    backgroundColor: 'rgba(255,255,255,0.05)', // frozen dark-card surface
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radius.lg,
@@ -683,6 +683,6 @@ const s = StyleSheet.create({
   socialBtnText: {
     fontSize: font.sm,
     fontWeight: font.medium,
-    color: colors.textPrimary,
+    color: '#ffffff', // frozen dark-card text
   },
 });

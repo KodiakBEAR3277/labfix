@@ -77,7 +77,7 @@ type StatusFilter = '' | 'in-progress' | 'active';
 function statusStyle(s: string): { bg: string; text: string; border: string } {
   switch (s) {
     case 'new':         return { bg: colors.infoBg,           text: colors.infoLight,    border: colors.infoBorder    };
-    case 'assigned':    return { bg: 'rgba(168,85,247,0.14)', text: '#c084fc',           border: 'rgba(168,85,247,0.3)' };
+    case 'assigned':    return { bg: 'rgba(168,85,247,0.14)', text: '#7e22ce',           border: 'rgba(168,85,247,0.3)' };
     case 'in-progress': return { bg: colors.warningBg,        text: colors.warningLight, border: colors.warningBorder };
     case 'resolved':
     case 'closed':      return { bg: colors.successBg,        text: colors.successLight, border: colors.successBorder };
@@ -565,7 +565,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.dangerBg, borderWidth: 1, borderColor: colors.dangerBorder,
     borderRadius: radius.md, padding: spacing.sm + 2, marginBottom: spacing.md,
   },
-  errorBannerText: { color: '#fca5a5', fontSize: font.sm },
+  errorBannerText: { color: '#b91c1c', fontSize: font.sm },
 
   // Empty state
   emptyState: {

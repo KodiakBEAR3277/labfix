@@ -18,6 +18,12 @@ class EquipmentController extends Controller
             'type' => ['required', 'in:computer,printer,projector,other'],
             'status' => ['required', 'in:operational,has-issue,maintenance,retired'],
             'notes' => ['nullable', 'string'],
+            'brand' => ['nullable', 'string', 'max:255'],
+            'model' => ['nullable', 'string', 'max:255'],
+            'specifications' => ['nullable', 'string'],
+            'serial_number' => ['nullable', 'string', 'max:255'],
+            'purchase_date' => ['nullable', 'date'],
+            'warranty_expiry' => ['nullable', 'date', 'after_or_equal:purchase_date'],
         ]);
 
         // Check if equipment code already exists in this lab
@@ -56,6 +62,12 @@ class EquipmentController extends Controller
             'type' => ['required', 'in:computer,printer,projector,other'],
             'status' => ['required', 'in:operational,has-issue,maintenance,retired'],
             'notes' => ['nullable', 'string'],
+            'brand' => ['nullable', 'string', 'max:255'],
+            'model' => ['nullable', 'string', 'max:255'],
+            'specifications' => ['nullable', 'string'],
+            'serial_number' => ['nullable', 'string', 'max:255'],
+            'purchase_date' => ['nullable', 'date'],
+            'warranty_expiry' => ['nullable', 'date', 'after_or_equal:purchase_date'],
         ]);
 
         // Check if equipment code already exists in this lab (excluding current equipment)

@@ -71,7 +71,7 @@ function FieldError({ message }: { message?: string }) {
   return <Text style={fe.text}>{message}</Text>;
 }
 const fe = StyleSheet.create({
-  text: { color: '#f87171', fontSize: font.xs, marginTop: spacing.xs - 2 },
+  text: { color: '#b91c1c', fontSize: font.xs, marginTop: spacing.xs - 2 },
 });
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -521,7 +521,7 @@ const s = StyleSheet.create({
   },
   optional:     { fontWeight: font.normal, color: colors.textMuted },
   input: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    backgroundColor: 'rgba(0,0,0,0.03)',
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radius.lg,
@@ -551,7 +551,7 @@ const s = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs + 3,
     borderRadius: radius.full,
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    backgroundColor: 'rgba(0,0,0,0.03)',
     borderWidth: 1,
     borderColor: colors.border,
   },
@@ -570,7 +570,7 @@ const s = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: spacing.sm + 4,
     borderRadius: radius.lg,
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    backgroundColor: 'rgba(0,0,0,0.03)',
     borderWidth: 1,
     borderColor: colors.border,
   },

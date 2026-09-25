@@ -168,7 +168,7 @@ function ArticleCard({
           activeOpacity={0.8}
         >
           {deleting
-            ? <ActivityIndicator size="small" color="#f87171" />
+            ? <ActivityIndicator size="small" color="#b91c1c" />
             : <Text style={card.deleteBtnText}>Delete</Text>}
         </TouchableOpacity>
       </View>
@@ -223,7 +223,7 @@ const card = StyleSheet.create({
   },
   editBtnText: { fontSize: font.xs, fontWeight: font.bold, color: '#fff' },
   viewBtn: {
-    backgroundColor: 'rgba(255,255,255,0.06)',
+    backgroundColor: 'rgba(0,0,0,0.04)',
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radius.md,
@@ -241,7 +241,7 @@ const card = StyleSheet.create({
     minWidth: 60,
     alignItems: 'center',
   },
-  deleteBtnText: { fontSize: font.xs, fontWeight: font.semibold, color: '#f87171' },
+  deleteBtnText: { fontSize: font.xs, fontWeight: font.semibold, color: '#b91c1c' },
 });
 
 // ─── Filter Tab ───────────────────────────────────────────────────────────────
@@ -663,7 +663,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.dangerBg, borderWidth: 1, borderColor: colors.dangerBorder,
     borderRadius: radius.md, padding: spacing.sm + 2, marginBottom: spacing.md,
   },
-  errorBannerText: { color: '#fca5a5', fontSize: font.sm },
+  errorBannerText: { color: '#b91c1c', fontSize: font.sm },
 
   // Empty state
   emptyState: { alignItems: 'center', paddingVertical: spacing.xxl, gap: spacing.sm },

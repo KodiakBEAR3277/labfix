@@ -6,6 +6,10 @@
 // Lab edit and equipment edit/add use fetch() to the existing JSON endpoints
 // (LabController::edit() and EquipmentController::edit() both return response()->json())
 // then submit via useForm(). This keeps the backend untouched.
+//
+// Equipment modal now also carries hardware detail fields (brand, model,
+// specifications, serial number, purchase date, warranty expiry) — all
+// optional, matching the nullable columns added to the equipment table.
 
 import AppLayout from '../../../Layouts/AppLayout.vue'
 import NavAdmin from '../../../Components/Nav/NavAdmin.vue'
@@ -79,12 +83,18 @@ const equipmentModalTitle = ref('Add Equipment')
 const currentEquipmentId  = ref(null)
 
 const equipmentForm = useForm({
-  _method:        'POST',
-  lab_id:         '',
-  equipment_code: '',
-  type:           'computer',
-  status:         'operational',
-  notes:          '',
+  _method:          'POST',
+  lab_id:           '',
+  equipment_code:   '',
+  type:             'computer',
+  status:           'operational',
+  notes:            '',
+  brand:            '',
+  model:            '',
+  specifications:   '',
+  serial_number:    '',
+  purchase_date:    '',
+  warranty_expiry:  '',
 })
 
 const equipmentActionUrl = ref('/admin/equipment')
@@ -114,6 +124,12 @@ function editEquipment(id) {
       equipmentForm.type           = eq.type
       equipmentForm.status         = eq.status
       equipmentForm.notes          = eq.notes ?? ''
+      equipmentForm.brand           = eq.brand ?? ''
+      equipmentForm.model           = eq.model ?? ''
+      equipmentForm.specifications  = eq.specifications ?? ''
+      equipmentForm.serial_number   = eq.serial_number ?? ''
+      equipmentForm.purchase_date   = eq.purchase_date ?? ''
+      equipmentForm.warranty_expiry = eq.warranty_expiry ?? ''
       showEquipmentModal.value     = true
     })
 }
@@ -245,6 +261,7 @@ function equipmentIcon(type) {
                   >
                     <div class="tooltip">
                       {{ eq.equipment_code }}: {{ eq.status }}
+                      <span v-if="eq.brand || eq.model"><br>{{ eq.brand }} {{ eq.model }}</span>
                       <span v-if="eq.notes"><br>{{ eq.notes.substring(0, 50) }}</span>
                     </div>
                     <div class="equipment-icon">{{ equipmentIcon(eq.type) }}</div>
@@ -349,6 +366,40 @@ function equipmentIcon(type) {
               <option value="maintenance">Under Maintenance</option>
               <option value="retired">Retired</option>
             </select>
+          </div>
+
+          <!-- Hardware details — all optional -->
+          <div class="form-row">
+            <div class="form-group">
+              <label>Brand</label>
+              <input v-model="equipmentForm.brand" type="text" placeholder="e.g., Dell, HP">
+            </div>
+            <div class="form-group">
+              <label>Model</label>
+              <input v-model="equipmentForm.model" type="text" placeholder="e.g., OptiPlex 7090">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Specifications</label>
+            <textarea v-model="equipmentForm.specifications" placeholder="e.g., i5-11500, 8GB RAM, 256GB SSD"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Serial Number</label>
+            <input v-model="equipmentForm.serial_number" type="text" placeholder="Manufacturer serial number">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Purchase Date</label>
+              <input v-model="equipmentForm.purchase_date" type="date">
+            </div>
+            <div class="form-group">
+              <label>Warranty Expiry</label>
+              <input v-model="equipmentForm.warranty_expiry" type="date">
+              <span v-if="equipmentForm.errors.warranty_expiry" class="text-danger">{{ equipmentForm.errors.warranty_expiry }}</span>
+            </div>
           </div>
 
           <div class="form-group">

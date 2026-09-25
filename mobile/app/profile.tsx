@@ -108,7 +108,7 @@ function FieldError({ message }: { message?: string }) {
   return <Text style={fe.text}>{message}</Text>;
 }
 const fe = StyleSheet.create({
-  text: { color: '#f87171', fontSize: font.xs, marginTop: spacing.xs - 2 },
+  text: { color: '#b91c1c', fontSize: font.xs, marginTop: spacing.xs - 2 },
 });
 
 // ─── Section Header ───────────────────────────────────────────────────────────
@@ -458,7 +458,7 @@ export default function ProfileScreen() {
             ]}>
               <Text style={[
                 s.stripBadgeText,
-                { color: user.is_active ? colors.successLight : '#f87171' },
+                { color: user.is_active ? colors.successLight : '#b91c1c' },
               ]}>
                 {user.is_active ? 'Active' : 'Inactive'}
               </Text>
@@ -469,7 +469,7 @@ export default function ProfileScreen() {
             <Text style={s.stripLabel}>Ticket Submission</Text>
             <Text style={[
               s.stripValue,
-              { color: user.can_submit_tickets ? colors.successLight : '#f87171' },
+              { color: user.can_submit_tickets ? colors.successLight : '#b91c1c' },
             ]}>
               {user.can_submit_tickets ? '✅ Enabled' : '❌ Disabled'}
             </Text>
@@ -666,7 +666,7 @@ export default function ProfileScreen() {
             activeOpacity={0.85}
           >
             {loggingOut
-              ? <ActivityIndicator size="small" color="#f87171" />
+              ? <ActivityIndicator size="small" color="#b91c1c" />
               : <Text style={s.signOutBtnText}>Sign Out</Text>}
           </TouchableOpacity>
         </View>
@@ -789,7 +789,7 @@ const s = StyleSheet.create({
   },
   optional: { fontWeight: font.normal, color: colors.textMuted },
   input: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    backgroundColor: 'rgba(0,0,0,0.03)',
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radius.lg,
@@ -846,7 +846,7 @@ const s = StyleSheet.create({
     paddingVertical: spacing.md,
     alignItems: 'center',
   },
-  signOutBtnText: { fontSize: font.base, fontWeight: font.semibold, color: '#f87171' },
+  signOutBtnText: { fontSize: font.base, fontWeight: font.semibold, color: '#b91c1c' },
 
   // Error state
   errorText: { fontSize: font.base, color: colors.textSecondary, textAlign: 'center' },

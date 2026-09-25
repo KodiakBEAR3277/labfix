@@ -86,7 +86,7 @@ const PRIORITY_OPTIONS = [
 function statusStyle(s: string): { bg: string; text: string; border: string } {
   switch (s) {
     case 'new':         return { bg: colors.infoBg,           text: colors.infoLight,    border: colors.infoBorder    };
-    case 'assigned':    return { bg: 'rgba(168,85,247,0.14)', text: '#c084fc',           border: 'rgba(168,85,247,0.3)' };
+    case 'assigned':    return { bg: 'rgba(168,85,247,0.14)', text: '#7e22ce',           border: 'rgba(168,85,247,0.3)' };
     case 'in-progress': return { bg: colors.warningBg,        text: colors.warningLight, border: colors.warningBorder };
     case 'resolved':
     case 'closed':      return { bg: colors.successBg,        text: colors.successLight, border: colors.successBorder };
@@ -645,7 +645,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.dangerBg, borderWidth: 1, borderColor: colors.dangerBorder,
     borderRadius: radius.md, padding: spacing.sm + 2, marginBottom: spacing.md,
   },
-  errorBannerText: { color: '#fca5a5', fontSize: font.sm, lineHeight: 19 },
+  errorBannerText: { color: '#b91c1c', fontSize: font.sm, lineHeight: 19 },
 
   // Cards
   card: {
@@ -660,7 +660,7 @@ const s = StyleSheet.create({
   infoRow: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start',
     paddingVertical: spacing.xs + 2,
-    borderBottomWidth: 1, borderBottomColor: 'rgba(45,212,191,0.06)', gap: spacing.sm,
+    borderBottomWidth: 1, borderBottomColor: 'rgba(0,0,0,0.08)', gap: spacing.sm,
   },
   infoLabel: { fontSize: font.sm, color: colors.textMuted, flex: 1 },
   infoValue: { fontSize: font.sm, fontWeight: font.medium, color: colors.textPrimary, flex: 2, textAlign: 'right' },
@@ -668,14 +668,14 @@ const s = StyleSheet.create({
   // Form fields
   fieldGroup:  { marginBottom: spacing.lg },
   fieldLabel:  { fontSize: font.sm, fontWeight: font.semibold, color: colors.textSecondary, marginBottom: spacing.sm },
-  fieldError:  { color: '#f87171', fontSize: font.xs, marginTop: spacing.xs - 2 },
+  fieldError:  { color: '#b91c1c', fontSize: font.xs, marginTop: spacing.xs - 2 },
   helpText:    { fontSize: font.xs, color: colors.textMuted, marginTop: spacing.xs },
 
   // Status option grid (2 per row)
   optionGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs + 2 },
   statusOption: {
     flexDirection: 'row', alignItems: 'center', gap: spacing.xs,
-    backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1.5,
+    backgroundColor: 'rgba(0,0,0,0.03)', borderWidth: 1.5,
     borderColor: colors.border, borderRadius: radius.lg,
     paddingHorizontal: spacing.md, paddingVertical: spacing.xs + 4,
   },
@@ -686,7 +686,7 @@ const s = StyleSheet.create({
   priorityRow: { flexDirection: 'row', gap: spacing.sm },
   priorityOption: {
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: spacing.xs, backgroundColor: 'rgba(255,255,255,0.05)',
+    gap: spacing.xs, backgroundColor: 'rgba(0,0,0,0.03)',
     borderWidth: 1.5, borderColor: colors.border, borderRadius: radius.lg,
     paddingVertical: spacing.sm + 2,
   },
@@ -696,7 +696,7 @@ const s = StyleSheet.create({
   assignRow: { gap: spacing.sm },
   assignOption: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1.5,
+    backgroundColor: 'rgba(0,0,0,0.03)', borderWidth: 1.5,
     borderColor: colors.border, borderRadius: radius.lg,
     paddingHorizontal: spacing.md, paddingVertical: spacing.sm + 4,
   },
@@ -712,7 +712,7 @@ const s = StyleSheet.create({
   },
   submitBtnText: { fontSize: font.base, fontWeight: font.bold, color: '#fff' },
   cancelBtn: {
-    backgroundColor: 'rgba(255,255,255,0.04)', borderWidth: 1, borderColor: colors.border,
+    backgroundColor: 'rgba(0,0,0,0.03)', borderWidth: 1, borderColor: colors.border,
     borderRadius: radius.lg, paddingVertical: spacing.md, alignItems: 'center',
     marginTop: spacing.sm,
   },
@@ -734,7 +734,7 @@ const s = StyleSheet.create({
     fontSize: font.base, color: colors.textSecondary, lineHeight: 23, marginBottom: spacing.md,
   },
   viewFullBtn: {
-    backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: colors.border,
+    backgroundColor: 'rgba(0,0,0,0.03)', borderWidth: 1, borderColor: colors.border,
     borderRadius: radius.lg, paddingVertical: spacing.sm + 2, alignItems: 'center',
   },
   viewFullBtnText: { fontSize: font.sm, fontWeight: font.semibold, color: colors.primary },

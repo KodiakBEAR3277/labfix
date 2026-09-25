@@ -29,6 +29,7 @@ use App\Http\Controllers\SuperAdmin\InstitutionController as SuperAdminInstituti
 // Public routes
 Route::get('/', fn() => Inertia::render('Landing'))->name('landing');
 Route::get('/contact', fn() => Inertia::render('Contact'))->name('contact');
+Route::get('/pricing', fn() => Inertia::render('Pricing'))->name('pricing');
 
 // Auth routes
 Route::middleware('guest')->group(function () {
@@ -36,6 +37,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->name('login.post');
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register'])->name('register.post');
+    Route::get('/register/pending', [AuthController::class, 'showRequestPending'])->name('register.pending');
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -61,6 +63,11 @@ Route::middleware('auth')->group(function () {
     Route::prefix('superadmin')->name('superadmin.')->middleware(['auth', 'superadmin'])->group(function () {
         Route::get('/institutions', [SuperAdminInstitutionController::class, 'index'])->name('institutions.index');
         Route::post('/institutions/{institution}/toggle-status', [SuperAdminInstitutionController::class, 'toggleStatus'])->name('institutions.toggle-status');
+        Route::get('/settings', [\App\Http\Controllers\SuperAdmin\SettingsController::class, 'index'])->name('settings');
+        Route::post('/settings/update', [\App\Http\Controllers\SuperAdmin\SettingsController::class, 'update'])->name('settings.update');
+        Route::get('/requests', [\App\Http\Controllers\SuperAdmin\RequestController::class, 'index'])->name('requests.index');
+        Route::post('/requests/{id}/approve', [\App\Http\Controllers\SuperAdmin\RequestController::class, 'approve'])->name('requests.approve');
+        Route::post('/requests/{id}/reject', [\App\Http\Controllers\SuperAdmin\RequestController::class, 'reject'])->name('requests.reject');
     });
 
     // User routes

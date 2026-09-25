@@ -9,7 +9,7 @@
 // not built yet.
 
 import AppLayout from '../../../Layouts/AppLayout.vue'
-import { router, usePage } from '@inertiajs/vue3'
+import { Link, router, usePage } from '@inertiajs/vue3'
 import { computed } from 'vue'
 
 defineProps({
@@ -34,7 +34,10 @@ function logout() {
         <span class="logo">
           LabFix<span style="font-size:0.7rem;color:#9ca3af;font-weight:400;margin-left:0.5rem;">· Platform Oversight</span>
         </span>
-        <div style="display:flex;align-items:center;gap:1rem;">
+        <div style="display:flex;align-items:center;gap:1.5rem;">
+          <Link href="/superadmin/institutions" style="color:#2dd4bf;text-decoration:none;font-size:0.9rem;font-weight:600;">Institutions</Link>
+          <Link href="/superadmin/requests" style="color:#9ca3af;text-decoration:none;font-size:0.9rem;">Requests</Link>
+          <Link href="/superadmin/settings" style="color:#9ca3af;text-decoration:none;font-size:0.9rem;">Settings</Link>
           <span style="color:#9ca3af;font-size:0.9rem;">{{ user?.first_name }} {{ user?.last_name }}</span>
           <button type="button" class="btn btn-secondary" @click="logout">Sign Out</button>
         </div>

@@ -81,7 +81,7 @@ type DashboardData = {
 function statusColor(status: string): { bg: string; text: string; border: string } {
   switch (status) {
     case 'new':         return { bg: colors.infoBg,            text: colors.infoLight,    border: colors.infoBorder    };
-    case 'assigned':    return { bg: 'rgba(168,85,247,0.14)',   text: '#c084fc',           border: 'rgba(168,85,247,0.3)' };
+    case 'assigned':    return { bg: 'rgba(168,85,247,0.14)',   text: '#7e22ce',           border: 'rgba(168,85,247,0.3)' };
     case 'in-progress': return { bg: colors.warningBg,         text: colors.warningLight, border: colors.warningBorder };
     case 'resolved':
     case 'closed':      return { bg: colors.successBg,         text: colors.successLight, border: colors.successBorder };
@@ -240,7 +240,7 @@ const tr = StyleSheet.create({
   wrap: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(30,30,40,0.9)',
+    backgroundColor: colors.bgCard,
     borderRadius: radius.lg,
     marginBottom: spacing.xs + 2,
     overflow: 'hidden',
@@ -284,7 +284,7 @@ const qa = StyleSheet.create({
     gap: spacing.sm,
     paddingVertical: spacing.sm + 2,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(45,212,191,0.06)',
+    borderBottomColor: 'rgba(0,0,0,0.08)',
   },
   iconBox: {
     width: 34,
@@ -629,7 +629,7 @@ const s = StyleSheet.create({
   adminTagText: {
     fontSize: font.xs - 1,
     fontWeight: font.bold,
-    color: '#f87171',
+    color: '#b91c1c',
   },
   // Amber avatar — distinguishes IT from user (teal) and admin (red)
   avatar: {
@@ -750,7 +750,7 @@ const s = StyleSheet.create({
     gap: spacing.sm,
     paddingVertical: spacing.sm + 2,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(45,212,191,0.06)',
+    borderBottomColor: 'rgba(0,0,0,0.08)',
   },
   activityTitle: {
     fontSize: font.sm,

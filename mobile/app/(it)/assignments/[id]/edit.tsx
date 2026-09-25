@@ -80,7 +80,7 @@ const PRIORITY_OPTIONS = [
 
 function statusStyle(s: string): { bg: string; text: string; border: string } {
   switch (s) {
-    case 'assigned':    return { bg: 'rgba(168,85,247,0.14)', text: '#c084fc',           border: 'rgba(168,85,247,0.3)' };
+    case 'assigned':    return { bg: 'rgba(168,85,247,0.14)', text: '#7e22ce',           border: 'rgba(168,85,247,0.3)' };
     case 'in-progress': return { bg: colors.warningBg,        text: colors.warningLight, border: colors.warningBorder };
     case 'resolved':    return { bg: colors.successBg,        text: colors.successLight, border: colors.successBorder };
     default:            return { bg: colors.borderLight,      text: colors.textMuted,    border: colors.border        };
@@ -516,8 +516,8 @@ export default function ITAssignmentEditScreen() {
                   activeOpacity={0.8}
                 >
                   {quickLoading === 'escalate'
-                    ? <ActivityIndicator size="small" color="#f87171" />
-                    : <Text style={[s.quickBtnText, { color: '#f87171' }]}>
+                    ? <ActivityIndicator size="small" color="#b91c1c" />
+                    : <Text style={[s.quickBtnText, { color: '#b91c1c' }]}>
                         🔴 Escalate Priority
                       </Text>}
                 </TouchableOpacity>
@@ -633,7 +633,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.dangerBg, borderWidth: 1, borderColor: colors.dangerBorder,
     borderRadius: radius.md, padding: spacing.sm + 2, marginBottom: spacing.md,
   },
-  errorBannerText: { color: '#fca5a5', fontSize: font.sm, lineHeight: 19 },
+  errorBannerText: { color: '#b91c1c', fontSize: font.sm, lineHeight: 19 },
 
   // Cards
   card: {
@@ -646,7 +646,7 @@ const s = StyleSheet.create({
   infoRow: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start',
     paddingVertical: spacing.xs + 2, borderBottomWidth: 1,
-    borderBottomColor: 'rgba(45,212,191,0.06)', gap: spacing.sm,
+    borderBottomColor: 'rgba(0,0,0,0.08)', gap: spacing.sm,
   },
   infoLabel: { fontSize: font.sm, color: colors.textMuted, flex: 1 },
   infoValue: { fontSize: font.sm, fontWeight: font.medium, color: colors.textPrimary, flex: 2, textAlign: 'right' },
@@ -654,14 +654,14 @@ const s = StyleSheet.create({
   // Form
   fieldGroup:  { marginBottom: spacing.lg },
   fieldLabel:  { fontSize: font.sm, fontWeight: font.semibold, color: colors.textSecondary, marginBottom: spacing.sm },
-  fieldError:  { color: '#f87171', fontSize: font.xs, marginTop: spacing.xs - 2 },
+  fieldError:  { color: '#b91c1c', fontSize: font.xs, marginTop: spacing.xs - 2 },
   helpText:    { fontSize: font.xs, color: colors.textMuted, marginTop: spacing.xs },
 
   // Status option list
   statusList: { gap: spacing.sm },
   statusOption: {
     flexDirection: 'row', alignItems: 'center', gap: spacing.md,
-    backgroundColor: 'rgba(255,255,255,0.04)', borderWidth: 1.5,
+    backgroundColor: 'rgba(0,0,0,0.03)', borderWidth: 1.5,
     borderColor: colors.border, borderRadius: radius.lg, padding: spacing.md,
   },
   radioOuter: {
@@ -681,7 +681,7 @@ const s = StyleSheet.create({
   priorityRow: { flexDirection: 'row', gap: spacing.sm },
   priorityOption: {
     flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
-    gap: spacing.xs, backgroundColor: 'rgba(255,255,255,0.04)',
+    gap: spacing.xs, backgroundColor: 'rgba(0,0,0,0.03)',
     borderWidth: 1.5, borderColor: colors.border, borderRadius: radius.lg,
     paddingVertical: spacing.sm + 4,
   },
@@ -693,7 +693,7 @@ const s = StyleSheet.create({
     borderColor: 'rgba(45,212,191,0.2)', borderRadius: radius.lg,
     padding: spacing.md, marginBottom: spacing.md,
   },
-  notifHintText: { fontSize: font.sm, color: '#a7f3d0', lineHeight: 19 },
+  notifHintText: { fontSize: font.sm, color: '#047857', lineHeight: 19 },
 
   // Submit / cancel
   submitBtn: {
@@ -704,7 +704,7 @@ const s = StyleSheet.create({
   },
   submitBtnText: { fontSize: font.base, fontWeight: font.bold, color: '#fff' },
   cancelBtn: {
-    backgroundColor: 'rgba(255,255,255,0.04)', borderWidth: 1, borderColor: colors.border,
+    backgroundColor: 'rgba(0,0,0,0.03)', borderWidth: 1, borderColor: colors.border,
     borderRadius: radius.lg, paddingVertical: spacing.md, alignItems: 'center', marginTop: spacing.sm,
   },
   cancelBtnText: { fontSize: font.base, fontWeight: font.semibold, color: colors.textMuted },
@@ -714,7 +714,7 @@ const s = StyleSheet.create({
   quickGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   quickBtn: {
     flex: 1, minWidth: '47%',
-    backgroundColor: 'rgba(255,255,255,0.05)', borderWidth: 1, borderColor: colors.border,
+    backgroundColor: 'rgba(0,0,0,0.03)', borderWidth: 1, borderColor: colors.border,
     borderRadius: radius.lg, paddingVertical: spacing.sm + 4, alignItems: 'center',
   },
   quickBtnDanger: { backgroundColor: 'rgba(239,68,68,0.07)', borderColor: 'rgba(239,68,68,0.25)' },
@@ -725,18 +725,18 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(59,130,246,0.07)', borderWidth: 1, borderColor: 'rgba(59,130,246,0.2)',
     borderRadius: radius.xl, padding: spacing.lg, marginBottom: spacing.md, gap: spacing.md,
   },
-  guidelinesTitle:{ fontSize: font.sm, fontWeight: font.bold, color: '#60a5fa', marginBottom: spacing.xs },
+  guidelinesTitle:{ fontSize: font.sm, fontWeight: font.bold, color: '#2563eb', marginBottom: spacing.xs },
   guidelineRow:   { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.sm },
   guidelineDot:   { width: 8, height: 8, borderRadius: 4, marginTop: 5, flexShrink: 0 },
   guidelineLabel: { fontSize: font.sm, fontWeight: font.semibold, marginBottom: 2 },
-  guidelineDesc:  { fontSize: font.xs, color: '#93c5fd', lineHeight: 17 },
+  guidelineDesc:  { fontSize: font.xs, color: '#2563eb', lineHeight: 17 },
 
   // Description preview
   descPreview: {
     fontSize: font.base, color: colors.textSecondary, lineHeight: 23, marginBottom: spacing.md,
   },
   viewFullBtn: {
-    backgroundColor: 'rgba(255,255,255,0.04)', borderWidth: 1, borderColor: colors.border,
+    backgroundColor: 'rgba(0,0,0,0.03)', borderWidth: 1, borderColor: colors.border,
     borderRadius: radius.lg, paddingVertical: spacing.sm + 2, alignItems: 'center',
   },
   viewFullBtnText: { fontSize: font.sm, fontWeight: font.semibold, color: colors.primary },

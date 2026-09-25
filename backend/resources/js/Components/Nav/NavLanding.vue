@@ -35,6 +35,7 @@ function dashboardHref(role) {
     <div class="nav-menu">
       <a href="/#features" class="nav-link">Features</a>
       <a href="/#about"    class="nav-link">About</a>
+      <Link href="/pricing" class="nav-link">Pricing</Link>
       <Link href="/contact" class="nav-link">Contact</Link>
     </div>
 

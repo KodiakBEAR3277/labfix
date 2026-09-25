@@ -50,6 +50,41 @@ class Setting extends Model
         return $setting;
     }
 
+    // Platform-level settings — deliberately separate from get()/set() above.
+    // A null institution context makes the trait's global scope add NO
+    // filter at all (it returns every institution's rows unscoped), not
+    // "just the null-institution rows" — so reaching a genuinely
+    // platform-level row requires explicitly bypassing that scope and
+    // filtering to institution_id IS NULL ourselves. withoutGlobalScope()
+    // is used here even though the realistic callers (the public
+    // contact-info endpoint, the superadmin-only settings page) already
+    // resolve to a null institution context on their own, so that this
+    // method's correctness never depends on assumptions about who's
+    // calling it or what context they're in.
+    public static function getPlatform($key, $default = null)
+    {
+        return Cache::remember("setting_platform_{$key}", 3600, function() use ($key, $default) {
+            $setting = self::withoutGlobalScope('institution')
+                ->whereNull('institution_id')
+                ->where('key', $key)
+                ->first();
+            return $setting ? $setting->value : $default;
+        });
+    }
+
+    public static function setPlatform($key, $value, $type = 'string', $group = 'platform')
+    {
+        $setting = self::withoutGlobalScope('institution')
+            ->whereNull('institution_id')
+            ->updateOrCreate(
+                ['key' => $key],
+                ['value' => $value, 'type' => $type, 'group' => $group, 'institution_id' => null]
+            );
+
+        Cache::forget("setting_platform_{$key}");
+        return $setting;
+    }
+
     /**
      * Seed a fresh institution with the standard set of default settings.
      * Called once, right after a new institution is created during

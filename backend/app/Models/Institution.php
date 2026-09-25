@@ -17,6 +17,7 @@ class Institution extends Model
         'contact_email',
         'address',
         'is_active',
+        'plan',
     ];
 
     protected $casts = [

@@ -538,7 +538,7 @@ const s = StyleSheet.create({
     marginBottom: spacing.md,
   },
   errorBannerText: {
-    color: '#fca5a5',
+    color: '#b91c1c',
     fontSize: font.sm,
     lineHeight: 19,
   },
@@ -566,7 +566,7 @@ const s = StyleSheet.create({
     alignItems: 'flex-start',
     paddingVertical: spacing.xs + 2,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(45,212,191,0.06)',
+    borderBottomColor: 'rgba(0,0,0,0.08)',
     gap: spacing.sm,
   },
   infoLabel: {
@@ -593,7 +593,7 @@ const s = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   input: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    backgroundColor: 'rgba(0,0,0,0.03)',
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: radius.lg,
@@ -612,7 +612,7 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(239,68,68,0.05)',
   },
   fieldError: {
-    color: '#f87171',
+    color: '#b91c1c',
     fontSize: font.xs,
     marginTop: spacing.xs - 2,
   },
@@ -633,7 +633,7 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.xs,
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    backgroundColor: 'rgba(0,0,0,0.03)',
     borderWidth: 1.5,
     borderColor: colors.border,
     borderRadius: radius.full,
@@ -676,7 +676,7 @@ const s = StyleSheet.create({
   infoNoteText: {
     flex: 1,
     fontSize: font.sm,
-    color: '#93c5fd',
+    color: '#2563eb',
     lineHeight: 19,
   },
 

@@ -69,9 +69,9 @@ function labStatusInfo(lab: Lab): { label: string; color: string; bg: string; bo
 
 function equipmentStyle(status: Equipment['status']): { bg: string; border: string; text: string } {
   switch (status) {
-    case 'operational': return { bg: 'rgba(16,185,129,0.12)', border: 'rgba(16,185,129,0.45)', text: '#34d399' };
-    case 'has-issue':   return { bg: 'rgba(239,68,68,0.12)',  border: 'rgba(239,68,68,0.45)',  text: '#f87171' };
-    case 'maintenance': return { bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.45)', text: '#fbbf24' };
+    case 'operational': return { bg: 'rgba(16,185,129,0.12)', border: 'rgba(16,185,129,0.45)', text: '#047857' };
+    case 'has-issue':   return { bg: 'rgba(239,68,68,0.12)',  border: 'rgba(239,68,68,0.45)',  text: '#b91c1c' };
+    case 'maintenance': return { bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.45)', text: '#b45309' };
     default:            return { bg: 'rgba(107,114,128,0.1)', border: 'rgba(107,114,128,0.3)', text: colors.textMuted };
   }
 }
@@ -666,7 +666,7 @@ const s = StyleSheet.create({
   },
   progressTrack: {
     height: 6,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: 'rgba(0,0,0,0.05)',
     borderRadius: 3,
     overflow: 'hidden',
   },
@@ -784,7 +784,7 @@ const s = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: spacing.sm + 2,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(45,212,191,0.07)',
+    borderBottomColor: 'rgba(0,0,0,0.08)',
     gap: spacing.sm,
   },
   overviewRowActive: {
@@ -823,7 +823,7 @@ const s = StyleSheet.create({
   overviewBarTrack: {
     flex: 1,
     height: 4,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: 'rgba(0,0,0,0.05)',
     borderRadius: 2,
     overflow: 'hidden',
   },

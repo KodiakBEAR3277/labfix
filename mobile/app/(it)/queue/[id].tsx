@@ -77,7 +77,7 @@ type Ticket = {
 function statusStyle(s: string): { bg: string; text: string; border: string } {
   switch (s) {
     case 'new':         return { bg: colors.infoBg,           text: colors.infoLight,    border: colors.infoBorder    };
-    case 'assigned':    return { bg: 'rgba(168,85,247,0.14)', text: '#c084fc',           border: 'rgba(168,85,247,0.3)' };
+    case 'assigned':    return { bg: 'rgba(168,85,247,0.14)', text: '#7e22ce',           border: 'rgba(168,85,247,0.3)' };
     case 'in-progress': return { bg: colors.warningBg,        text: colors.warningLight, border: colors.warningBorder };
     case 'resolved':
     case 'closed':      return { bg: colors.successBg,        text: colors.successLight, border: colors.successBorder };
@@ -150,7 +150,7 @@ function InfoRow({ label, value, children }: {
   );
 }
 const ir = StyleSheet.create({
-  row:   { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: spacing.xs + 2, borderBottomWidth: 1, borderBottomColor: 'rgba(45,212,191,0.06)', gap: spacing.sm },
+  row:   { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: spacing.xs + 2, borderBottomWidth: 1, borderBottomColor: 'rgba(0,0,0,0.08)', gap: spacing.sm },
   label: { fontSize: font.sm, color: colors.textMuted, flex: 1 },
   value: { fontSize: font.sm, fontWeight: font.medium, color: colors.textPrimary, flex: 2, textAlign: 'right' },
 });
@@ -726,9 +726,9 @@ const s = StyleSheet.create({
   tlTime:   { fontSize: font.xs - 1, color: colors.textMuted },
   tlText:   { fontSize: font.xs, color: colors.textMuted, lineHeight: 17 },
   tlChange: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(45,212,191,0.07)', borderRadius: radius.sm, paddingHorizontal: spacing.xs + 2, paddingVertical: 2, alignSelf: 'flex-start' },
-  tlOld:    { fontSize: font.xs, color: '#f87171' },
+  tlOld:    { fontSize: font.xs, color: '#b91c1c' },
   tlArrow:  { fontSize: font.xs, color: colors.textMuted },
-  tlNew:    { fontSize: font.xs, color: '#34d399' },
+  tlNew:    { fontSize: font.xs, color: '#047857' },
   tlBy:     { fontSize: font.xs - 1, color: colors.textMuted, fontStyle: 'italic' },
 
   // Error / states

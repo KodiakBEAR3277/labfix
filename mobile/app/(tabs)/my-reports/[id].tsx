@@ -86,7 +86,7 @@ function statusLabel(s: string): string {
 function statusStyle(status: string) {
   switch (status) {
     case 'new':         return { bg: colors.infoBg,           text: colors.infoLight,    border: colors.infoBorder    };
-    case 'assigned':    return { bg: 'rgba(168,85,247,0.18)', text: '#c084fc',           border: 'rgba(168,85,247,0.3)' };
+    case 'assigned':    return { bg: 'rgba(168,85,247,0.18)', text: '#7e22ce',           border: 'rgba(168,85,247,0.3)' };
     case 'in-progress': return { bg: colors.warningBg,        text: colors.warningLight, border: colors.warningBorder };
     case 'resolved':
     case 'closed':      return { bg: colors.successBg,        text: colors.successLight, border: colors.successBorder };
@@ -160,7 +160,7 @@ const ir = StyleSheet.create({
     alignItems: 'flex-start',
     paddingVertical: spacing.xs + 2,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(45,212,191,0.06)',
+    borderBottomColor: 'rgba(0,0,0,0.08)',
     gap: spacing.sm,
   },
   label: { fontSize: font.sm, color: colors.textMuted, flex: 1 },
@@ -415,7 +415,7 @@ export default function TicketShowScreen() {
                   activeOpacity={0.8}
                 >
                   {cancelling ? (
-                    <ActivityIndicator size="small" color="#f87171" />
+                    <ActivityIndicator size="small" color="#b91c1c" />
                   ) : (
                     <Text style={s.cancelBtnText}>Cancel Ticket</Text>
                   )}
@@ -445,7 +445,7 @@ export default function TicketShowScreen() {
                 </Text>
               </View>
               <View style={[s.statusPill, statusStyle('assigned') as any]}>
-                <Text style={[s.statusPillText, { color: '#c084fc' }]}>Active</Text>
+                <Text style={[s.statusPillText, { color: '#7e22ce' }]}>Active</Text>
               </View>
             </View>
           </View>
@@ -679,7 +679,7 @@ const s = StyleSheet.create({
   cancelBtnText: {
     fontSize: font.base,
     fontWeight: font.semibold,
-    color: '#f87171',
+    color: '#b91c1c',
   },
   manageNote: {
     fontSize: font.xs,
@@ -817,9 +817,9 @@ const s = StyleSheet.create({
     paddingVertical: 2,
     alignSelf: 'flex-start',
   },
-  tlOld:   { fontSize: font.xs, color: '#f87171' },
+  tlOld:   { fontSize: font.xs, color: '#b91c1c' },
   tlArrow: { fontSize: font.xs, color: colors.textMuted },
-  tlNew:   { fontSize: font.xs, color: '#34d399' },
+  tlNew:   { fontSize: font.xs, color: '#047857' },
   tlBy: {
     fontSize: font.xs - 1,
     color: colors.textMuted,

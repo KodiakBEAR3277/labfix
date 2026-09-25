@@ -16,11 +16,23 @@ import { Link, useForm } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
 import AuthLayout from '../../Layouts/AuthLayout.vue'
 
+const props = defineProps({
+  plan: String,
+})
+
+const planLabels = {
+  free: 'Free',
+  standard: 'Standard',
+  pro: 'Pro',
+  enterprise: 'Enterprise',
+}
+
 const form = useForm({
   mode: 'join',
   institution_id: null,
   institution_name: '',
   institution_contact_email: '',
+  plan: props.plan ?? null,
   first_name: '',
   last_name: '',
   email: '',
@@ -134,6 +146,24 @@ function submit() {
           >
             My school isn't listed yet
           </button>
+        </div>
+
+        <div
+          v-if="form.mode === 'create' && form.plan"
+          style="display:flex;align-items:center;justify-content:space-between;background:rgba(45,212,191,0.1);border:1px solid rgba(45,212,191,0.3);border-radius:8px;padding:0.75rem 1rem;margin-bottom:1.5rem;"
+        >
+          <span style="color:#2dd4bf;font-size:0.9rem;">
+            Signing up for the <strong>{{ planLabels[form.plan] ?? form.plan }}</strong> plan
+          </span>
+          <Link href="/pricing" style="color:#9ca3af;font-size:0.85rem;text-decoration:underline;">Change plan</Link>
+        </div>
+
+        <div
+          v-else-if="form.mode === 'create'"
+          style="font-size:0.85rem;color:#9ca3af;margin-bottom:1.5rem;"
+        >
+          Want to compare plans first?
+          <Link href="/pricing" style="color:#2dd4bf;text-decoration:underline;">View pricing</Link>
         </div>
 
         <form @submit.prevent="submit">

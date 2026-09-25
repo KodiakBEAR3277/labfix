@@ -19,10 +19,18 @@ class Equipment extends Model
         'type',
         'status',
         'notes',
+        'brand',
+        'model',
+        'specifications',
+        'serial_number',
+        'purchase_date',
+        'warranty_expiry',
     ];
 
     protected $casts = [
         'lab_id' => 'integer',
+        'purchase_date' => 'date:Y-m-d',
+        'warranty_expiry' => 'date:Y-m-d',
     ];
 
     // Relationship: Lab this equipment belongs to
@@ -47,11 +55,11 @@ class Equipment extends Model
     public function updateStatusFromReports(): void
     {
         $openReports = $this->activeReports()->count();
-
+        
         if ($openReports > 0) {
             // Check if any high priority reports
             $highPriorityReports = $this->activeReports()->where('priority', 'high')->count();
-
+            
             if ($highPriorityReports > 0) {
                 $this->update(['status' => 'has-issue']);
             } else {
@@ -67,5 +75,11 @@ class Equipment extends Model
     public function getFullCodeAttribute(): string
     {
         return $this->lab->name . ', ' . $this->equipment_code;
+    }
+
+    // Check if equipment is still within its warranty period
+    public function isUnderWarranty(): bool
+    {
+        return $this->warranty_expiry !== null && $this->warranty_expiry->isFuture();
     }
 }

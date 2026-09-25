@@ -71,7 +71,7 @@ function statusLabel(status: string): string {
 function statusColors(status: string): { bg: string; text: string; border: string } {
   switch (status) {
     case 'new':         return { bg: colors.infoBg,     text: colors.infoLight,    border: colors.infoBorder    };
-    case 'assigned':    return { bg: 'rgba(168,85,247,0.18)', text: '#c084fc', border: 'rgba(168,85,247,0.3)' };
+    case 'assigned':    return { bg: 'rgba(168,85,247,0.18)', text: '#7e22ce', border: 'rgba(168,85,247,0.3)' };
     case 'in-progress': return { bg: colors.warningBg,  text: colors.warningLight, border: colors.warningBorder };
     case 'resolved':
     case 'closed':      return { bg: colors.successBg,  text: colors.successLight, border: colors.successBorder };

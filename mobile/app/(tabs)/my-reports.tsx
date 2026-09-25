@@ -85,7 +85,7 @@ function statusLabel(status: string): string {
 function statusStyle(status: string): { bg: string; text: string; border: string } {
   switch (status) {
     case 'new':         return { bg: colors.infoBg,            text: colors.infoLight,    border: colors.infoBorder    };
-    case 'assigned':    return { bg: 'rgba(168,85,247,0.18)',   text: '#c084fc',           border: 'rgba(168,85,247,0.3)' };
+    case 'assigned':    return { bg: 'rgba(168,85,247,0.18)',   text: '#7e22ce',           border: 'rgba(168,85,247,0.3)' };
     case 'in-progress': return { bg: colors.warningBg,         text: colors.warningLight, border: colors.warningBorder };
     case 'resolved':
     case 'closed':      return { bg: colors.successBg,         text: colors.successLight, border: colors.successBorder };
@@ -746,7 +746,7 @@ const s = StyleSheet.create({
   actionBtnCancelText: {
     fontSize: font.xs,
     fontWeight: font.semibold,
-    color: '#f87171',
+    color: '#b91c1c',
   },
   actionBtnLocked: {
     backgroundColor: 'rgba(156,163,175,0.12)',
@@ -846,7 +846,7 @@ const s = StyleSheet.create({
   infoText: {
     flex: 1,
     fontSize: font.sm,
-    color: '#93c5fd',
+    color: '#2563eb',
     lineHeight: 19,
   },
 

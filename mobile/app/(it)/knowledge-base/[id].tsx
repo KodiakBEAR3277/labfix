@@ -63,12 +63,12 @@ const CATEGORY_ICONS: Record<string, string> = {
 };
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  hardware:    { bg: 'rgba(239,68,68,0.1)',  text: '#f87171', border: 'rgba(239,68,68,0.3)'  },
-  software:    { bg: 'rgba(245,158,11,0.1)', text: '#fbbf24', border: 'rgba(245,158,11,0.3)' },
-  network:     { bg: 'rgba(59,130,246,0.1)', text: '#60a5fa', border: 'rgba(59,130,246,0.3)' },
-  display:     { bg: 'rgba(168,85,247,0.1)', text: '#c084fc', border: 'rgba(168,85,247,0.3)' },
-  peripherals: { bg: 'rgba(16,185,129,0.1)', text: '#34d399', border: 'rgba(16,185,129,0.3)' },
-  general:     { bg: 'rgba(45,212,191,0.1)', text: '#2dd4bf', border: 'rgba(45,212,191,0.3)' },
+  hardware:    { bg: 'rgba(239,68,68,0.1)',  text: '#b91c1c', border: 'rgba(239,68,68,0.3)'  },
+  software:    { bg: 'rgba(245,158,11,0.1)', text: '#b45309', border: 'rgba(245,158,11,0.3)' },
+  network:     { bg: 'rgba(59,130,246,0.1)', text: '#2563eb', border: 'rgba(59,130,246,0.3)' },
+  display:     { bg: 'rgba(168,85,247,0.1)', text: '#7e22ce', border: 'rgba(168,85,247,0.3)' },
+  peripherals: { bg: 'rgba(16,185,129,0.1)', text: '#047857', border: 'rgba(16,185,129,0.3)' },
+  general:     { bg: 'rgba(45,212,191,0.1)', text: '#0d9488', border: 'rgba(45,212,191,0.3)' },
 };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -108,7 +108,7 @@ const ir = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: spacing.xs + 2,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(45,212,191,0.06)',
+    borderBottomColor: 'rgba(0,0,0,0.08)',
   },
   label: { fontSize: font.sm, color: colors.textMuted, flex: 1 },
   value: { flex: 1, alignItems: 'flex-end' },
@@ -424,7 +424,7 @@ export default function ITKBShowScreen() {
           </InfoRow>
 
           <InfoRow label="Not Helpful">
-            <Text style={[s.statValue, { color: '#f87171' }]}>
+            <Text style={[s.statValue, { color: '#b91c1c' }]}>
               👎 {article.not_helpful_count}
             </Text>
           </InfoRow>
@@ -490,7 +490,7 @@ export default function ITKBShowScreen() {
             activeOpacity={0.85}
           >
             {deleting
-              ? <ActivityIndicator size="small" color="#f87171" />
+              ? <ActivityIndicator size="small" color="#b91c1c" />
               : <Text style={s.deleteBtnText}>🗑️ Delete Article</Text>}
           </TouchableOpacity>
         </View>
@@ -633,7 +633,7 @@ const s = StyleSheet.create({
   helpBarTrack: {
     width: 90,
     height: 5,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: 'rgba(0,0,0,0.05)',
     borderRadius: 3,
     overflow: 'hidden',
   },
@@ -679,7 +679,7 @@ const s = StyleSheet.create({
     paddingVertical: spacing.sm + 4,
     alignItems: 'center',
   },
-  deleteBtnText: { fontSize: font.base, fontWeight: font.semibold, color: '#f87171' },
+  deleteBtnText: { fontSize: font.base, fontWeight: font.semibold, color: '#b91c1c' },
   btnDisabled: { opacity: 0.55 },
 
   // Error

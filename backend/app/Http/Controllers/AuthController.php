@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Institution;
+use App\Models\InstitutionRequest;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
@@ -38,15 +38,32 @@ class AuthController extends Controller
         ])->onlyInput('email');
     }
 
-    // Show register page — now served through Inertia/inertia.blade.php
-    public function showRegister()
+    // Show register page — now served through Inertia/inertia.blade.php.
+    // Carries the plan query param through from the pricing page, if any,
+    // so Register.vue can pre-fill and display which plan was picked.
+    public function showRegister(Request $request)
     {
-        return Inertia::render('Auth/Register');
+        return Inertia::render('Auth/Register', [
+            'plan' => $request->query('plan'),
+        ]);
+    }
+
+    // Shown after a "create new institution" submission. No live account
+    // exists yet at this point, so there's nothing to log into — the
+    // request sits pending until a superadmin reviews it.
+    public function showRequestPending()
+    {
+        return Inertia::render('Auth/RequestPending');
     }
 
     // Handle register POST — branches on institution mode:
-    //   'join'   → pick an existing, active institution, becomes a student there
-    //   'create' → registers a brand-new institution, becomes its first admin
+    //   'join'   → pick an existing, active institution, becomes a student
+    //              there immediately, unchanged from before.
+    //   'create' → no longer creates a live institution directly. Files an
+    //              InstitutionRequest for a superadmin to review instead,
+    //              so nobody can spin up an institution (and its own admin
+    //              account) unapproved. The actual creation now only
+    //              happens via InstitutionRequest::approve().
     public function register(Request $request)
     {
         $validated = $request->validate([
@@ -54,6 +71,7 @@ class AuthController extends Controller
             'institution_id'            => ['required_if:mode,join', 'nullable', 'exists:institutions,id'],
             'institution_name'          => ['required_if:mode,create', 'nullable', 'string', 'max:255'],
             'institution_contact_email' => ['nullable', 'string', 'email', 'max:255'],
+            'plan'                      => ['nullable', 'string', 'in:free,standard,pro,enterprise'],
             'first_name'                => ['required', 'string', 'max:255'],
             'last_name'                 => ['required', 'string', 'max:255'],
             'email'                     => ['required', 'string', 'email', 'max:255', 'unique:users'],
@@ -71,25 +89,31 @@ class AuthController extends Controller
             }
 
             $user = $this->createUser($validated, $institution->id, 'student');
-        } else {
-            // Institution, its default settings, and its first admin are all
-            // created together — if any step fails, none should be left
-            // half-created.
-            $user = DB::transaction(function () use ($validated) {
-                $institution = Institution::create([
-                    'name'          => $validated['institution_name'],
-                    'contact_email' => $validated['institution_contact_email'] ?: $validated['email'],
-                ]);
 
-                Setting::seedDefaultsFor($institution->id);
+            Auth::login($user);
 
-                return $this->createUser($validated, $institution->id, 'admin');
-            });
+            return $this->redirectBasedOnRole($user);
         }
 
-        Auth::login($user);
+        // 'create' mode — file a request instead of creating anything live.
+        if (InstitutionRequest::where('email', $validated['email'])->where('status', 'pending')->exists()) {
+            return back()
+                ->withErrors(['email' => 'A request for this email is already pending review.'])
+                ->onlyInput('first_name', 'last_name', 'institution_name', 'institution_contact_email');
+        }
 
-        return $this->redirectBasedOnRole($user);
+        InstitutionRequest::create([
+            'institution_name'          => $validated['institution_name'],
+            'institution_contact_email' => $validated['institution_contact_email'] ?: $validated['email'],
+            'plan'                      => $validated['plan'] ?? null,
+            'first_name'                => $validated['first_name'],
+            'last_name'                 => $validated['last_name'],
+            'email'                     => $validated['email'],
+            'password'                  => Hash::make($validated['password']),
+            'status'                    => 'pending',
+        ]);
+
+        return redirect()->route('register.pending');
     }
 
     private function createUser(array $validated, int $institutionId, string $role): User
