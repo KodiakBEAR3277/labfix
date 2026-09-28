@@ -23,7 +23,37 @@ Route::middleware('auth:sanctum')->group(function () {
     // Auth endpoints
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
-    
+
+    // ── User dashboard (mobile (tabs)/index.tsx) ────────────────────────────
+    Route::get('/dashboard', function () {
+        $user = auth()->user();
+
+        $recentTickets = \App\Models\Report::where('user_id', $user->id)
+            ->with('equipment.lab')
+            ->latest()
+            ->take(5)
+            ->get();
+
+        $stats = [
+            'active' => \App\Models\Report::where('user_id', $user->id)->open()->count(),
+            'resolved_this_month' => \App\Models\Report::where('user_id', $user->id)
+                ->whereIn('status', ['resolved', 'closed'])
+                ->whereHas('transactions', function ($q) {
+                    $q->where('action', 'status_changed')
+                      ->where('new_value', 'resolved')
+                      ->whereMonth('created_at', now()->month)
+                      ->whereYear('created_at', now()->year);
+                })->count(),
+            'total' => \App\Models\Report::where('user_id', $user->id)->count(),
+        ];
+
+        return response()->json([
+            'role'           => $user->role,
+            'stats'          => $stats,
+            'recent_tickets' => $recentTickets,
+        ]);
+    });
+
     // Lab endpoints
     Route::get('/labs', function() {
         return response()->json(\App\Models\Lab::with('equipment')->get());
@@ -35,26 +65,44 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     
     // Ticket endpoints
-    Route::get('/tickets', function() {
+    Route::get('/tickets', function (Request $request) {
         $user = auth()->user();
-        
-        // Return tickets based on role
+
+        // Scope by role (grouped so the OR can't escape other constraints)
         if ($user->role === 'admin') {
-            $tickets = \App\Models\Report::with(['reporter', 'assignedTo', 'equipment.lab'])->get();
+            $query = \App\Models\Report::with(['reporter', 'assignedTo', 'equipment.lab']);
         } elseif ($user->role === 'it-support') {
-            $tickets = \App\Models\Report::where('assigned_to', $user->id)
-                ->orWhereNull('assigned_to')
-                ->with(['reporter', 'equipment.lab'])
-                ->get();
+            $query = \App\Models\Report::where(function ($q) use ($user) {
+                    $q->where('assigned_to', $user->id)->orWhereNull('assigned_to');
+                })
+                ->with(['reporter', 'equipment.lab']);
         } else {
-            $tickets = \App\Models\Report::where('user_id', $user->id)
-                ->with(['assignedTo', 'equipment.lab'])
-                ->get();
+            $query = \App\Models\Report::where('user_id', $user->id)
+                ->with(['assignedTo', 'equipment.lab']);
         }
-        
-        return response()->json($tickets);
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('ticket_number', 'like', "%{$search}%")
+                  ->orWhere('title', 'like', "%{$search}%");
+            });
+        }
+
+        // Mobile filter tabs send: active | resolved | closed
+        if ($request->filled('status') && $request->status !== 'all') {
+            if ($request->status === 'active') {
+                $query->open();
+            } else {
+                $query->where('status', $request->status);
+            }
+        }
+
+        // Paginator JSON already has data, current_page, last_page, total,
+        // from, to, prev_page_url, next_page_url, which my-reports.tsx expects.
+        return response()->json($query->latest()->paginate(10)->withQueryString());
     });
-    
+
     Route::get('/tickets/{id}', function($id) {
         $ticket = \App\Models\Report::with(['reporter', 'assignedTo', 'equipment.lab'])
             ->findOrFail($id);
@@ -285,7 +333,46 @@ Route::middleware('auth:sanctum')->group(function () {
 
             $unassignedCount = \App\Models\Report::whereNull('assigned_to')->open()->count();
 
-            return response()->json(compact('recentTickets', 'priorityAlerts', 'stats', 'unassignedCount'));
+            // avg hours from creation to first assignment, last 7 days
+            $assignedRows = \App\Models\Report::whereDate('created_at', '>=', now()->subDays(7))
+                ->with(['transactions' => fn ($q) => $q->where('action', 'assigned')])
+                ->get();
+            $hours = [];
+            foreach ($assignedRows as $r) {
+                $tx = $r->transactions->first();
+                if ($tx) $hours[] = $r->created_at->diffInHours($tx->created_at);
+            }
+            $stats['avg_response_time'] = count($hours)
+                ? number_format(array_sum($hours) / count($hours), 1)
+                : '0.0';
+
+            // resolved this month / created this month, as a percentage
+            $resolvedThisMonth = \App\Models\Report::where('status', 'resolved')
+                ->whereHas('transactions', function ($q) {
+                    $q->where('action', 'status_changed')->where('new_value', 'resolved')
+                      ->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year);
+                })->count();
+            $createdThisMonth = \App\Models\Report::whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year)->count();
+            $stats['team_satisfaction'] = $createdThisMonth > 0
+                ? round(($resolvedThisMonth / $createdThisMonth) * 100)
+                : 0;
+
+            // last 3 resolutions: [{ ticket_number, resolved_at }]
+            $recentResolved = \App\Models\TicketTransaction::with('ticket')
+                ->where('action', 'status_changed')
+                ->where('new_value', 'resolved')
+                ->latest('created_at')
+                ->take(3)
+                ->get()
+                ->filter(fn ($t) => $t->ticket)
+                ->map(fn ($t) => [
+                    'ticket_number' => $t->ticket->ticket_number,
+                    'resolved_at'   => $t->created_at->diffForHumans(),
+                ])
+                ->values();
+
+            return response()->json(compact('recentTickets', 'priorityAlerts', 'stats', 'unassignedCount', 'recentResolved'));
         });
 
         // Ticket queue
