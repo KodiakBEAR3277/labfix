@@ -31,6 +31,13 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    // Mobile screens read reporter.full_name, author.full_name and similar,
+    // so these accessors need to be part of the JSON, not just PHP properties.
+    protected $appends = [
+        'full_name',
+        'initials',
+    ];
+
     protected function casts(): array
     {
         return [

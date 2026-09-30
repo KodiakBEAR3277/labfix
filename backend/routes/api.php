@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Models\Setting;
 use App\Models\VoiceReport;
+use App\Support\ProfileRules;
 
 // Public API routes
 Route::post('/login', [AuthController::class, 'login']);
@@ -19,6 +20,36 @@ Route::get('/contact-info', function () {
 
 // Protected API routes (require token)
 Route::middleware('auth:sanctum')->group(function () {
+
+    // ── Shared shaping helpers ──────────────────────────────────────────────
+    // Laravel serialises the assignedTo relation under the key "assigned_to",
+    // which overwrites the assigned_to id column. The mobile screens expect the
+    // numeric id under assigned_to and the person under assigned_to_user.
+    $shapeTicket = function ($ticket) {
+        $data = $ticket->toArray();
+        $data['assigned_to_user'] = ($ticket->relationLoaded('assignedTo') && $ticket->assignedTo)
+            ? $ticket->assignedTo->toArray()
+            : null;
+        $data['assigned_to'] = $ticket->getAttribute('assigned_to');
+        return $data;
+    };
+
+    // Same shape for GET and PUT /profile so the screen can trust either.
+    $profileShape = fn ($user) => [
+        'id'                  => $user->id,
+        'first_name'          => $user->first_name,
+        'last_name'           => $user->last_name,
+        'full_name'           => $user->full_name,
+        'initials'            => $user->initials,
+        'email'               => $user->email,
+        'role'                => $user->role,
+        'phone'               => $user->phone,
+        'student_staff_id'    => $user->student_staff_id,
+        'email_notifications' => $user->email_notifications,
+        'is_active'           => $user->is_active,
+        'can_submit_tickets'  => $user->can_submit_tickets,
+        'created_at'          => $user->created_at,
+    ];
     
     // Auth endpoints
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -65,7 +96,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     
     // Ticket endpoints
-    Route::get('/tickets', function (Request $request) {
+    Route::get('/tickets', function (Request $request) use ($shapeTicket) {
         $user = auth()->user();
 
         // Scope by role (grouped so the OR can't escape other constraints)
@@ -100,14 +131,19 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Paginator JSON already has data, current_page, last_page, total,
         // from, to, prev_page_url, next_page_url, which my-reports.tsx expects.
-        return response()->json($query->latest()->paginate(10)->withQueryString());
+        return response()->json($query->latest()->paginate(10)->withQueryString()->through($shapeTicket));
     });
 
-    Route::get('/tickets/{id}', function($id) {
-        $ticket = \App\Models\Report::with(['reporter', 'assignedTo', 'equipment.lab'])
-            ->findOrFail($id);
-        
-        return response()->json($ticket);
+    Route::get('/tickets/{id}', function ($id) use ($shapeTicket) {
+        $user  = auth()->user();
+        $query = \App\Models\Report::with(['reporter', 'assignedTo', 'equipment.lab', 'transactions.user']);
+
+        // Students and staff can only open their own tickets
+        if (!in_array($user->role, ['admin', 'it-support'])) {
+            $query->where('user_id', $user->id);
+        }
+
+        return response()->json($shapeTicket($query->findOrFail($id)));
     });
     
     Route::post('/tickets', function(\Illuminate\Http\Request $request) {
@@ -171,41 +207,30 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // ── Profile ──────────────────────────────────────────────────────────────
 
-    Route::get('/profile', function () {
-        $user = auth()->user();
-        return response()->json([
-            'user' => [
-                'id'                  => $user->id,
-                'first_name'          => $user->first_name,
-                'last_name'           => $user->last_name,
-                'full_name'           => $user->full_name,
-                'initials'            => $user->initials,
-                'email'               => $user->email,
-                'role'                => $user->role,
-                'phone'               => $user->phone,
-                'student_staff_id'    => $user->student_staff_id,
-                'email_notifications' => $user->email_notifications,
-                'is_active'           => $user->is_active,
-                'can_submit_tickets'  => $user->can_submit_tickets,
-                'created_at'          => $user->created_at,
-            ],
-        ]);
+    Route::get('/profile', function () use ($profileShape) {
+        return response()->json(['user' => $profileShape(auth()->user())]);
     });
 
-    Route::put('/profile', function (Request $request) {
+    Route::put('/profile', function (Request $request) use ($profileShape) {
         $user = auth()->user();
 
+        ProfileRules::normalize($request);
+
         $validated = $request->validate([
-            'first_name'       => ['required', 'string', 'max:255'],
-            'last_name'        => ['required', 'string', 'max:255'],
+            'first_name'       => ProfileRules::name(),
+            'last_name'        => ProfileRules::name(),
             'email'            => ['required', 'string', 'email', 'max:255', \Illuminate\Validation\Rule::unique('users')->ignore($user->id)],
-            'phone'            => ['nullable', 'string', 'max:20'],
-            'student_staff_id' => ['nullable', 'string', 'max:50'],
-        ]);
+            'phone'            => ProfileRules::phone(),
+            'student_staff_id' => ProfileRules::studentId(),
+        ], ProfileRules::messages());
 
         $user->update($validated);
 
-        return response()->json(['message' => 'Profile updated successfully']);
+        // Return the saved user so the screen can refresh without a second request
+        return response()->json([
+            'message' => 'Profile updated successfully',
+            'user'    => $profileShape($user->fresh()),
+        ]);
     });
 
     Route::put('/profile/password', function (Request $request) {
@@ -313,7 +338,17 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // ── IT zone (role:it-support,admin) ─────────────────────────────────────
-    Route::middleware('role:it-support,admin')->prefix('it')->group(function () {
+    Route::middleware('role:it-support,admin')->prefix('it')->group(function () use ($shapeTicket) {
+
+        // One full ticket, shaped for mobile. $mineOnly limits it to tickets
+        // assigned to the caller (used by the assignments screens).
+        $itTicket = function ($id, $mineOnly = false) use ($shapeTicket) {
+            $query = \App\Models\Report::with(['reporter', 'assignedTo', 'equipment.lab', 'transactions.user']);
+            if ($mineOnly) {
+                $query->where('assigned_to', auth()->id());
+            }
+            return $shapeTicket($query->findOrFail($id));
+        };
 
         Route::get('/dashboard', function () {
             $recentTickets = \App\Models\Report::with(['reporter', 'equipment.lab'])->latest()->take(10)->get();
@@ -376,7 +411,7 @@ Route::middleware('auth:sanctum')->group(function () {
         });
 
         // Ticket queue
-        Route::get('/queue', function (Request $request) {
+        Route::get('/queue', function (Request $request) use ($shapeTicket) {
             $query = \App\Models\Report::with(['reporter', 'assignedTo', 'equipment.lab']);
 
             if ($request->filled('search')) {
@@ -391,7 +426,7 @@ Route::middleware('auth:sanctum')->group(function () {
                 $query->whereHas('equipment.lab', fn ($q) => $q->where('name', $request->lab));
             }
 
-            $tickets = $query->latest()->paginate(10)->withQueryString();
+            $tickets = $query->latest()->paginate(10)->withQueryString()->through($shapeTicket);
 
             $stats = [
                 'open'          => \App\Models\Report::open()->count(),
@@ -406,12 +441,11 @@ Route::middleware('auth:sanctum')->group(function () {
             return response()->json(compact('tickets', 'stats', 'itStaff', 'labs'));
         });
 
-        Route::get('/queue/{id}', function ($id) {
-            $ticket = \App\Models\Report::with(['reporter', 'assignedTo', 'equipment.lab', 'transactions.user'])->findOrFail($id);
-            return response()->json(compact('ticket'));
+        Route::get('/queue/{id}', function ($id) use ($itTicket) {
+            return response()->json($itTicket($id));
         });
 
-        Route::put('/queue/{id}', function (Request $request, $id) {
+        Route::put('/queue/{id}', function (Request $request, $id) use ($itTicket) {
             $ticket = \App\Models\Report::findOrFail($id);
 
             $validated = $request->validate([
@@ -456,17 +490,17 @@ Route::middleware('auth:sanctum')->group(function () {
                 ]);
             }
 
-            return response()->json(['message' => 'Ticket updated successfully!']);
+            return response()->json($itTicket($ticket->id));
         });
 
-        Route::post('/queue/{id}/assign-self', function ($id) {
+        Route::post('/queue/{id}/assign-self', function ($id) use ($itTicket) {
             $ticket = \App\Models\Report::findOrFail($id);
             $ticket->update([
                 'assigned_to' => auth()->id(),
                 'status'      => 'assigned',
                 'assigned_at' => $ticket->assigned_at ?? now(),
             ]);
-            return response()->json(['message' => 'Ticket assigned to you!']);
+            return response()->json($itTicket($ticket->id));
         });
 
         // My assignments
@@ -492,13 +526,11 @@ Route::middleware('auth:sanctum')->group(function () {
             return response()->json(compact('tickets', 'stats'));
         });
 
-        Route::get('/assignments/{id}', function ($id) {
-            $ticket = \App\Models\Report::where('assigned_to', auth()->id())
-                ->with(['reporter', 'equipment.lab', 'transactions.user'])->findOrFail($id);
-            return response()->json(compact('ticket'));
+        Route::get('/assignments/{id}', function ($id) use ($itTicket) {
+            return response()->json($itTicket($id, true));
         });
 
-        Route::put('/assignments/{id}', function (Request $request, $id) {
+        Route::put('/assignments/{id}', function (Request $request, $id) use ($itTicket) {
             $ticket = \App\Models\Report::where('assigned_to', auth()->id())->findOrFail($id);
 
             $validated = $request->validate([
@@ -528,7 +560,7 @@ Route::middleware('auth:sanctum')->group(function () {
                 ]);
             }
 
-            return response()->json(['message' => 'Ticket updated successfully!']);
+            return response()->json($itTicket($ticket->id, true));
         });
 
         // Knowledge base management

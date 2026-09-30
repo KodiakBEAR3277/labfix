@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
+use App\Support\ProfileRules;
 
 class ProfileController extends Controller
 {
@@ -29,13 +30,15 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
 
+        ProfileRules::normalize($request);
+
         $validated = $request->validate([
-            'first_name' => ['required', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
+            'first_name' => ProfileRules::name(),
+            'last_name' => ProfileRules::name(),
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
-            'phone' => ['nullable', 'string', 'max:20'],
-            'student_staff_id' => ['nullable', 'string', 'max:50'],
-        ]);
+            'phone' => ProfileRules::phone(),
+            'student_staff_id' => ProfileRules::studentId(),
+        ], ProfileRules::messages());
 
         $user->update($validated);
 
