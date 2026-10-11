@@ -72,6 +72,11 @@ function isActivePrefix(prefix) {
         System Settings
       </Link>
 
+      <div v-if="institution" class="plan-badge">
+        <span>{{ institution.plan }} plan</span>
+        <Link href="/admin/upgrade" class="plan-badge-upgrade">Upgrade</Link>
+      </div>
+
       <Link href="/profile" class="user-profile">
         <div class="user-avatar">{{ user?.initials ?? 'AD' }}</div>
         <span>{{ user?.first_name ?? 'Admin' }} {{ user?.last_name ?? '' }}</span>

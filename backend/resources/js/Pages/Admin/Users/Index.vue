@@ -6,12 +6,21 @@
 import AppLayout from '../../../Layouts/AppLayout.vue'
 import NavAdmin from '../../../Components/Nav/NavAdmin.vue'
 import { Link, router } from '@inertiajs/vue3'
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 
 const props = defineProps({
-  users:   Object,
-  stats:   Object,
-  filters: Object,
+  users:      Object,
+  stats:      Object,
+  filters:    Object,
+  planLimits: Object,
+})
+
+// null max = unlimited. Mirrors Institution::canAddUser() on the backend —
+// this only controls the button's state and a friendlier message; the
+// real guard is server-side.
+const usersAtLimit = computed(() => {
+  const u = props.planLimits?.users
+  return !!u && u.max !== null && u.current >= u.max
 })
 
 // ── Filters ───────────────────────────────────────────────────────────────────
@@ -42,12 +51,6 @@ function roleBadgeClass(r) {
 function roleLabel(r) {
   return r.replace('-', ' ').replace(/\b\w/g, c => c.toUpperCase())
 }
-
-// function deleteUser(id, name) {
-//   if (confirm(`Are you sure you want to delete "${name}"? This action cannot be undone!`)) {
-//     router.delete(`/admin/users/${id}`)
-//   }
-// }
 </script>
 
 <template>
@@ -56,12 +59,26 @@ function roleLabel(r) {
 
     <div class="container">
 
+      <div v-if="planLimits" class="filter-bar" style="justify-content:space-between;align-items:center;">
+        <span style="color:var(--color-text-secondary);font-size:0.9rem;">
+          <strong style="color:var(--color-primary-dark);">{{ planLimits.plan }} plan</strong>
+          &nbsp;·&nbsp; Users: {{ planLimits.users.current }}/{{ planLimits.users.max ?? '∞' }}
+        </span>
+        <a href="/admin/upgrade" class="view-all-link">Upgrade →</a>
+      </div>
+
       <div class="page-header">
         <div>
           <h1>User Management</h1>
           <p style="color:#9ca3af;">Manage all registered users and their roles</p>
         </div>
-        <Link href="/admin/users/create" class="btn btn-primary">+ Add New User</Link>
+        <Link v-if="!usersAtLimit" href="/admin/users/create" class="btn btn-primary">+ Add New User</Link>
+        <span
+          v-else
+          class="btn btn-primary"
+          style="opacity:0.5;cursor:not-allowed;"
+          title="User limit reached for your plan — upgrade to add more."
+        >+ Add New User</span>
       </div>
 
       <!-- Stats -->

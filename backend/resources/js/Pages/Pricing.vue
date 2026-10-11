@@ -21,6 +21,7 @@ const annual = ref(false)
 const tiers = [
   {
     name: 'Free',
+    slug: 'free',
     monthly: 0,
     annualMonthly: 0,
     tagline: 'Forever',
@@ -37,6 +38,7 @@ const tiers = [
   },
   {
     name: 'Standard',
+    slug: 'standard',
     monthly: 19,
     annualMonthly: 15,
     tagline: 'Per institution, per month',
@@ -54,6 +56,7 @@ const tiers = [
   },
   {
     name: 'Pro',
+    slug: 'pro',
     monthly: 49,
     annualMonthly: 39,
     tagline: 'Per institution, per month',
@@ -70,6 +73,7 @@ const tiers = [
   },
   {
     name: 'Enterprise',
+    slug: 'enterprise',
     monthly: null,
     annualMonthly: null,
     tagline: 'Custom',
@@ -188,7 +192,7 @@ function cardStyle(tier) {
             </ul>
 
             <Link
-              :href="tier.cta === 'Contact us' ? '/contact' : '/register'"
+              :href="tier.cta === 'Contact us' ? '/contact' : `/register?plan=${tier.slug}`"
               :class="tier.highlight ? 'btn-primary' : 'btn-secondary'"
               style="display: block; text-align: center; text-decoration: none;"
             >

@@ -12,6 +12,12 @@ class EquipmentController extends Controller
     // Store new equipment
     public function store(Request $request)
     {
+        if (!auth()->user()->institution->canAddEquipment()) {
+            return redirect()
+                ->route('admin.labs.index')
+                ->with('error', "You've reached your plan's equipment limit. Upgrade to add more.");
+        }
+
         $validated = $request->validate([
             'lab_id' => ['required', 'exists:labs,id'],
             'equipment_code' => ['required', 'string', 'max:50'],

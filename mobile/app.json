@@ -11,8 +11,7 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSSpeechRecognitionUsageDescription": "Allow LabFix to use speech recognition to fill in your ticket report.",
-        "NSMicrophoneUsageDescription": "Allow LabFix to use the microphone to dictate your ticket report."
+        "NSMicrophoneUsageDescription": "Allow LabFix to use the microphone to record voice messages for your ticket reports."
       }
     },
     "android": {
@@ -25,7 +24,6 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "permissions": [
-        "android.permission.RECORD_AUDIO",
         "android.permission.RECORD_AUDIO"
       ],
       "package": "com.kodiakbear3277.mobile"
@@ -52,16 +50,6 @@
         }
       ],
       "expo-secure-store",
-      [
-        "expo-speech-recognition",
-        {
-          "microphonePermission": "Allow LabFix to use the microphone to dictate your ticket report.",
-          "speechRecognitionPermission": "Allow LabFix to use speech recognition to fill in your ticket report.",
-          "androidSpeechServicePackages": [
-            "com.google.android.googlequicksearchbox"
-          ]
-        }
-      ],
       "expo-font",
       "expo-web-browser"
     ],

@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => CheckRole::class,
             'maintenance.check' => CheckMaintenanceMode::class,
             'superadmin' => EnsureIsSuperAdmin::class,
+            'institution.active' => EnsureInstitutionIsActive::class,
         ]);
         $middleware->web(append: [
             EnsureInstitutionIsActive::class,

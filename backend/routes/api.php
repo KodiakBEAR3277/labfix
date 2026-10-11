@@ -4,7 +4,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Models\Setting;
-use App\Models\VoiceReport;
 use App\Support\ProfileRules;
 
 // Public API routes
@@ -19,7 +18,7 @@ Route::get('/contact-info', function () {
 });
 
 // Protected API routes (require token)
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'institution.active'])->group(function () {
 
     // ── Shared shaping helpers ──────────────────────────────────────────────
     // Laravel serialises the assignedTo relation under the key "assigned_to",
@@ -317,26 +316,6 @@ Route::middleware('auth:sanctum')->group(function () {
         return response()->json(['message' => 'Thank you for your feedback!']);
     });
 
-    // Voice dictation audit log — fired after each field-level dictation
-    // completes on the mobile report form. Fire-and-forget from the
-    // client's perspective: this only records what was said for the
-    // audit trail, it never blocks or changes what ends up in the ticket.
-    Route::post('/reports/voice-log', function (Request $request) {
-        $validated = $request->validate([
-            'field'      => ['required', 'in:title,description'],
-            'transcript' => ['required', 'string', 'max:2000'],
-        ]);
-
-        VoiceReport::create([
-            'user_id'                => auth()->id(),
-            'transcript'             => $validated['transcript'],
-            'extracted_title'        => $validated['field'] === 'title' ? $validated['transcript'] : null,
-            'extracted_description'  => $validated['field'] === 'description' ? $validated['transcript'] : null,
-        ]);
-
-        return response()->json(['status' => 'logged']);
-    });
-
     // ── IT zone (role:it-support,admin) ─────────────────────────────────────
     Route::middleware('role:it-support,admin')->prefix('it')->group(function () use ($shapeTicket) {
 
@@ -611,8 +590,11 @@ Route::middleware('auth:sanctum')->group(function () {
         });
 
         Route::get('/articles/{id}', function ($id) {
+            // Unwrapped, not compact('article') — the mobile Article type
+            // reads fields straight off the response (article.category, not
+            // article.article.category), same as the show and edit screens.
             $article = \App\Models\Article::with('author')->findOrFail($id);
-            return response()->json(compact('article'));
+            return response()->json($article);
         });
 
         Route::put('/articles/{id}', function (Request $request, $id) {

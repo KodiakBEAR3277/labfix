@@ -7,24 +7,13 @@
  *   Step 1 — Lab Location    (tap a lab card to select)
  *   Step 2 — Equipment       (dropdown, fetched from GET /api/labs/{id}/equipment)
  *   Step 3 — Problem Type    (category grid)
- *   Step 4 — Description     (title + description text inputs, each with its own mic button)
+ *   Step 4 — Description     (title + description text inputs)
  *   Step 5 — Review & Submit (summary card, then POST /api/tickets)
  *
  * API:
  *   GET  /api/labs                    → list of active labs (auth required)
  *   GET  /api/labs/{id}/equipment     → equipment for selected lab
  *   POST /api/tickets                 → create ticket
- *   POST /api/reports/voice-log       → logs a per-field transcript for the audit
- *                                        trail; fire-and-forget, never blocks the UI
- *
- * Voice dictation:
- *   Lives on Step 4, one mic button per field. Tapping a field's mic starts
- *   listening and streams live partial results straight into that field's
- *   own TextInput — there is no separate review modal, since the TextInput
- *   itself is already the place to look at and edit what was heard. Tapping
- *   the mic again stops listening. Only one field can be dictated to at a
- *   time; the other field's mic button is disabled meanwhile. Each finished
- *   dictation is logged to the backend afterward, without blocking the form.
  *
  * Maintenance mode:
  *   If GET /api/dashboard returns a maintenance flag (or a dedicated endpoint),
@@ -59,10 +48,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
-import {
-  ExpoSpeechRecognitionModule,
-  useSpeechRecognitionEvent,
-} from 'expo-speech-recognition';
 import { colors, spacing, radius, font } from '@/constants/theme';
 import { loadAuth } from '@/utils/auth';
 import { apiUrl } from '@/constants/api';
@@ -286,36 +271,6 @@ function StepNav({
   );
 }
 
-// Small inline mic button used on Step 4, one per field. Toggles between
-// idle and listening; the parent owns which field (if any) is active so
-// only one dictation can run at a time — the other field's button just
-// disables itself rather than trying to interrupt an in-progress one.
-function FieldMicButton({
-  field,
-  activeField,
-  onStart,
-  onStop,
-}: {
-  field: 'title' | 'description';
-  activeField: 'title' | 'description' | null;
-  onStart: () => void;
-  onStop: () => void;
-}) {
-  const isActive   = activeField === field;
-  const isDisabled = activeField !== null && !isActive;
-
-  return (
-    <TouchableOpacity
-      style={[s.fieldMicBtn, isActive && s.fieldMicBtnActive, isDisabled && s.fieldMicBtnDisabled]}
-      onPress={isActive ? onStop : onStart}
-      disabled={isDisabled}
-      activeOpacity={0.8}
-    >
-      <Text style={s.fieldMicIcon}>{isActive ? '⏹' : '🎙️'}</Text>
-    </TouchableOpacity>
-  );
-}
-
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function ReportScreen() {
@@ -342,16 +297,6 @@ export default function ReportScreen() {
     description:  '',
   });
 
-  // ── Voice dictation state ──────────────────────────────────────────────────
-  // Which field (if any) is currently being dictated to. Refs mirror the
-  // active field and its running transcript so the 'end' event can always
-  // read the latest values even if it fires before this render's state
-  // has settled.
-  const [activeVoiceField, setActiveVoiceField] = useState<'title' | 'description' | null>(null);
-  const [voiceFieldError,  setVoiceFieldError]  = useState('');
-  const activeVoiceFieldRef      = useRef<'title' | 'description' | null>(null);
-  const activeFieldTranscriptRef = useRef('');
-
   useFocusEffect(
     useCallback(() => {
       // 1. Reset step wizard back to the beginning
@@ -373,15 +318,6 @@ export default function ReportScreen() {
         title: '',
         description: '',
       });
-
-      // 5. Stop any in-progress dictation from a previous visit
-      if (activeVoiceFieldRef.current) {
-        ExpoSpeechRecognitionModule.stop();
-      }
-      activeVoiceFieldRef.current = null;
-      activeFieldTranscriptRef.current = '';
-      setActiveVoiceField(null);
-      setVoiceFieldError('');
     }, [])
   );
 
@@ -493,83 +429,6 @@ export default function ReportScreen() {
     setErrors(e);
     return Object.keys(e).length === 0;
   }
-
-  // ── Voice dictation ───────────────────────────────────────────────────────
-
-  async function startFieldDictation(field: 'title' | 'description') {
-    if (activeVoiceFieldRef.current) return; // a dictation is already running
-
-    setVoiceFieldError('');
-
-    try {
-      const result = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
-      if (!result.granted) {
-        Alert.alert(
-          'Microphone Needed',
-          'Allow microphone access to dictate, or type your report instead.'
-        );
-        return;
-      }
-    } catch {
-      Alert.alert(
-        'Microphone Unavailable',
-        'Could not access the microphone. You can type your report instead.'
-      );
-      return;
-    }
-
-    activeVoiceFieldRef.current = field;
-    activeFieldTranscriptRef.current = '';
-    setActiveVoiceField(field);
-
-    ExpoSpeechRecognitionModule.start({
-      lang: 'en-US',
-      interimResults: true,
-      continuous: false,
-    });
-  }
-
-  function stopFieldDictation() {
-    ExpoSpeechRecognitionModule.stop();
-  }
-
-  // Fire-and-forget audit log — this never blocks or affects the field
-  // itself, it just records what was said for later review.
-  function logVoiceTranscript(field: 'title' | 'description', transcript: string) {
-    if (!token || !transcript.trim()) return;
-    fetch(apiUrl('reports/voice-log'), {
-      method:  'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept':        'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify({ field, transcript }),
-    }).catch(() => {/* audit-only — a failed log should never bother the user */});
-  }
-
-  useSpeechRecognitionEvent('result', (event) => {
-    const field = activeVoiceFieldRef.current;
-    if (!field) return;
-    const text = event.results?.[0]?.transcript ?? '';
-    activeFieldTranscriptRef.current = text;
-    setForm((f) => ({ ...f, [field]: text }));
-    if (errors[field]) setErrors((e) => ({ ...e, [field]: undefined }));
-  });
-
-  useSpeechRecognitionEvent('end', () => {
-    const field      = activeVoiceFieldRef.current;
-    const transcript = activeFieldTranscriptRef.current;
-    if (field) logVoiceTranscript(field, transcript);
-    activeVoiceFieldRef.current = null;
-    setActiveVoiceField(null);
-  });
-
-  useSpeechRecognitionEvent('error', () => {
-    activeVoiceFieldRef.current = null;
-    setActiveVoiceField(null);
-    setVoiceFieldError('Could not hear you clearly — try again.');
-  });
 
   // ── Submit ────────────────────────────────────────────────────────────────
 
@@ -942,15 +801,7 @@ export default function ReportScreen() {
 
                 {/* Title field */}
                 <View style={s.fieldGroup}>
-                  <View style={s.fieldLabelRow}>
-                    <Text style={s.fieldLabel}>Issue Title *</Text>
-                    <FieldMicButton
-                      field="title"
-                      activeField={activeVoiceField}
-                      onStart={() => startFieldDictation('title')}
-                      onStop={stopFieldDictation}
-                    />
-                  </View>
+                  <Text style={s.fieldLabel}>Issue Title *</Text>
                   <TextInput
                     style={[s.input, !!errors.title && s.inputError]}
                     value={form.title}
@@ -958,31 +809,19 @@ export default function ReportScreen() {
                       setForm((f) => ({ ...f, title: v }));
                       if (errors.title) setErrors((e) => ({ ...e, title: undefined }));
                     }}
-                    placeholder="Brief description, or tap the mic to dictate"
+                    placeholder="Brief description of the problem"
                     placeholderTextColor={colors.textDisabled}
                     returnKeyType="next"
                     maxLength={255}
                     editable={!submitting}
                   />
                   <FieldError message={errors.title} />
-                  {activeVoiceField === 'title' ? (
-                    <Text style={s.listeningHint}>🔴 Listening…</Text>
-                  ) : (
-                    <Text style={s.charCount}>{form.title.length}/255</Text>
-                  )}
+                  <Text style={s.charCount}>{form.title.length}/255</Text>
                 </View>
 
                 {/* Description field */}
                 <View style={s.fieldGroup}>
-                  <View style={s.fieldLabelRow}>
-                    <Text style={s.fieldLabel}>Detailed Description *</Text>
-                    <FieldMicButton
-                      field="description"
-                      activeField={activeVoiceField}
-                      onStart={() => startFieldDictation('description')}
-                      onStop={stopFieldDictation}
-                    />
-                  </View>
+                  <Text style={s.fieldLabel}>Detailed Description *</Text>
                   <TextInput
                     style={[s.input, s.textArea, !!errors.description && s.inputError]}
                     value={form.description}
@@ -990,7 +829,7 @@ export default function ReportScreen() {
                       setForm((f) => ({ ...f, description: v }));
                       if (errors.description) setErrors((e) => ({ ...e, description: undefined }));
                     }}
-                    placeholder="Describe the issue in detail, or tap the mic to dictate. What happened? When did it start? What have you already tried?"
+                    placeholder="Describe the issue in detail. What happened? When did it start? What have you already tried?"
                     placeholderTextColor={colors.textDisabled}
                     multiline
                     textAlignVertical="top"
@@ -998,21 +837,13 @@ export default function ReportScreen() {
                     editable={!submitting}
                   />
                   <FieldError message={errors.description} />
-                  {activeVoiceField === 'description' ? (
-                    <Text style={s.listeningHint}>🔴 Listening…</Text>
-                  ) : (
-                    <Text style={s.charCount}>
-                      {form.description.length} chars
-                      {form.description.length < 10 && form.description.length > 0
-                        ? ` (${10 - form.description.length} more needed)`
-                        : ''}
-                    </Text>
-                  )}
+                  <Text style={s.charCount}>
+                    {form.description.length} chars
+                    {form.description.length < 10 && form.description.length > 0
+                      ? ` (${10 - form.description.length} more needed)`
+                      : ''}
+                  </Text>
                 </View>
-
-                {!!voiceFieldError && (
-                  <Text style={s.voiceFieldErrorText}>{voiceFieldError}</Text>
-                )}
 
                 {/* Tips card */}
                 <View style={s.tipsCard}>
@@ -1188,7 +1019,7 @@ const s = StyleSheet.create({
     padding: spacing.sm + 2,
   },
   errorBannerText: {
-    color: '#b91c1c',
+    color: '#fca5a5',
     fontSize: font.sm,
     lineHeight: 19,
   },
@@ -1362,45 +1193,6 @@ const s = StyleSheet.create({
     paddingVertical: spacing.md,
   },
 
-  // ── Voice dictation (Step 4, per-field) ───────────────────────────────────
-  fieldLabelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  fieldMicBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: radius.full,
-    backgroundColor: colors.primaryLight,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  fieldMicBtnActive: {
-    backgroundColor: colors.dangerBg,
-    borderColor: colors.dangerBorder,
-  },
-  fieldMicBtnDisabled: {
-    opacity: 0.35,
-  },
-  fieldMicIcon: {
-    fontSize: 15,
-  },
-  listeningHint: {
-    fontSize: font.sm,
-    color: colors.danger,
-    fontWeight: font.semibold,
-    marginTop: spacing.xs,
-  },
-  voiceFieldErrorText: {
-    fontSize: font.sm,
-    color: colors.danger,
-    marginTop: -spacing.sm,
-    marginBottom: spacing.md,
-  },
-
   // ── Category grid ─────────────────────────────────────────────────────────
   catGrid: {
     flexDirection: 'row',
@@ -1524,7 +1316,7 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(239,68,68,0.05)',
   },
   fieldError: {
-    color: '#b91c1c',
+    color: '#f87171',
     fontSize: font.xs,
     marginTop: spacing.xs - 2,
   },
@@ -1546,12 +1338,12 @@ const s = StyleSheet.create({
   tipsTitle: {
     fontSize: font.sm,
     fontWeight: font.semibold,
-    color: '#2563eb',
+    color: '#60a5fa',
     marginBottom: spacing.xs - 2,
   },
   tipItem: {
     fontSize: font.xs,
-    color: '#2563eb',
+    color: '#93c5fd',
     lineHeight: 18,
   },
 
@@ -1570,7 +1362,7 @@ const s = StyleSheet.create({
     alignItems: 'flex-start',
     paddingVertical: spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.08)',
+    borderBottomColor: 'rgba(45,212,191,0.07)',
     gap: spacing.sm,
   },
   reviewRowDesc: {
@@ -1597,7 +1389,7 @@ const s = StyleSheet.create({
 
   // ── Next steps info card ──────────────────────────────────────────────────
   nextStepsCard: {
-    backgroundColor: 'rgba(0,0,0,0.08)',
+    backgroundColor: 'rgba(45,212,191,0.06)',
     borderWidth: 1,
     borderColor: 'rgba(45,212,191,0.2)',
     borderRadius: radius.lg,

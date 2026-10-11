@@ -63,6 +63,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('superadmin')->name('superadmin.')->middleware(['auth', 'superadmin'])->group(function () {
         Route::get('/institutions', [SuperAdminInstitutionController::class, 'index'])->name('institutions.index');
         Route::post('/institutions/{institution}/toggle-status', [SuperAdminInstitutionController::class, 'toggleStatus'])->name('institutions.toggle-status');
+        Route::post('/institutions/{institution}/plan', [SuperAdminInstitutionController::class, 'updatePlan'])->name('institutions.update-plan');
         Route::get('/settings', [\App\Http\Controllers\SuperAdmin\SettingsController::class, 'index'])->name('settings');
         Route::post('/settings/update', [\App\Http\Controllers\SuperAdmin\SettingsController::class, 'update'])->name('settings.update');
         Route::get('/requests', [\App\Http\Controllers\SuperAdmin\RequestController::class, 'index'])->name('requests.index');
@@ -107,6 +108,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
         Route::post('/settings/update', [SettingsController::class, 'update'])->name('settings.update');
+        Route::get('/upgrade', [\App\Http\Controllers\Admin\UpgradeController::class, 'index'])->name('upgrade');
         
         // User management
         Route::resource('users', AdminUserController::class);

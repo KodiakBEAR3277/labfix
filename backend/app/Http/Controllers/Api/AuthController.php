@@ -25,6 +25,12 @@ class AuthController extends Controller
             ]);
         }
 
+        if ($user->institution_id && $user->institution && !$user->institution->is_active) {
+            throw ValidationException::withMessages([
+                'email' => ['This institution has been deactivated. Please contact LabFix support.'],
+            ]);
+        }
+
         // Delete old tokens for this user
         $user->tokens()->delete();
 

@@ -27,12 +27,17 @@ const planLabels = {
   enterprise: 'Enterprise',
 }
 
+// Arriving with a plan already picked (from the Pricing page) only makes
+// sense for someone creating a new institution — nobody "joins" a school
+// after choosing a plan. Default to 'create' in that case so the toggle
+// reflects the path they actually came in on, instead of always landing
+// on 'join' and leaving the plan banner orphaned above a hidden form.
 const form = useForm({
-  mode: 'join',
+  mode: props.plan ? 'create' : 'join',
   institution_id: null,
   institution_name: '',
   institution_contact_email: '',
-  plan: props.plan ?? null,
+  plan: planLabels[props.plan] ? props.plan : 'free',
   first_name: '',
   last_name: '',
   email: '',
@@ -148,22 +153,19 @@ function submit() {
           </button>
         </div>
 
-        <div
-          v-if="form.mode === 'create' && form.plan"
-          style="display:flex;align-items:center;justify-content:space-between;background:rgba(45,212,191,0.1);border:1px solid rgba(45,212,191,0.3);border-radius:8px;padding:0.75rem 1rem;margin-bottom:1.5rem;"
-        >
-          <span style="color:#2dd4bf;font-size:0.9rem;">
-            Signing up for the <strong>{{ planLabels[form.plan] ?? form.plan }}</strong> plan
-          </span>
-          <Link href="/pricing" style="color:#9ca3af;font-size:0.85rem;text-decoration:underline;">Change plan</Link>
-        </div>
-
-        <div
-          v-else-if="form.mode === 'create'"
-          style="font-size:0.85rem;color:#9ca3af;margin-bottom:1.5rem;"
-        >
-          Want to compare plans first?
-          <Link href="/pricing" style="color:#2dd4bf;text-decoration:underline;">View pricing</Link>
+        <!-- Plan picker: creating an institution always records a plan. Arriving
+             from /pricing pre-selects it; arriving directly defaults to Free. -->
+        <div v-if="form.mode === 'create'" class="auth-form-group">
+          <label for="plan">Plan</label>
+          <select id="plan" v-model="form.plan">
+            <option v-for="(label, slug) in planLabels" :key="slug" :value="slug">{{ label }}</option>
+          </select>
+          <p class="help-text">
+            Not sure?
+            <Link href="/pricing" style="color:#2dd4bf;text-decoration:underline;">Compare plans</Link>
+            — you can change plan later by contacting us.
+          </p>
+          <span v-if="form.errors.plan" class="text-danger">{{ form.errors.plan }}</span>
         </div>
 
         <form @submit.prevent="submit">

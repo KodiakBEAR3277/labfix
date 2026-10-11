@@ -61,7 +61,10 @@ class InstitutionRequest extends Model
             $institution = Institution::create([
                 'name'          => $this->institution_name,
                 'contact_email' => $this->institution_contact_email,
-                'plan'          => $this->plan,
+                // A request filed without going through /pricing has no plan.
+                // Default to free here, at the point it becomes a real institution,
+                // so the plan column is never null on anything that's live.
+                'plan'          => $this->plan ?: 'free',
             ]);
 
             Setting::seedDefaultsFor($institution->id);

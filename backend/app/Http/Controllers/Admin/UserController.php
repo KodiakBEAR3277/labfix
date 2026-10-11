@@ -45,10 +45,20 @@ class UserController extends Controller
             'admins'     => User::where('role', 'admin')->count(),
         ];
 
+        // User::count() above is already institution-scoped — BelongsToInstitution's
+        // global scope applies automatically for an authenticated admin — so
+        // $stats['total'] is the right number to check against the plan's limit.
+        $institution = auth()->user()->institution;
+        $planLimits = [
+            'plan'  => $institution->planLabel(),
+            'users' => ['current' => $stats['total'], 'max' => $institution->userLimit()],
+        ];
+
         return Inertia::render('Admin/Users/Index', [
-            'users'   => $users,
-            'stats'   => $stats,
-            'filters' => $request->only(['search', 'role', 'status']),
+            'users'      => $users,
+            'stats'      => $stats,
+            'filters'    => $request->only(['search', 'role', 'status']),
+            'planLimits' => $planLimits,
         ]);
     }
 
@@ -65,9 +75,15 @@ class UserController extends Controller
         return Inertia::render('Admin/Users/Create');
     }
 
-    // Store new user — business logic untouched
+    // Store new user
     public function store(Request $request)
     {
+        if (!auth()->user()->institution->canAddUser()) {
+            return redirect()
+                ->route('admin.users.index')
+                ->with('error', "You've reached your plan's user limit. Upgrade to add more.");
+        }
+
         $validated = $request->validate([
             'first_name'      => ['required', 'string', 'max:255'],
             'last_name'       => ['required', 'string', 'max:255'],

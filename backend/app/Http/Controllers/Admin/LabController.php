@@ -24,7 +24,16 @@ class LabController extends Controller
             'total_maintenance' => $labs->sum(fn($lab) => $lab->maintenance_count),
         ];
 
-        return Inertia::render('Admin/Labs/Index', compact('labs', 'stats'));
+        // Reuses the counts already computed above — no extra queries.
+        // null max means unlimited, mirrored as-is for the Vue page to check.
+        $institution = Auth::user()->institution;
+        $planLimits = [
+            'plan'      => $institution->planLabel(),
+            'labs'      => ['current' => $stats['total_labs'], 'max' => $institution->labLimit()],
+            'equipment' => ['current' => $stats['total_equipment'], 'max' => $institution->equipmentLimit()],
+        ];
+
+        return Inertia::render('Admin/Labs/Index', compact('labs', 'stats', 'planLimits'));
     }
 
     // create() is unused — lab creation is handled via modal on the index page.
@@ -34,9 +43,16 @@ class LabController extends Controller
         return redirect()->route('admin.labs.index');
     }
 
-    // Store new lab — business logic untouched, code uniqueness now scoped per institution
+    // Store new lab — code uniqueness scoped per institution, plus a hard
+    // cap on how many labs the institution's plan allows.
     public function store(Request $request)
     {
+        if (!Auth::user()->institution->canAddLab()) {
+            return redirect()
+                ->route('admin.labs.index')
+                ->with('error', "You've reached your plan's lab limit. Upgrade to add more labs.");
+        }
+
         $validated = $request->validate([
             'name'        => ['required', 'string', 'max:255'],
             'code'        => [

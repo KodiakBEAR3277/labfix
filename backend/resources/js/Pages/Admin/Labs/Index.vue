@@ -14,11 +14,24 @@
 import AppLayout from '../../../Layouts/AppLayout.vue'
 import NavAdmin from '../../../Components/Nav/NavAdmin.vue'
 import { Link, useForm, router } from '@inertiajs/vue3'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 const props = defineProps({
-  labs:  Array,
-  stats: Object,
+  labs:       Array,
+  stats:      Object,
+  planLimits: Object,
+})
+
+// null max = unlimited. Mirrors Institution::canAddLab()/canAddEquipment()
+// on the backend — this only controls the button's disabled state and a
+// friendlier message; the real guard is server-side.
+const labsAtLimit = computed(() => {
+  const l = props.planLimits?.labs
+  return !!l && l.max !== null && l.current >= l.max
+})
+const equipmentAtLimit = computed(() => {
+  const e = props.planLimits?.equipment
+  return !!e && e.max !== null && e.current >= e.max
 })
 
 // ── Lab modal ─────────────────────────────────────────────────────────────────
@@ -165,12 +178,27 @@ function equipmentIcon(type) {
 
     <div class="container">
 
+      <div v-if="planLimits" class="filter-bar" style="justify-content:space-between;align-items:center;">
+        <span style="color:var(--color-text-secondary);font-size:0.9rem;">
+          <strong style="color:var(--color-primary-dark);">{{ planLimits.plan }} plan</strong>
+          &nbsp;·&nbsp; Labs: {{ planLimits.labs.current }}/{{ planLimits.labs.max ?? '∞' }}
+          &nbsp;·&nbsp; Equipment: {{ planLimits.equipment.current }}/{{ planLimits.equipment.max ?? '∞' }}
+        </span>
+        <a href="/admin/upgrade" class="view-all-link">Upgrade →</a>
+      </div>
+
       <div class="page-header">
         <div>
           <h1>Lab Configuration</h1>
           <p style="color:#9ca3af;">Manage lab layouts and equipment assignments</p>
         </div>
-        <button type="button" class="btn btn-primary" @click="openAddLab">+ Add New Lab</button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          :disabled="labsAtLimit"
+          :title="labsAtLimit ? 'Lab limit reached for your plan — upgrade to add more.' : ''"
+          @click="openAddLab"
+        >+ Add New Lab</button>
       </div>
 
       <!-- Stats -->
@@ -248,7 +276,13 @@ function equipmentIcon(type) {
             <div class="equipment-section">
               <div class="equipment-header">
                 <h3 class="section-title">Equipment Layout ({{ lab.equipment.length }} items)</h3>
-                <button type="button" class="btn-add" @click="openAddEquipment(lab.id)">+ Add Equipment</button>
+                <button
+                  type="button"
+                  class="btn-add"
+                  :disabled="equipmentAtLimit"
+                  :title="equipmentAtLimit ? 'Equipment limit reached for your plan — upgrade to add more.' : ''"
+                  @click="openAddEquipment(lab.id)"
+                >+ Add Equipment</button>
               </div>
               <div class="equipment-grid">
                 <template v-if="lab.equipment.length">
@@ -270,7 +304,14 @@ function equipmentIcon(type) {
                 </template>
                 <div v-else style="grid-column:1/-1;text-align:center;padding:2rem;color:#9ca3af;">
                   <p>No equipment added yet</p>
-                  <button type="button" class="btn-add" style="margin-top:1rem;" @click="openAddEquipment(lab.id)">+ Add Equipment</button>
+                  <button
+                    type="button"
+                    class="btn-add"
+                    style="margin-top:1rem;"
+                    :disabled="equipmentAtLimit"
+                    :title="equipmentAtLimit ? 'Equipment limit reached for your plan — upgrade to add more.' : ''"
+                    @click="openAddEquipment(lab.id)"
+                  >+ Add Equipment</button>
                 </div>
               </div>
               <p v-if="lab.equipment.length > 20" style="text-align:center;margin-top:1rem;color:#9ca3af;font-size:0.9rem;">
@@ -285,7 +326,14 @@ function equipmentIcon(type) {
           <div class="empty-icon">🏫</div>
           <h3>No Labs Configured</h3>
           <p>Create your first lab to get started</p>
-          <button type="button" class="btn btn-primary" style="margin-top:1rem;" @click="openAddLab">+ Add New Lab</button>
+          <button
+            type="button"
+            class="btn btn-primary"
+            style="margin-top:1rem;"
+            :disabled="labsAtLimit"
+            :title="labsAtLimit ? 'Lab limit reached for your plan — upgrade to add more.' : ''"
+            @click="openAddLab"
+          >+ Add New Lab</button>
         </div>
       </div>
 

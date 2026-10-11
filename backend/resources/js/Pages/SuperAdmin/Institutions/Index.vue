@@ -22,6 +22,11 @@ function toggleStatus(institution) {
   router.post(`/superadmin/institutions/${institution.id}/toggle-status`)
 }
 
+function changePlan(institution, plan) {
+  if (plan === institution.plan) return
+  router.post(`/superadmin/institutions/${institution.id}/plan`, { plan }, { preserveScroll: true })
+}
+
 function logout() {
   router.post('/logout')
 }
@@ -57,6 +62,7 @@ function logout() {
               <th>Name</th>
               <th>Users</th>
               <th>Labs</th>
+              <th>Plan</th>
               <th>Status</th>
               <th>Registered</th>
               <th>Actions</th>
@@ -68,6 +74,14 @@ function logout() {
                 <td><strong>{{ institution.name }}</strong></td>
                 <td>{{ institution.user_count }}</td>
                 <td>{{ institution.lab_count }}</td>
+                <td>
+                  <select :value="institution.plan" style="padding:0.4rem 2rem 0.4rem 0.6rem;width:auto;" @change="changePlan(institution, $event.target.value)">
+                    <option value="free">Free</option>
+                    <option value="standard">Standard</option>
+                    <option value="pro">Pro</option>
+                    <option value="enterprise">Enterprise</option>
+                  </select>
+                </td>
                 <td>
                   <span class="status-badge" :class="institution.is_active ? 'status-active' : 'status-inactive'">
                     {{ institution.is_active ? 'Active' : 'Inactive' }}
@@ -82,7 +96,7 @@ function logout() {
               </tr>
             </template>
             <tr v-else>
-              <td colspan="6" style="text-align:center;padding:3rem;color:#9ca3af;">
+              <td colspan="7" style="text-align:center;padding:3rem;color:#9ca3af;">
                 No institutions registered yet.
               </td>
             </tr>
