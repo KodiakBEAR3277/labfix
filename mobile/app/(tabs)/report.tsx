@@ -358,10 +358,29 @@ export default function ReportScreen() {
       .catch(() => {/* fail silently, labs will be empty */})
       .finally(() => setLabsLoading(false));
 
-    // Check maintenance mode (best-effort — not all backends expose this)
-    fetch(apiUrl('contact-info'), { headers: { 'Accept': 'application/json' } })
-      .catch(() => {/* ignore */});
   }, [token]);
+
+  // Maintenance mode is re-checked every time this tab gains focus, so
+  // switching it on or off in System Settings shows up without restarting
+  // the app. The server also rejects submissions while it is on (503 with
+  // a message), so this is only the up-front notice.
+  useFocusEffect(
+    useCallback(() => {
+      if (!token) return;
+      fetch(apiUrl('maintenance'), {
+        headers: {
+          'Accept':        'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      })
+        .then((r) => r.json())
+        .then((m: { active: boolean; message: string }) => {
+          setMaintenance(!!m.active);
+          setMaintMsg(m.message ?? '');
+        })
+        .catch(() => {/* best effort: the server still enforces it */});
+    }, [token])
+  );
 
   // ── Fetch equipment when lab is selected ──────────────────────────────────
   const fetchEquipment = useCallback(async (labId: number, tok: string) => {

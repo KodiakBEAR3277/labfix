@@ -84,6 +84,16 @@ Route::middleware(['auth:sanctum', 'institution.active'])->group(function () {
         ]);
     });
 
+    // Maintenance status for the caller's institution. The mobile report screen
+    // reads this to show the notice up front. The server also rejects new
+    // tickets while it is on, so this is only a convenience.
+    Route::get('/maintenance', function () {
+        return response()->json([
+            'active'  => (bool) Setting::get('maintenance_mode', false),
+            'message' => (string) Setting::get('maintenance_message', ''),
+        ]);
+    });
+
     // Lab endpoints
     Route::get('/labs', function() {
         return response()->json(\App\Models\Lab::with('equipment')->get());
@@ -145,31 +155,52 @@ Route::middleware(['auth:sanctum', 'institution.active'])->group(function () {
         return response()->json($shapeTicket($query->findOrFail($id)));
     });
     
-    Route::post('/tickets', function(\Illuminate\Http\Request $request) {
+    Route::post('/tickets', function (Request $request) {
+        $institutionId = auth()->user()->institution_id;
+
+        // exists: alone ignores the institution scope, so an id from another
+        // school would pass. Scope both checks to the caller's institution.
         $validated = $request->validate([
-            'lab_id' => 'required|exists:labs,id',
-            'equipment_id' => 'nullable|exists:equipment,id',
-            'category' => 'required|in:hardware,software,network,other',
-            'title' => 'required|string|max:255',
-            'description' => 'required|string|min:10',
+            'lab_id'       => ['required', \Illuminate\Validation\Rule::exists('labs', 'id')->where('institution_id', $institutionId)],
+            'equipment_id' => ['nullable', \Illuminate\Validation\Rule::exists('equipment', 'id')->where('institution_id', $institutionId)],
+            'category'     => ['required', 'in:hardware,software,network,other'],
+            'title'        => ['required', 'string', 'max:255'],
+            'description'  => ['required', 'string', 'min:10'],
         ]);
-        
+
+        // "General / Don't know" sends no equipment_id. Attach it to the lab's
+        // placeholder equipment, the same way the web form does.
+        if (empty($validated['equipment_id'])) {
+            $general = \App\Models\Equipment::firstOrCreate(
+                ['lab_id' => $validated['lab_id'], 'equipment_code' => 'GENERAL'],
+                ['type' => 'other', 'status' => 'operational', 'notes' => 'General lab issues without specific equipment']
+            );
+            $validated['equipment_id'] = $general->id;
+        }
+
         $ticket = \App\Models\Report::create([
             'ticket_number' => \App\Models\Report::generateTicketNumber(),
-            'user_id' => auth()->id(),
-            'equipment_id' => $validated['equipment_id'],
-            'category' => $validated['category'],
-            'title' => $validated['title'],
-            'description' => $validated['description'],
-            'status' => 'new',
-            'priority' => 'medium',
+            'user_id'       => auth()->id(),
+            'equipment_id'  => $validated['equipment_id'],
+            'category'      => $validated['category'],
+            'title'         => $validated['title'],
+            'description'   => $validated['description'],
+            'status'        => 'new',
+            'priority'      => \App\Models\Report::determinePriority($validated),
         ]);
-        
+
+        \App\Models\TicketTransaction::create([
+            'ticket_id'   => $ticket->id,
+            'user_id'     => auth()->id(),
+            'action'      => 'created',
+            'description' => auth()->user()->full_name . ' created this ticket',
+        ]);
+
         return response()->json([
             'message' => 'Ticket created successfully',
-            'ticket' => $ticket->load(['equipment.lab'])
+            'ticket'  => $ticket->load(['equipment.lab']),
         ], 201);
-    });
+    })->middleware('maintenance.check');
 
     Route::put('/tickets/{id}', function (Request $request, $id) {
         $report = \App\Models\Report::where('user_id', auth()->id())->findOrFail($id);

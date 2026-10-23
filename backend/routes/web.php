@@ -74,7 +74,8 @@ Route::middleware('auth')->group(function () {
     // User routes
     Route::prefix('user')->name('user.')->group(function () {
         Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
-        Route::resource('reports', ReportController::class);
+        Route::post('/reports', [ReportController::class, 'store'])->middleware('maintenance.check')->name('reports.store');
+        Route::resource('reports', ReportController::class)->except(['store']);
         Route::get('/lab-status', [LabStatusController::class, 'index'])->name('lab-status');
         Route::get('/knowledge-base', [KnowledgeBaseController::class, 'index'])->name('knowledge-base');
         Route::get('/knowledge-base/{slug}', [KnowledgeBaseController::class, 'show'])->name('knowledge-base.show');
