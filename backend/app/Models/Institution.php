@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use App\Support\Plans;
 
 class Institution extends Model
 {
@@ -63,32 +64,12 @@ class Institution extends Model
         return $this->hasMany(Equipment::class);
     }
 
-    // ── Plan limits ─────────────────────────────────────────────────────────
-    // Single source of truth is config/plans.php. A null limit means
-    // unlimited. Falls back to the free tier's limits if plan is unset,
-    // since that's the safest default for institutions that predate the
-    // plan column.
-    // Hardcoded as a last-resort fallback — config/plans.php not being
-    // loaded (missing file, or a stale config:cache from before it was
-    // added) should never 500 the whole admin area. It should just act
-    // like Free until whoever's deploying notices and fixes the config.
-    private const FALLBACK_PLAN = [
-        'label'          => 'Free',
-        'max_labs'       => 1,
-        'max_equipment'  => 30,
-        'max_users'      => 50,
-        'auto_rules'     => false,
-        'knowledge_base' => false,
-    ];
-
+    // Plan limits. The single source of truth is App\Support\Plans. A null
+    // limit means unlimited. An unset or unknown plan resolves to Free,
+    // the safest default for institutions that predate the plan column.
     public function planConfig(): array
     {
-        $all = config('plans');
-        if (!is_array($all)) {
-            return self::FALLBACK_PLAN;
-        }
-
-        return $all[$this->plan ?: 'free'] ?? $all['free'] ?? self::FALLBACK_PLAN;
+        return Plans::get($this->plan);
     }
 
     public function planLabel(): string
@@ -129,8 +110,8 @@ class Institution extends Model
         return $limit === null || $this->users()->count() < $limit;
     }
 
-    // Not enforced anywhere yet — reserved for gating the auto-close /
-    // auto-escalate commands and the knowledge base routes later.
+    // hasAutoRules() gates the auto-close and auto-escalate commands.
+    // hasKnowledgeBase() is reserved for gating article authoring later.
     public function hasAutoRules(): bool
     {
         return (bool) $this->planConfig()['auto_rules'];

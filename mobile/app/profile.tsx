@@ -13,15 +13,13 @@
  *   GET  /api/profile               → load user data
  *   PUT  /api/profile               → update name/email/phone/ID
  *   PUT  /api/profile/password      → change password
- *   PUT  /api/profile/preferences   → toggle email notifications
  *   POST /api/logout                → delete token → clearAuth() → redirect /
  *
  * Sections:
  *   1. Avatar + name + role badge + quick stats strip
  *   2. Profile Information form
  *   3. Change Password form
- *   4. Notification Preferences toggle
- *   5. Sign Out (danger zone)
+ *   4. Sign Out (danger zone)
  */
 
 import React, { useEffect, useState, useCallback } from 'react';
@@ -35,7 +33,6 @@ import {
   StatusBar,
   ActivityIndicator,
   Alert,
-  Switch,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -151,11 +148,6 @@ export default function ProfileScreen() {
   const [pwSaving,   setPwSaving]   = useState(false);
   const [pwFlash,    setPwFlash]    = useState('');
 
-  // ── Preferences state ─────────────────────────────────────────────────────
-  const [emailNotif,   setEmailNotif]   = useState(true);
-  const [prefSaving,   setPrefSaving]   = useState(false);
-  const [prefFlash,    setPrefFlash]    = useState('');
-
   // ── Logout ────────────────────────────────────────────────────────────────
   const [loggingOut, setLoggingOut] = useState(false);
 
@@ -186,7 +178,6 @@ export default function ProfileScreen() {
       setEmail(u.email ?? '');
       setPhone(u.phone ?? '');
       setStaffId(u.student_staff_id ?? '');
-      setEmailNotif(u.email_notifications ?? true);
       setError(null);
     } catch (e: any) {
       setError(e.message ?? 'Could not load profile.');
@@ -315,40 +306,6 @@ export default function ProfileScreen() {
       Alert.alert('Error', 'Could not reach the server.');
     } finally {
       setPwSaving(false);
-    }
-  }
-
-  // ── Update Preferences ────────────────────────────────────────────────────
-  async function handleUpdatePreferences(value: boolean) {
-    setEmailNotif(value);
-    if (!token) return;
-    setPrefSaving(true);
-    setPrefFlash('');
-
-    try {
-      const res = await fetch(apiUrl('profile/preferences'), {
-        method: 'PUT',
-        headers: {
-          'Content-Type':  'application/json',
-          'Accept':        'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ email_notifications: value }),
-      });
-
-      if (res.ok) {
-        setPrefFlash('Preferences saved!');
-        setTimeout(() => setPrefFlash(''), 2500);
-      } else {
-        // Revert on failure
-        setEmailNotif(!value);
-        Alert.alert('Error', 'Failed to update preferences.');
-      }
-    } catch {
-      setEmailNotif(!value);
-      Alert.alert('Error', 'Could not reach the server.');
-    } finally {
-      setPrefSaving(false);
     }
   }
 
@@ -628,29 +585,6 @@ export default function ProfileScreen() {
               ? <ActivityIndicator color="#fff" />
               : <Text style={s.saveBtnText}>Update Password</Text>}
           </TouchableOpacity>
-        </View>
-
-        {/* ── Notification Preferences ── */}
-        <View style={s.card}>
-          <SectionTitle title="Notification Preferences" />
-
-          {!!prefFlash && <View style={s.flash}><Text style={s.flashText}>✓ {prefFlash}</Text></View>}
-
-          <View style={s.toggleRow}>
-            <View style={s.toggleInfo}>
-              <Text style={s.toggleLabel}>Email Notifications</Text>
-              <Text style={s.toggleDesc}>
-                Receive email updates when your ticket status changes
-              </Text>
-            </View>
-            <Switch
-              value={emailNotif}
-              onValueChange={handleUpdatePreferences}
-              disabled={prefSaving}
-              trackColor={{ false: 'rgba(255,255,255,0.12)', true: colors.primary }}
-              thumbColor="#fff"
-            />
-          </View>
         </View>
 
         {/* ── Sign Out ── */}

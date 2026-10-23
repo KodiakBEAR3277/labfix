@@ -19,7 +19,12 @@ import { Link } from '@inertiajs/vue3'
 const props = defineProps({
   currentPlan: String,
   tiers:       Array,
+  usage:       Object,
 })
+
+function usageText(u) {
+  return `${u.current} / ${u.max ?? '∞'}`
+}
 
 function limitLine(value, singular, plural) {
   if (value === null) return `Unlimited ${plural}`
@@ -69,7 +74,22 @@ function cardStyle(tier) {
         </div>
       </div>
 
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1.5rem;margin-top:1rem;">
+      <div v-if="usage" class="stats-row" style="margin-top:1rem;">
+        <div class="stat-card">
+          <div class="stat-label">Labs used</div>
+          <div class="stat-value">{{ usageText(usage.labs) }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Equipment used</div>
+          <div class="stat-value">{{ usageText(usage.equipment) }}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Users</div>
+          <div class="stat-value">{{ usageText(usage.users) }}</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1.5rem;margin-top:1.5rem;">
         <div v-for="tier in tiers" :key="tier.slug" :style="cardStyle(tier)">
 
           <div

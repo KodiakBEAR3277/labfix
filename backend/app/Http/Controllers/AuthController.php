@@ -88,6 +88,12 @@ class AuthController extends Controller
                     ->onlyInput('email', 'first_name', 'last_name');
             }
 
+            if (!$institution->canAddUser()) {
+                return back()
+                    ->withErrors(['institution_id' => 'This institution has reached its user limit and cannot take new accounts right now. Please contact your IT office.'])
+                    ->onlyInput('email', 'first_name', 'last_name');
+            }
+
             $user = $this->createUser($validated, $institution->id, 'student');
 
             Auth::login($user);

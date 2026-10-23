@@ -80,6 +80,26 @@ class Report extends Model
         };
     }
 
+    /**
+     * Priority for a new ticket. Wording that signals urgency makes it High,
+     * otherwise the institution's default applies. Whole words only, so
+     * "install" or "small" no longer match the keyword "all".
+     * Shared by the web form and the mobile API so both behave the same.
+     */
+    public static function determinePriority(array $data): string
+    {
+        $keywords = ['not working', 'broken', 'urgent', 'critical', 'cannot', "can't", 'multiple', 'all'];
+        $text = strtolower(($data['title'] ?? '') . ' ' . ($data['description'] ?? ''));
+
+        foreach ($keywords as $keyword) {
+            if (preg_match('/\b' . preg_quote($keyword, '/') . '\b/i', $text)) {
+                return 'high';
+            }
+        }
+
+        return \App\Models\Setting::get('default_priority', 'medium');
+    }
+
     // Get formatted ticket ID for display
     public function getFormattedIdAttribute(): string
     {

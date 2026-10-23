@@ -10,6 +10,18 @@ class Setting extends Model
 {
     use BelongsToInstitution;
 
+    // The settings an institution actually has, with their defaults. The
+    // admin settings page and seedDefaultsFor() both read this list, so a
+    // setting that nothing uses cannot linger in either place.
+    public const DEFAULTS = [
+        'ticket_number_format'           => ['value' => 'format_1', 'type' => 'string',  'group' => 'tickets'],
+        'default_priority'               => ['value' => 'medium',   'type' => 'string',  'group' => 'tickets'],
+        'auto_close_resolved_after_days' => ['value' => '7',        'type' => 'integer', 'group' => 'tickets'],
+        'auto_escalate_after_hours'      => ['value' => '24',       'type' => 'integer', 'group' => 'tickets'],
+        'maintenance_mode'               => ['value' => '0',        'type' => 'boolean', 'group' => 'maintenance'],
+        'maintenance_message'            => ['value' => '',         'type' => 'string',  'group' => 'maintenance'],
+    ];
+
     protected $fillable = ['institution_id', 'key', 'value', 'type', 'group', 'description'];
 
     // Auto-cast values based on type
@@ -93,26 +105,14 @@ class Setting extends Model
      */
     public static function seedDefaultsFor(int $institutionId): void
     {
-        $defaults = [
-            ['key' => 'system_name',                  'value' => 'LabFix',   'type' => 'string',  'group' => 'general'],
-            ['key' => 'support_email',                 'value' => '',         'type' => 'string',  'group' => 'general'],
-            ['key' => 'support_phone',                 'value' => '',         'type' => 'string',  'group' => 'general'],
-            ['key' => 'notify_user_on_assignment',      'value' => '1',        'type' => 'boolean', 'group' => 'notifications'],
-            ['key' => 'notify_user_on_status_change',   'value' => '1',        'type' => 'boolean', 'group' => 'notifications'],
-            ['key' => 'notify_user_on_resolution',      'value' => '1',        'type' => 'boolean', 'group' => 'notifications'],
-            ['key' => 'notify_it_on_new_ticket',        'value' => '1',        'type' => 'boolean', 'group' => 'notifications'],
-            ['key' => 'notify_it_on_high_priority',     'value' => '1',        'type' => 'boolean', 'group' => 'notifications'],
-            ['key' => 'ticket_number_format',           'value' => 'format_1', 'type' => 'string',  'group' => 'tickets'],
-            ['key' => 'default_priority',               'value' => 'medium',   'type' => 'string',  'group' => 'tickets'],
-            ['key' => 'auto_close_resolved_after_days', 'value' => '7',        'type' => 'integer', 'group' => 'tickets'],
-            ['key' => 'auto_escalate_after_hours',      'value' => '24',       'type' => 'integer', 'group' => 'tickets'],
-            ['key' => 'allow_attachments',              'value' => '1',        'type' => 'boolean', 'group' => 'tickets'],
-            ['key' => 'maintenance_mode',                'value' => '0',        'type' => 'boolean', 'group' => 'maintenance'],
-            ['key' => 'maintenance_message',             'value' => '',         'type' => 'string',  'group' => 'maintenance'],
-        ];
-
-        foreach ($defaults as $default) {
-            static::create(array_merge($default, ['institution_id' => $institutionId]));
+        foreach (self::DEFAULTS as $key => $def) {
+            static::create([
+                'institution_id' => $institutionId,
+                'key'            => $key,
+                'value'          => $def['value'],
+                'type'           => $def['type'],
+                'group'          => $def['group'],
+            ]);
         }
     }
 }

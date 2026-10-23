@@ -208,13 +208,6 @@ class ReportController extends Controller
 
     private function determinePriority(array $data): string
     {
-        $keywords = ['not working', 'broken', 'urgent', 'critical', 'cannot', "can't", 'multiple', 'all'];
-        $text = strtolower($data['title'] . ' ' . $data['description']);
-
-        foreach ($keywords as $keyword) {
-            if (str_contains($text, $keyword)) return 'high';
-        }
-
-        return Setting::get('default_priority', 'medium');
+        return Report::determinePriority($data);
     }
 }
