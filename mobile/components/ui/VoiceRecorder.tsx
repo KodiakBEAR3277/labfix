@@ -14,6 +14,10 @@
  *   - The status listener fires with `isFinished` for both a manual stop and
  *     an auto-stop, so the note is emitted from one place either way.
  *   - `useAudioRecorderState` polls the live duration for the timer.
+ *
+ * Split into an outer component (which renders a fallback when the ExpoAudio
+ * native module isn't in the running binary) and an inner one that uses the
+ * expo-audio hooks. See utils/audio.ts for why the import is guarded.
  */
 
 import React, { useEffect, useRef, useState } from 'react';
@@ -23,14 +27,8 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from 'react-native';
-import {
-  useAudioRecorder,
-  useAudioRecorderState,
-  AudioModule,
-  RecordingPresets,
-  setAudioModeAsync,
-} from 'expo-audio';
 import { colors, spacing, radius, font } from '@/constants/theme';
+import { getAudio, isAudioAvailable } from '@/utils/audio';
 
 type Phase = 'idle' | 'recording' | 'paused';
 
@@ -48,7 +46,30 @@ function formatTime(totalSeconds: number): string {
   return `${m}:${String(s).padStart(2, '0')}`;
 }
 
-export default function VoiceRecorder({ onAdd, maxSeconds = 60 }: Props) {
+export default function VoiceRecorder(props: Props) {
+  if (!isAudioAvailable) {
+    return (
+      <View style={s.wrap}>
+        <Text style={s.micGlyph}>🔇</Text>
+        <Text style={s.hint}>
+          Voice recording needs an app build that includes expo-audio.
+        </Text>
+      </View>
+    );
+  }
+
+  return <VoiceRecorderInner {...props} />;
+}
+
+function VoiceRecorderInner({ onAdd, maxSeconds = 60 }: Props) {
+  const {
+    useAudioRecorder,
+    useAudioRecorderState,
+    AudioModule,
+    RecordingPresets,
+    setAudioModeAsync,
+  } = getAudio()!;
+
   const [phase, setPhase] = useState<Phase>('idle');
   const [error, setError] = useState<string | null>(null);
 
@@ -59,7 +80,7 @@ export default function VoiceRecorder({ onAdd, maxSeconds = 60 }: Props) {
   const emittedRef = useRef(false);
   const durationRef = useRef(1);
 
-  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY, (status) => {
+  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY, (status: { isFinished: boolean; url: string | null }) => {
     if (status.isFinished && !emittedRef.current) {
       emittedRef.current = true;
       const uri = status.url ?? recorderRef.current?.uri ?? null;

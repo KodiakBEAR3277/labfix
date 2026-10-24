@@ -11,13 +11,9 @@
  * Only one VoiceMessage plays at a time: a module-level reference holds the
  * active player's pause function, and starting a new one pauses the old one.
  *
- * expo-audio notes:
- *   - `useAudioPlayer(source)` loads the source; `useAudioPlayerStatus(player)`
- *     gives live position/duration. Both are released on unmount.
- *   - Seek with `player.seekTo(seconds)`.
- *   - `status.duration` can be 0 until metadata loads (and Infinity on a few
- *     container/codec combos), so we fall back to the stored duration passed
- *     down as a prop.
+ * Split into an outer component (which renders a fallback when the ExpoAudio
+ * native module isn't in the running binary) and an inner one that uses the
+ * expo-audio hooks. See utils/audio.ts for why the import is guarded.
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -29,9 +25,9 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from 'react-native';
-import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { colors, spacing, radius, font } from '@/constants/theme';
 import { storageUrl } from '@/constants/api';
+import { getAudio, isAudioAvailable } from '@/utils/audio';
 
 // ─── One-at-a-time playback ───────────────────────────────────────────────────
 // Holds the pause() of whichever VoiceMessage is currently playing.
@@ -67,7 +63,35 @@ type Props = {
   onRemove?: () => void;
 };
 
-export default function VoiceMessage({ uri, path, duration, onRemove }: Props) {
+export default function VoiceMessage(props: Props) {
+  // Without the native module, render an inert row instead of throwing at
+  // import time (which would take down the whole route tree).
+  if (!isAudioAvailable) {
+    return (
+      <View style={s.row}>
+        <View style={[s.playBtn, s.playBtnDisabled]}>
+          <Text style={s.playGlyph}>🔇</Text>
+        </View>
+        <View style={s.middle}>
+          <Text style={s.unavailable}>
+            Voice playback needs an app build that includes expo-audio.
+          </Text>
+        </View>
+        {props.onRemove && (
+          <TouchableOpacity style={s.removeBtn} onPress={props.onRemove} activeOpacity={0.7}>
+            <Text style={s.removeGlyph}>✕</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    );
+  }
+
+  return <VoiceMessagePlayer {...props} />;
+}
+
+function VoiceMessagePlayer({ uri, path, duration, onRemove }: Props) {
+  const { useAudioPlayer, useAudioPlayerStatus } = getAudio()!;
+
   const source = uri ?? (path ? storageUrl(path) : null);
 
   const player = useAudioPlayer(source ? { uri: source } : null, { updateInterval: 200 });
@@ -226,6 +250,8 @@ const s = StyleSheet.create({
     justifyContent: 'center',
     flexShrink: 0,
   },
+  playBtnDisabled: { backgroundColor: colors.textDisabled },
+
   playGlyph: {
     fontSize: 14,
     fontWeight: font.bold,
@@ -261,6 +287,12 @@ const s = StyleSheet.create({
   time: {
     fontSize: font.xs - 1,
     color: colors.textMuted,
+  },
+
+  unavailable: {
+    fontSize: font.xs,
+    color: colors.textMuted,
+    lineHeight: 17,
   },
 
   removeBtn: {
