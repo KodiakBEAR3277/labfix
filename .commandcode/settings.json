@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Shell(npx expo install expo-audio)",
-      "Shell(php artisan migrate)"
+      "Shell(php artisan migrate)",
+      "Shell(git:*)"
     ],
     "deny": [],
     "defaultMode": "default"
