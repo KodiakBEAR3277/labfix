@@ -57,7 +57,8 @@
         {
           "microphonePermission": "Allow LabFix to record voice notes for your ticket reports."
         }
-      ]
+      ],
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true,
