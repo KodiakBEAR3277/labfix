@@ -53,7 +53,7 @@ class ReportController extends Controller
     public function show($id)
     {
         $report = Report::where('user_id', Auth::id())
-            ->with(['reporter', 'assignedTo', 'equipment.lab', 'transactions.user'])
+            ->with(['reporter', 'assignedTo', 'equipment.lab', 'transactions.user', 'voiceNotes'])
             ->findOrFail($id);
 
         $report->created_at_human = $report->created_at->diffForHumans();

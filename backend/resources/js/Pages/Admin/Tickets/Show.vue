@@ -7,6 +7,7 @@
 
 import AppLayout from '../../../Layouts/AppLayout.vue'
 import NavAdmin from '../../../Components/Nav/NavAdmin.vue'
+import VoiceMessage from '../../../Components/VoiceMessage.vue'
 import { Link, useForm, router } from '@inertiajs/vue3'
 
 const props = defineProps({
@@ -132,6 +133,19 @@ function diffForHumans(d) {
                 <div class="info-label">Building/Floor</div>
                 <div class="info-value">{{ ticket.equipment.lab.location }}</div>
               </div>
+            </div>
+          </div>
+
+          <!-- Voice notes (recorded on mobile) -->
+          <div v-if="ticket.voice_notes?.length" class="card">
+            <h2 class="card-title">Voice Notes</h2>
+            <div class="voice-notes-list">
+              <VoiceMessage
+                v-for="vn in ticket.voice_notes"
+                :key="vn.id"
+                :src="`/storage/${vn.path}`"
+                :duration="vn.duration_seconds ?? 0"
+              />
             </div>
           </div>
 

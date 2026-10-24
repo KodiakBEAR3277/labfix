@@ -30,6 +30,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { colors, spacing, radius, font } from '@/constants/theme';
 import { loadAuth, AuthUser } from '@/utils/auth';
 import { apiUrl } from '@/constants/api';
+import VoiceMessage from '@/components/ui/VoiceMessage';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -70,6 +71,7 @@ type Ticket = {
     lab?: { name: string; location: string | null };
   };
   transactions?: Transaction[];
+  voice_notes?: { id: number; path: string; duration_seconds: number | null }[];
 };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -533,6 +535,17 @@ export default function ITQueueShowScreen() {
           </SectionCard>
         )}
 
+        {/* ── Voice Notes ── */}
+        {ticket.voice_notes && ticket.voice_notes.length > 0 && (
+          <SectionCard title="Voice Notes">
+            <View style={s.voiceList}>
+              {ticket.voice_notes.map((vn) => (
+                <VoiceMessage key={vn.id} path={vn.path} duration={vn.duration_seconds} />
+              ))}
+            </View>
+          </SectionCard>
+        )}
+
         {/* ── Attachments ── */}
         {ticket.attachments && ticket.attachments.length > 0 && (
           <SectionCard title="Attachments">
@@ -682,6 +695,9 @@ const s = StyleSheet.create({
 
   // Description
   descText: { fontSize: font.base, color: colors.textSecondary, lineHeight: 24 },
+
+  // Voice notes
+  voiceList: { gap: spacing.sm },
 
   // Person card (reporter / technician)
   personCard: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md },

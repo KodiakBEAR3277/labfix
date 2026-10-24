@@ -81,6 +81,7 @@ class TicketController extends Controller
             'assignedTo',
             'equipment.lab',
             'transactions.user',
+            'voiceNotes',
         ])->findOrFail($id);
 
         return Inertia::render('IT/Tickets/Show', compact('ticket'));

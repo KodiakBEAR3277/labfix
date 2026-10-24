@@ -51,6 +51,8 @@ import { router, useFocusEffect } from 'expo-router';
 import { colors, spacing, radius, font } from '@/constants/theme';
 import { loadAuth } from '@/utils/auth';
 import { apiUrl } from '@/constants/api';
+import VoiceRecorder, { Recording } from '@/components/ui/VoiceRecorder';
+import VoiceMessage from '@/components/ui/VoiceMessage';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -89,6 +91,7 @@ type FieldErrors = {
   category?:    string;
   title?:       string;
   description?: string;
+  voice_notes?: string;
   general?:     string;
 };
 
@@ -285,6 +288,9 @@ export default function ReportScreen() {
   const [maintenance,setMaintenance]= useState(false);
   const [maintMsg,   setMaintMsg]   = useState('');
 
+  // Voice notes recorded on this report, held as local files until submit.
+  const [recordings, setRecordings] = useState<Recording[]>([]);
+
   // Display names for the review step
   const [selectedLabName,   setSelectedLabName]   = useState('');
   const [selectedEquipName, setSelectedEquipName] = useState("General lab issue / Don't know");
@@ -318,6 +324,9 @@ export default function ReportScreen() {
         title: '',
         description: '',
       });
+
+      // 5. Drop any voice notes recorded for the previous report
+      setRecordings([]);
     }, [])
   );
 
@@ -457,24 +466,34 @@ export default function ReportScreen() {
     setErrors({});
 
     try {
-      const body: Record<string, unknown> = {
-        lab_id:       form.lab_id,
-        category:     form.category,
-        title:        form.title.trim(),
-        description:  form.description.trim(),
-      };
+      // Multipart so voice notes can ride along with the text fields.
+      // Content-Type is deliberately NOT set — React Native fills it in with
+      // the correct multipart boundary.
+      const body = new FormData();
+      body.append('lab_id', String(form.lab_id));
+      body.append('category', String(form.category));
+      body.append('title', form.title.trim());
+      body.append('description', form.description.trim());
       if (form.equipment_id) {
-        body.equipment_id = form.equipment_id;
+        body.append('equipment_id', String(form.equipment_id));
       }
+
+      recordings.forEach((rec, i) => {
+        body.append('voice_notes[]', {
+          uri: rec.uri,
+          name: `voice-note-${i + 1}.m4a`,
+          type: 'audio/m4a',
+        } as any);
+        body.append('voice_durations[]', String(rec.duration));
+      });
 
       const res = await fetch(apiUrl('tickets'), {
         method:  'POST',
         headers: {
-          'Content-Type': 'application/json',
           'Accept':        'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify(body),
+        body,
       });
 
       const data = await res.json();
@@ -864,6 +883,31 @@ export default function ReportScreen() {
                   </Text>
                 </View>
 
+                {/* Voice note (optional) */}
+                <View style={s.fieldGroup}>
+                  <Text style={s.fieldLabel}>Voice Note (Optional)</Text>
+                  <Text style={s.voiceHelp}>
+                    Record a short spoken explanation — handy when typing it out is awkward.
+                  </Text>
+
+                  {recordings.map((rec, i) => (
+                    <View key={`${rec.uri}-${i}`} style={s.voiceItem}>
+                      <VoiceMessage
+                        uri={rec.uri}
+                        duration={rec.duration}
+                        onRemove={() =>
+                          setRecordings((prev) => prev.filter((_, idx) => idx !== i))
+                        }
+                      />
+                    </View>
+                  ))}
+
+                  <VoiceRecorder
+                    onAdd={(rec) => setRecordings((prev) => [...prev, rec])}
+                  />
+                  <FieldError message={errors.voice_notes} />
+                </View>
+
                 {/* Tips card */}
                 <View style={s.tipsCard}>
                   <Text style={s.tipsTitle}>💡 Helpful tips</Text>
@@ -907,6 +951,14 @@ export default function ReportScreen() {
                     }
                   />
                   <ReviewRow label="Issue Title"       value={form.title || '—'}             />
+                  <ReviewRow
+                    label="Voice Notes"
+                    value={
+                      recordings.length
+                        ? `${recordings.length} recording${recordings.length > 1 ? 's' : ''}`
+                        : 'None'
+                    }
+                  />
                   <View style={s.reviewRowDesc}>
                     <Text style={s.reviewLabel}>Description</Text>
                     <Text style={s.reviewDescText}>
@@ -1314,6 +1366,15 @@ const s = StyleSheet.create({
     fontWeight: font.semibold,
     color: colors.textSecondary,
     marginBottom: spacing.xs,
+  },
+  voiceHelp: {
+    fontSize: font.xs,
+    color: colors.textMuted,
+    marginBottom: spacing.sm,
+    lineHeight: 17,
+  },
+  voiceItem: {
+    marginBottom: spacing.sm,
   },
   input: {
     backgroundColor: colors.bgCard,

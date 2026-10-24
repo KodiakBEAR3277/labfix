@@ -5,6 +5,7 @@
 
 import AppLayout from '../../../Layouts/AppLayout.vue'
 import NavUser from '../../../Components/Nav/NavUser.vue'
+import VoiceMessage from '../../../Components/VoiceMessage.vue'
 import { Link, router } from '@inertiajs/vue3'
 
 const props = defineProps({
@@ -100,6 +101,19 @@ function cancelReport() {
           <div class="content-card">
             <h2 class="card-title">Problem Description</h2>
             <p class="description-text">{{ report.description }}</p>
+          </div>
+
+          <!-- Voice notes (recorded on mobile) -->
+          <div v-if="report.voice_notes?.length" class="card">
+            <h2 class="card-title">Voice Notes</h2>
+            <div class="voice-notes-list">
+              <VoiceMessage
+                v-for="vn in report.voice_notes"
+                :key="vn.id"
+                :src="`/storage/${vn.path}`"
+                :duration="vn.duration_seconds ?? 0"
+              />
+            </div>
           </div>
 
           <div class="content-card">

@@ -92,6 +92,7 @@ class TicketController extends Controller
             'assignedTo',
             'equipment.lab',
             'transactions.user',
+            'voiceNotes',
         ])->findOrFail($id);
 
         return Inertia::render('Admin/Tickets/Show', compact('ticket'));
@@ -255,6 +256,12 @@ class TicketController extends Controller
             foreach ($ticket->attachments as $attachment) {
                 Storage::disk('public')->delete($attachment);
             }
+        }
+
+        // Voice notes live in their own table, so their files aren't covered
+        // by the attachments loop above — remove them too before the row goes.
+        foreach ($ticket->voiceNotes as $voiceNote) {
+            Storage::disk('public')->delete($voiceNote->path);
         }
 
         $ticket->forceDelete();

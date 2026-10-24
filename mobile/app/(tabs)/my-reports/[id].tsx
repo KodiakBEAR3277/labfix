@@ -36,6 +36,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { colors, spacing, radius, font } from '@/constants/theme';
 import { loadAuth } from '@/utils/auth';
 import { apiUrl } from '@/constants/api';
+import VoiceMessage from '@/components/ui/VoiceMessage';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -75,6 +76,7 @@ type Ticket = {
     };
   };
   transactions?: Transaction[];
+  voice_notes?: { id: number; path: string; duration_seconds: number | null }[];
 };
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -366,6 +368,18 @@ export default function TicketShowScreen() {
           <Text style={s.descriptionText}>{ticket.description}</Text>
         </View>
 
+        {/* ── Voice Notes ── */}
+        {ticket.voice_notes && ticket.voice_notes.length > 0 && (
+          <View style={s.card}>
+            <Text style={s.cardTitle}>Voice Notes</Text>
+            <View style={s.voiceList}>
+              {ticket.voice_notes.map((vn) => (
+                <VoiceMessage key={vn.id} path={vn.path} duration={vn.duration_seconds} />
+              ))}
+            </View>
+          </View>
+        )}
+
         {/* ── Equipment Information ── */}
         <View style={s.card}>
           <Text style={s.cardTitle}>Equipment Information</Text>
@@ -650,6 +664,11 @@ const s = StyleSheet.create({
     fontSize: font.base,
     color: colors.textSecondary,
     lineHeight: 23,
+  },
+
+  // Voice notes
+  voiceList: {
+    gap: spacing.sm,
   },
 
   // Manage actions

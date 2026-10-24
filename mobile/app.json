@@ -51,7 +51,13 @@
       ],
       "expo-secure-store",
       "expo-font",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Allow LabFix to record voice notes for your ticket reports."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

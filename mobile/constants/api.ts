@@ -22,3 +22,12 @@ export const API_BASE =
 /** Convenience helper — returns full URL for an API path */
 export const apiUrl = (path: string) =>
   `${API_BASE}/api/${path.replace(/^\//, '')}`;
+
+/**
+ * Full URL for a file stored on the backend's public disk (voice notes,
+ * attachments). The API only ever returns the relative path, e.g.
+ * "voice-notes/abc.m4a", which the device can't fetch on its own — so build
+ * the absolute URL here. Mirrors the web's `/storage/${path}`.
+ */
+export const storageUrl = (path: string) =>
+  `${API_BASE}/storage/${path.replace(/^\//, '')}`;

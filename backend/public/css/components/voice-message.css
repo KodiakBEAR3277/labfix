@@ -1,0 +1,113 @@
+/* ============================================
+   LabFix - Voice Message Player
+   File: css/components/voice-message.css
+
+   Messenger-style scrubber for ticket voice notes. Mirrors the mobile
+   VoiceMessage component: round play button, waveform track with a
+   draggable thumb, and a current / total time label.
+   ============================================ */
+
+.voice-message {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-sm);
+    background: rgba(45, 212, 191, 0.08);
+    border: var(--border-width) solid var(--color-border-light);
+    border-radius: var(--border-radius-xl);
+}
+
+/* Stacked list of voice notes inside a card */
+.voice-notes-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.voice-message + .voice-message {
+    margin-top: var(--spacing-sm);
+}
+
+.vm-play {
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: var(--border-radius-full);
+    background: var(--color-primary);
+    color: #fff;
+    cursor: pointer;
+    transition: background var(--transition-fast), transform var(--transition-fast);
+}
+
+.vm-play:hover {
+    background: var(--color-primary-dark);
+    transform: scale(1.05);
+}
+
+.vm-play:active {
+    transform: scale(0.97);
+}
+
+.vm-icon {
+    font-size: 0.75rem;
+    line-height: 1;
+    /* ❚❚ reads better slightly tightened */
+    letter-spacing: -1px;
+}
+
+.vm-body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.vm-track {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 30px;
+    cursor: pointer;
+    touch-action: none; /* let pointer drag scrub instead of scrolling */
+}
+
+.vm-bars {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    width: 100%;
+    height: 100%;
+}
+
+.vm-bar {
+    flex: 1;
+    border-radius: 2px;
+    background: rgba(13, 148, 136, 0.25);
+    transition: background var(--transition-fast);
+}
+
+.vm-bar--filled {
+    background: var(--color-primary);
+}
+
+.vm-thumb {
+    position: absolute;
+    top: 9px;
+    width: 12px;
+    height: 12px;
+    border-radius: var(--border-radius-full);
+    background: #fff;
+    border: 2px solid var(--color-primary);
+    pointer-events: none;
+}
+
+.vm-time {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    font-variant-numeric: tabular-nums;
+}

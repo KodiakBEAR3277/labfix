@@ -145,7 +145,7 @@ Route::middleware(['auth:sanctum', 'institution.active'])->group(function () {
 
     Route::get('/tickets/{id}', function ($id) use ($shapeTicket) {
         $user  = auth()->user();
-        $query = \App\Models\Report::with(['reporter', 'assignedTo', 'equipment.lab', 'transactions.user']);
+        $query = \App\Models\Report::with(['reporter', 'assignedTo', 'equipment.lab', 'transactions.user', 'voiceNotes']);
 
         // Students and staff can only open their own tickets
         if (!in_array($user->role, ['admin', 'it-support'])) {
@@ -166,6 +166,13 @@ Route::middleware(['auth:sanctum', 'institution.active'])->group(function () {
             'category'     => ['required', 'in:hardware,software,network,other'],
             'title'        => ['required', 'string', 'max:255'],
             'description'  => ['required', 'string', 'min:10'],
+            // Optional voice notes recorded on the mobile report form. m4a/aac is
+            // what expo-audio emits natively; the rest are accepted defensively.
+            // 5 MB mirrors the image/PDF limit, and easily covers the 60s cap.
+            'voice_notes'       => ['nullable', 'array'],
+            'voice_notes.*'     => ['nullable', 'file', 'mimes:m4a,mp4,aac,webm,mp3,ogg,wav,caf,3gp', 'max:5120'],
+            'voice_durations'   => ['nullable', 'array'],
+            'voice_durations.*' => ['nullable', 'integer', 'min:0', 'max:120'],
         ]);
 
         // "General / Don't know" sends no equipment_id. Attach it to the lab's
@@ -196,9 +203,22 @@ Route::middleware(['auth:sanctum', 'institution.active'])->group(function () {
             'description' => auth()->user()->full_name . ' created this ticket',
         ]);
 
+        // Persist any voice notes that came with the report. The durations
+        // arrive as a parallel array so index $i lines up with file $i.
+        foreach ($request->file('voice_notes', []) as $i => $file) {
+            \App\Models\VoiceNote::create([
+                'report_id'        => $ticket->id,
+                'user_id'          => auth()->id(),
+                'path'             => $file->store('voice-notes', 'public'),
+                'mime_type'        => $file->getClientMimeType(),
+                'size_bytes'       => $file->getSize(),
+                'duration_seconds' => $request->input("voice_durations.{$i}"),
+            ]);
+        }
+
         return response()->json([
             'message' => 'Ticket created successfully',
-            'ticket'  => $ticket->load(['equipment.lab']),
+            'ticket'  => $ticket->load(['equipment.lab', 'voiceNotes']),
         ], 201);
     })->middleware('maintenance.check');
 
@@ -353,7 +373,7 @@ Route::middleware(['auth:sanctum', 'institution.active'])->group(function () {
         // One full ticket, shaped for mobile. $mineOnly limits it to tickets
         // assigned to the caller (used by the assignments screens).
         $itTicket = function ($id, $mineOnly = false) use ($shapeTicket) {
-            $query = \App\Models\Report::with(['reporter', 'assignedTo', 'equipment.lab', 'transactions.user']);
+            $query = \App\Models\Report::with(['reporter', 'assignedTo', 'equipment.lab', 'transactions.user', 'voiceNotes']);
             if ($mineOnly) {
                 $query->where('assigned_to', auth()->id());
             }

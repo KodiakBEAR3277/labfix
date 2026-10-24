@@ -184,4 +184,10 @@ class Report extends Model
     {
         return $this->hasMany(TicketTransaction::class, 'ticket_id');
     }
+
+    // Relationship: Voice notes recorded against this ticket
+    public function voiceNotes(): HasMany
+    {
+        return $this->hasMany(VoiceNote::class);
+    }
 }

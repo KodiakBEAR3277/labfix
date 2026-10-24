@@ -49,7 +49,7 @@ class AssignmentController extends Controller
     public function show($id)
     {
         $ticket = Report::where('assigned_to', Auth::id())
-            ->with(['reporter', 'equipment.lab', 'transactions.user'])
+            ->with(['reporter', 'equipment.lab', 'transactions.user', 'voiceNotes'])
             ->findOrFail($id);
 
         return Inertia::render('IT/Assignments/Show', compact('ticket'));
