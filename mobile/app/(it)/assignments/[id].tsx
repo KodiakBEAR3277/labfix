@@ -284,7 +284,7 @@ export default function ITAssignmentShowScreen() {
         <View style={s.centered}>
           <Text style={s.errorIcon}>⚠️</Text>
           <Text style={s.errorText}>{error ?? 'Ticket not found.'}</Text>
-          <TouchableOpacity style={s.retryBtn} onPress={() => router.back()}>
+          <TouchableOpacity style={s.retryBtn} onPress={() => router.replace('/(it)/assignments' as any)}>
             <Text style={s.retryText}>← Go Back</Text>
           </TouchableOpacity>
         </View>
@@ -303,7 +303,7 @@ export default function ITAssignmentShowScreen() {
 
       {/* ── Top Nav ── */}
       <View style={s.nav}>
-        <TouchableOpacity onPress={() => router.back()} activeOpacity={0.7}>
+        <TouchableOpacity onPress={() => router.replace('/(it)/assignments' as any)} activeOpacity={0.7}>
           <Text style={s.navBack}>← My Assignments</Text>
         </TouchableOpacity>
         <TouchableOpacity

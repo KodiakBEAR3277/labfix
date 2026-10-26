@@ -197,7 +197,7 @@ export default function TicketShowScreen() {
         },
       });
       if (res.status === 401) { router.replace('/login'); return; }
-      if (res.status === 403) { router.back(); return; }
+      if (res.status === 403) { router.replace('/(tabs)/my-reports' as any); return; }
       if (!res.ok) throw new Error(`Server error ${res.status}`);
       const data: Ticket = await res.json();
       setTicket(data);
@@ -277,7 +277,7 @@ export default function TicketShowScreen() {
         <StatusBar barStyle="light-content" backgroundColor={colors.bgPrimary} />
         <View style={s.centered}>
           <Text style={s.errorText}>{error ?? 'Ticket not found.'}</Text>
-          <TouchableOpacity style={s.retryBtn} onPress={() => router.back()}>
+          <TouchableOpacity style={s.retryBtn} onPress={() => router.replace('/(tabs)/my-reports' as any)}>
             <Text style={s.retryText}>← Go Back</Text>
           </TouchableOpacity>
         </View>
@@ -295,7 +295,7 @@ export default function TicketShowScreen() {
 
       {/* ── Top Nav ── */}
       <View style={s.nav}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity onPress={() => router.replace('/(tabs)/my-reports' as any)}>
           <Text style={s.navBack}>← My Reports</Text>
         </TouchableOpacity>
         <Text style={s.navTicketNum}>{ticket.ticket_number}</Text>

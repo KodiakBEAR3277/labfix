@@ -62,6 +62,11 @@ import { colors, spacing, radius, font } from '@/constants/theme';
 import { loadAuth } from '@/utils/auth';
 import { apiUrl } from '@/constants/api';
 
+// Where the back / cancel / discard actions return to. The tab bars navigate
+// with replace(), so there's no list entry in history for router.back() to pop
+// to, and it falls through to the dashboard instead — go to the list directly.
+const LIST_ROUTE = '/(tabs)/my-reports';
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type Category = 'hardware' | 'software' | 'network' | 'other';
@@ -155,7 +160,7 @@ export default function EditReportScreen() {
       });
 
       if (res.status === 401) { router.replace('/login'); return; }
-      if (res.status === 403) { router.back(); return; }
+      if (res.status === 403) { router.replace(LIST_ROUTE as any); return; }
       if (!res.ok) throw new Error(`Server error ${res.status}`);
 
       const data: Ticket = await res.json();
@@ -165,7 +170,7 @@ export default function EditReportScreen() {
         Alert.alert(
           'Cannot Edit',
           'This ticket has been assigned to a technician and can no longer be edited.',
-          [{ text: 'OK', onPress: () => router.back() }]
+          [{ text: 'OK', onPress: () => router.replace(LIST_ROUTE as any) }]
         );
         return;
       }
@@ -228,7 +233,7 @@ export default function EditReportScreen() {
         Alert.alert(
           'Cannot Edit',
           data?.message ?? 'This ticket can no longer be edited.',
-          [{ text: 'OK', onPress: () => router.back() }]
+          [{ text: 'OK', onPress: () => router.replace(LIST_ROUTE as any) }]
         );
       } else if (res.status === 422) {
         const serverErrors: FieldErrors = {};
@@ -261,11 +266,11 @@ export default function EditReportScreen() {
         'You have unsaved changes. Are you sure you want to go back?',
         [
           { text: 'Keep Editing', style: 'cancel' },
-          { text: 'Discard',      style: 'destructive', onPress: () => router.back() },
+          { text: 'Discard',      style: 'destructive', onPress: () => router.replace(LIST_ROUTE as any) },
         ]
       );
     } else {
-      router.back();
+      router.replace(LIST_ROUTE as any);
     }
   }
 
@@ -289,7 +294,7 @@ export default function EditReportScreen() {
           <Text style={s.errorText}>
             {errors.general ?? 'Ticket not found.'}
           </Text>
-          <TouchableOpacity style={s.retryBtn} onPress={() => router.back()}>
+          <TouchableOpacity style={s.retryBtn} onPress={() => router.replace(LIST_ROUTE as any)}>
             <Text style={s.retryBtnText}>← Go Back</Text>
           </TouchableOpacity>
         </View>

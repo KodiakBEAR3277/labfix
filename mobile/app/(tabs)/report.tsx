@@ -540,7 +540,7 @@ export default function ReportScreen() {
               'Your progress will be lost.',
               [
                 { text: 'Keep Editing', style: 'cancel' },
-                { text: 'Discard', style: 'destructive', onPress: () => router.back() },
+                { text: 'Discard', style: 'destructive', onPress: () => router.replace('/(tabs)/dashboard' as any) },
               ]
             );
           }

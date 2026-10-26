@@ -296,7 +296,7 @@ export default function ITQueueShowScreen() {
         <View style={s.centered}>
           <Text style={s.errorIcon}>⚠️</Text>
           <Text style={s.errorText}>{error ?? 'Ticket not found.'}</Text>
-          <TouchableOpacity style={s.retryBtn} onPress={() => router.back()}>
+          <TouchableOpacity style={s.retryBtn} onPress={() => router.replace('/(it)/queue' as any)}>
             <Text style={s.retryText}>← Go Back</Text>
           </TouchableOpacity>
         </View>
@@ -317,7 +317,7 @@ export default function ITQueueShowScreen() {
 
       {/* ── Top Nav ── */}
       <View style={s.nav}>
-        <TouchableOpacity onPress={() => router.back()} activeOpacity={0.7}>
+        <TouchableOpacity onPress={() => router.replace('/(it)/queue' as any)} activeOpacity={0.7}>
           <Text style={s.navBack}>← Queue</Text>
         </TouchableOpacity>
         <Text style={s.navTicketNum}>{ticket.ticket_number}</Text>

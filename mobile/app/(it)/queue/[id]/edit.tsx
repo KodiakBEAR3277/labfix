@@ -30,6 +30,11 @@ import { colors, spacing, radius, font } from '@/constants/theme';
 import { loadAuth, AuthUser } from '@/utils/auth';
 import { apiUrl } from '@/constants/api';
 
+// Where the back / cancel actions return to. The tab bars navigate with
+// replace(), so there's no list entry in history for router.back() to pop
+// to, and it falls through to the dashboard instead — go to the list directly.
+const LIST_ROUTE = '/(it)/queue';
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type Ticket = {
@@ -300,7 +305,7 @@ export default function ITQueueEditScreen() {
         <StatusBar barStyle="light-content" backgroundColor={colors.bgPrimary} />
         <View style={s.centered}>
           <Text style={s.errorText}>{errors.general ?? 'Ticket not found.'}</Text>
-          <TouchableOpacity style={s.retryBtn} onPress={() => router.back()}>
+          <TouchableOpacity style={s.retryBtn} onPress={() => router.replace(LIST_ROUTE as any)}>
             <Text style={s.retryText}>← Go Back</Text>
           </TouchableOpacity>
         </View>
@@ -319,7 +324,7 @@ export default function ITQueueEditScreen() {
       {/* ── Top Nav ── */}
       <View style={s.nav}>
         <TouchableOpacity
-          onPress={() => router.back()}
+          onPress={() => router.replace(LIST_ROUTE as any)}
           activeOpacity={0.7}
         >
           <Text style={s.navBack}>← Ticket</Text>
@@ -499,7 +504,7 @@ export default function ITQueueEditScreen() {
 
             <TouchableOpacity
               style={s.cancelBtn}
-              onPress={() => router.back()}
+              onPress={() => router.replace(LIST_ROUTE as any)}
               disabled={submitting}
               activeOpacity={0.75}
             >

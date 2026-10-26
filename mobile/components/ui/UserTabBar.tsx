@@ -44,8 +44,17 @@ export function UserTabBar(_props: BottomTabBarProps) {
   const pathname = usePathname();
 
   function isActive(tab: TabDef): boolean {
-    if (tab.key === 'index') return pathname === '/' || pathname === '/(tabs)/';
-    return pathname.includes(tab.key);
+    // expo-router strips group segments, so /(tabs)/my-reports arrives as
+    // /my-reports. Match on whole path segments: a plain substring test
+    // ("report") also matched "my-reports", lighting up two tabs at once.
+    const path = pathname.replace(/\/\([^)]+\)/g, '') || '/';
+
+    if (tab.key === 'index') {
+      return path === '/' || path === '/dashboard';
+    }
+
+    const segment = `/${tab.key}`;
+    return path === segment || path.startsWith(`${segment}/`);
   }
 
   return (

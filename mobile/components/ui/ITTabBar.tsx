@@ -40,14 +40,12 @@ import { colors, font, spacing, radius } from '@/constants/theme';
 // ─── Tab definitions ──────────────────────────────────────────────────────────
 
 type TabDef = {
-  /** Unique key — also used for active-detection prefix matching */
+  /** Unique key — also used to match the active path segment */
   key:    string;
   label:  string;
   icon:   string;
   /** Full Expo Router route string */
   route:  string;
-  /** If true, use exact pathname match instead of startsWith */
-  exact?: boolean;
 };
 
 const TABS: TabDef[] = [
@@ -56,7 +54,6 @@ const TABS: TabDef[] = [
     label: 'Dashboard',
     icon:  '📊',
     route: '/(it)/dashboard',
-    exact: true,
   },
   {
     key:   'queue',
@@ -85,16 +82,17 @@ export function ITTabBar(_props: BottomTabBarProps) {
   const pathname = usePathname();
 
   function isActive(tab: TabDef): boolean {
-    if (tab.exact) {
-      // Exact match — normalise trailing slash differences
-      return (
-        pathname === tab.route ||
-        pathname === tab.route.replace('/(it)/', '/it/')
-      );
+    // expo-router strips group segments, so /(it)/queue arrives as /queue.
+    // The previous checks compared against "/(it)/…" and "/it/…", which never
+    // matched a real pathname — so no tab ever showed its active indicator.
+    const path = pathname.replace(/\/\([^)]+\)/g, '') || '/';
+
+    if (tab.key === 'dashboard') {
+      return path === '/dashboard' || path === '/';
     }
-    // Prefix match — covers nested screens like /it/queue/42/edit
-    const prefix = tab.route.replace('/(it)/', '/it/');
-    return pathname.startsWith(prefix) || pathname.startsWith(tab.route);
+
+    const segment = `/${tab.key}`;
+    return path === segment || path.startsWith(`${segment}/`);
   }
 
   return (

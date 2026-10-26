@@ -233,7 +233,7 @@ export default function ITKBEditScreen() {
           >
             <Text style={s.retryText}>Try Again</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.back()}>
+          <TouchableOpacity onPress={() => router.replace('/(it)/knowledge-base' as any)}>
             <Text style={s.backLink}>← Go Back</Text>
           </TouchableOpacity>
         </View>

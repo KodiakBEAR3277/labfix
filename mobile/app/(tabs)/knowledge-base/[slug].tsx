@@ -3,7 +3,8 @@
  *
  * Mirrors: resources/js/Pages/User/KnowledgeBaseShow.vue
  *
- * Fetches GET /api/knowledge-base/{slug} on mount (public, no auth needed).
+ * Fetches GET /api/knowledge-base/{slug} on mount, with the Sanctum bearer
+ * token — the KB routes are inside the auth:sanctum group in routes/api.php.
  * Response: { article, related }
  *
  * Sections:
@@ -31,6 +32,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { colors, spacing, radius, font } from '@/constants/theme';
+import { loadAuth } from '@/utils/auth';
 import { apiUrl } from '@/constants/api';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -118,6 +120,7 @@ const badge = StyleSheet.create({
 export default function KnowledgeBaseShowScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
 
+  const [token,      setToken]      = useState<string | null>(null);
   const [article,    setArticle]    = useState<Article | null>(null);
   const [related,    setRelated]    = useState<RelatedArticle[]>([]);
   const [loading,    setLoading]    = useState(true);
@@ -129,12 +132,26 @@ export default function KnowledgeBaseShowScreen() {
   const [notHelpfulCount, setNotHelpfulCount] = useState(0);
   const [voted,           setVoted]           = useState<'helpful' | 'not-helpful' | null>(null);
 
+  // ── Auth ──────────────────────────────────────────────────────────────────
+  // The KB routes sit inside the auth:sanctum group in routes/api.php, so the
+  // article fetch needs the same Bearer token the index screen sends.
+  useEffect(() => {
+    loadAuth().then((auth) => {
+      if (!auth) { router.replace('/login'); return; }
+      setToken(auth.token);
+    });
+  }, []);
+
   // ── Fetch ─────────────────────────────────────────────────────────────────
-  const fetchArticle = useCallback(async () => {
+  const fetchArticle = useCallback(async (tok: string) => {
     try {
       const res = await fetch(apiUrl(`knowledge-base/${slug}`), {
-        headers: { 'Accept': 'application/json' },
+        headers: {
+          'Accept':        'application/json',
+          'Authorization': `Bearer ${tok}`,
+        },
       });
+      if (res.status === 401) { router.replace('/login'); return; }
       if (res.status === 404) throw new Error('Article not found.');
       if (!res.ok) throw new Error(`Server error ${res.status}`);
 
@@ -150,19 +167,21 @@ export default function KnowledgeBaseShowScreen() {
   }, [slug]);
 
   useEffect(() => {
+    if (!token) return;
     setLoading(true);
-    fetchArticle().finally(() => setLoading(false));
-  }, [fetchArticle]);
+    fetchArticle(token).finally(() => setLoading(false));
+  }, [token, fetchArticle]);
 
   const onRefresh = useCallback(async () => {
+    if (!token) return;
     setRefreshing(true);
-    await fetchArticle();
+    await fetchArticle(token);
     setRefreshing(false);
-  }, [fetchArticle]);
+  }, [token, fetchArticle]);
 
   // ── Helpfulness voting ────────────────────────────────────────────────────
   async function vote(type: 'helpful' | 'not-helpful') {
-    if (voted) return; // one vote per session
+    if (voted || !token) return; // one vote per session
 
     // Optimistic update
     if (type === 'helpful') {
@@ -173,10 +192,14 @@ export default function KnowledgeBaseShowScreen() {
     setVoted(type);
 
     try {
-      await fetch(apiUrl(`knowledge-base/${slug}/${type}`), {
+      const res = await fetch(apiUrl(`knowledge-base/${slug}/${type}`), {
         method:  'POST',
-        headers: { 'Accept': 'application/json' },
+        headers: {
+          'Accept':        'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
       });
+      if (!res.ok) throw new Error(`Vote failed (${res.status})`);
     } catch {
       // Revert on failure
       if (type === 'helpful') {
