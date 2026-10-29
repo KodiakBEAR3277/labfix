@@ -11,21 +11,22 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. First create users (required by other seeders)
+        // 1. Institutions + the platform superadmin (everything else hangs off
+        //    these). UserSeeder then creates each institution's 4 accounts.
+        $this->call(InstitutionSeeder::class);
         $this->call(UserSeeder::class);
-        
-        // 2. Create labs
+
+        // 2. Labs and their equipment (depends on institutions)
         $this->call(LabSeeder::class);
-        
-        // 3. Create equipment (depends on labs)
         $this->call(EquipmentSeeder::class);
-        
-        // 4. Create articles (depends on users)
+
+        // 3. KB articles (depends on users)
         $this->call(ArticleSeeder::class);
-        
-        // 5. Create reports (depends on users, labs, and equipment)
+
+        // 4. Reports (depends on users, labs, and equipment)
         $this->call(ReportSeeder::class);
 
+        // 5. Settings — platform keys + each institution's defaults
         $this->call(SettingsSeeder::class);
     }
 }

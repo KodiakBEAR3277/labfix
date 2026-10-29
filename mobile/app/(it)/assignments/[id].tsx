@@ -33,6 +33,7 @@ import { colors, spacing, radius, font } from '@/constants/theme';
 import { loadAuth } from '@/utils/auth';
 import { apiUrl } from '@/constants/api';
 import VoiceMessage from '@/components/ui/VoiceMessage';
+import AttachmentList from '@/components/ui/AttachmentList';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -516,18 +517,7 @@ export default function ITAssignmentShowScreen() {
         {/* ── Attachments ── */}
         {ticket.attachments && ticket.attachments.length > 0 && (
           <SectionCard title="Attachments">
-            <View style={s.attachGrid}>
-              {ticket.attachments.map((att) => (
-                <View key={att} style={s.attachItem}>
-                  <Text style={s.attachIcon}>
-                    {att.endsWith('.pdf') ? '📄' : '🖼️'}
-                  </Text>
-                  <Text style={s.attachName} numberOfLines={1}>
-                    {att.split('/').pop()}
-                  </Text>
-                </View>
-              ))}
-            </View>
+            <AttachmentList attachments={ticket.attachments} />
           </SectionCard>
         )}
 
@@ -705,16 +695,6 @@ const s = StyleSheet.create({
   reporterName:    { fontSize: font.base, fontWeight: font.semibold, color: colors.textPrimary, marginBottom: 2 },
   reporterRole:    { fontSize: font.sm, color: colors.textMuted, textTransform: 'capitalize' },
   reporterContact: { fontSize: font.xs, color: colors.primary, marginTop: spacing.xs },
-
-  // Attachments
-  attachGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  attachItem: {
-    width: '30%', backgroundColor: 'rgba(0,0,0,0.03)',
-    borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg,
-    padding: spacing.sm, alignItems: 'center', gap: spacing.xs,
-  },
-  attachIcon: { fontSize: 22 },
-  attachName: { fontSize: font.xs - 1, color: colors.textMuted, textAlign: 'center' },
 
   // Timeline
   timeline: { gap: 0 },

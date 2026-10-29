@@ -37,6 +37,7 @@ import { colors, spacing, radius, font } from '@/constants/theme';
 import { loadAuth } from '@/utils/auth';
 import { apiUrl } from '@/constants/api';
 import VoiceMessage from '@/components/ui/VoiceMessage';
+import AttachmentList from '@/components/ui/AttachmentList';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -76,6 +77,7 @@ type Ticket = {
     };
   };
   transactions?: Transaction[];
+  attachments?: string[] | null;
   voice_notes?: { id: number; path: string; duration_seconds: number | null }[];
 };
 
@@ -377,6 +379,14 @@ export default function TicketShowScreen() {
                 <VoiceMessage key={vn.id} path={vn.path} duration={vn.duration_seconds} />
               ))}
             </View>
+          </View>
+        )}
+
+        {/* ── Attachments ── */}
+        {ticket.attachments && ticket.attachments.length > 0 && (
+          <View style={s.card}>
+            <Text style={s.cardTitle}>Attachments</Text>
+            <AttachmentList attachments={ticket.attachments} />
           </View>
         )}
 

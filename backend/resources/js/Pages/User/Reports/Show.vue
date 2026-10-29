@@ -116,6 +116,23 @@ function cancelReport() {
             </div>
           </div>
 
+          <!-- Attachments (uploaded from the web create form) -->
+          <div v-if="report.attachments?.length" class="card">
+            <h2 class="card-title">Attachments</h2>
+            <div class="attachments-grid">
+              <a
+                v-for="att in report.attachments"
+                :key="att"
+                :href="`/storage/${att}`"
+                target="_blank"
+                class="attachment-item"
+              >
+                <div class="attachment-icon">{{ att.endsWith('.pdf') ? '📄' : '🖼️' }}</div>
+                <div class="attachment-name">{{ att.split('/').pop() }}</div>
+              </a>
+            </div>
+          </div>
+
           <div class="content-card">
             <h2 class="card-title">Equipment Information</h2>
             <div class="info-list">

@@ -25,6 +25,7 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, radius, font } from '@/constants/theme';
 import { storageUrl } from '@/constants/api';
 import { getAudio, isAudioAvailable } from '@/utils/audio';
@@ -70,7 +71,7 @@ export default function VoiceMessage(props: Props) {
     return (
       <View style={s.row}>
         <View style={[s.playBtn, s.playBtnDisabled]}>
-          <Text style={s.playGlyph}>🔇</Text>
+          <Ionicons name="volume-mute" size={18} color="#fff" />
         </View>
         <View style={s.middle}>
           <Text style={s.unavailable}>
@@ -176,7 +177,7 @@ function VoiceMessagePlayer({ uri, path, duration, onRemove }: Props) {
         {status?.isBuffering && !playing ? (
           <ActivityIndicator size="small" color="#fff" />
         ) : (
-          <Text style={s.playGlyph}>{playing ? '❚❚' : '▶'}</Text>
+          <Ionicons name={playing ? 'pause' : 'play'} size={18} color="#fff" />
         )}
       </TouchableOpacity>
 
@@ -251,12 +252,6 @@ const s = StyleSheet.create({
     flexShrink: 0,
   },
   playBtnDisabled: { backgroundColor: colors.textDisabled },
-
-  playGlyph: {
-    fontSize: 14,
-    fontWeight: font.bold,
-    color: '#fff',
-  },
 
   middle: { flex: 1, gap: 4 },
 

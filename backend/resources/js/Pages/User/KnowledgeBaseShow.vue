@@ -5,14 +5,18 @@
 
 import AppLayout from '../../Layouts/AppLayout.vue'
 import NavUser from '../../Components/Nav/NavUser.vue'
-import { Link } from '@inertiajs/vue3'
+import { Link, router } from '@inertiajs/vue3'
 
 const props = defineProps({
   article:         Object,
   relatedArticles: Array,
 })
 
-const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? ''
+// Inertia POST — axios carries the live XSRF-TOKEN cookie, so the vote stays
+// valid even though session()->regenerate() (at login) rotated the CSRF token.
+function vote(type) {
+  router.post(`/user/knowledge-base/${props.article.slug}/${type}`)
+}
 
 function formatDate(dateStr) {
   return new Date(dateStr).toLocaleDateString('en-US', {
@@ -56,22 +60,16 @@ const categoryIcons = {
             <!-- Article body -->
             <div style="color:#d1d5db;line-height:1.8;white-space:pre-wrap;">{{ article.content }}</div>
 
-            <!-- Helpfulness rating — native POST forms, back() redirect from controller -->
+            <!-- Helpfulness rating — Inertia POST, back() redirect from controller -->
             <div style="margin-top:2rem;padding-top:2rem;border-top:1px solid rgba(45,212,191,0.2);">
               <p style="color:#9ca3af;margin-bottom:1rem;">Was this article helpful?</p>
               <div style="display:flex;gap:1rem;">
-                <form :action="`/user/knowledge-base/${article.slug}/helpful`" method="POST">
-                  <input type="hidden" name="_token" :value="csrfToken">
-                  <button type="submit" class="btn btn-secondary">
-                    👍 Yes ({{ article.helpful_count }})
-                  </button>
-                </form>
-                <form :action="`/user/knowledge-base/${article.slug}/not-helpful`" method="POST">
-                  <input type="hidden" name="_token" :value="csrfToken">
-                  <button type="submit" class="btn btn-secondary">
-                    👎 No ({{ article.not_helpful_count }})
-                  </button>
-                </form>
+                <button type="button" class="btn btn-secondary" @click="vote('helpful')">
+                  👍 Yes ({{ article.helpful_count }})
+                </button>
+                <button type="button" class="btn btn-secondary" @click="vote('not-helpful')">
+                  👎 No ({{ article.not_helpful_count }})
+                </button>
               </div>
               <div v-if="article.helpful_count + article.not_helpful_count > 0" style="margin-top:1rem;color:#9ca3af;font-size:0.9rem;">
                 {{ article.helpfulness_percentage }}% of readers found this helpful

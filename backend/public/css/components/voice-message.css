@@ -53,10 +53,7 @@
 }
 
 .vm-icon {
-    font-size: 0.75rem;
-    line-height: 1;
-    /* ❚❚ reads better slightly tightened */
-    letter-spacing: -1px;
+    display: block;
 }
 
 .vm-body {

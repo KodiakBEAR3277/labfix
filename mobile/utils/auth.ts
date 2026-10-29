@@ -56,13 +56,16 @@ export async function clearAuth(): Promise<void> {
 }
 
 /**
- * Map a user's role to their home route in the authenticated tab group.
- * Adjust the route strings once the (tabs) group screens are created.
+ * Map a user's role to their home route after login.
+ *
+ * The mobile app has no admin zone — the (it) group accepts both it-support
+ * and admin — so admins are sent there instead of /(admin)/dashboard, which
+ * is not a registered route and left them on a dead screen.
  */
 export function dashboardRouteForRole(role: AuthUser['role']): string {
   switch (role) {
-    case 'admin':      return '/(admin)/dashboard';
-    case 'it-support': return '/(it)/dashboard';
+    case 'it-support':
+    case 'admin':      return '/(it)/dashboard';
     default:           return '/(tabs)/dashboard';
   }
 }

@@ -7,39 +7,11 @@
  *   - Only allowed if the ticket has NOT been assigned (assigned_to === null)
  *   - Can edit: title, category, description
  *   - Cannot change: lab, equipment, status, priority
- *   - New attachments can be added (web supports this; mobile skips file upload
- *     since the API doesn't yet have a multipart endpoint — noted below)
+ *   - Mobile edits the text fields only; attachment upload stays on the web
  *
  * API:
- *   GET  /api/tickets/{id}   → load current ticket data + verify ownership
- *   PUT  /api/tickets/{id}   → not yet in api.php; we call PATCH via POST
- *                              with a _method override in the body.
- *                              The endpoint mirrors User\ReportController::update()
- *
- * NOTE: The PUT /api/tickets/{id} endpoint isn't in routes/api.php yet.
- * This screen is built and ready — add the route when the backend is extended:
- *
- *   Route::put('/tickets/{id}', function (Request $request, $id) {
- *       $user   = auth()->user();
- *       $ticket = \App\Models\Report::where('user_id', $user->id)->findOrFail($id);
- *       if ($ticket->assigned_to) {
- *           return response()->json(['message' => 'Cannot edit an assigned ticket.'], 403);
- *       }
- *       $validated = $request->validate([
- *           'title'       => ['required', 'string', 'max:255'],
- *           'description' => ['required', 'string', 'min:10'],
- *           'category'    => ['required', 'in:hardware,software,network,other'],
- *       ]);
- *       $ticket->update($validated);
- *       // Log update transaction
- *       \App\Models\TicketTransaction::create([
- *           'ticket_id'   => $ticket->id,
- *           'user_id'     => $user->id,
- *           'action'      => 'updated',
- *           'description' => $user->full_name . ' updated ticket details',
- *       ]);
- *       return response()->json($ticket->load(['equipment.lab', 'transactions']), 200);
- *   });
+ *   GET /api/tickets/{id} → load current ticket data + verify ownership
+ *   PUT /api/tickets/{id} → save the edited title, category and description
  */
 
 import React, { useEffect, useState, useCallback } from 'react';

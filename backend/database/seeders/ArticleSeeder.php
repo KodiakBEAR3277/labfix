@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Article;
+use App\Models\Institution;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -10,13 +11,6 @@ class ArticleSeeder extends Seeder
 {
     public function run(): void
     {
-        $itUser = User::where('email', 'it@labfix.com')->first();
-        
-        if (!$itUser) {
-            $this->command->warn('IT user not found. Please run UserSeeder first.');
-            return;
-        }
-
         $articles = [
             [
                 'title' => 'Computer won\'t turn on - Troubleshooting steps',
@@ -65,14 +59,28 @@ class ArticleSeeder extends Seeder
             ],
         ];
 
-        foreach ($articles as $articleData) {
-            Article::create([
-                'author_id' => $itUser->id,
-                'published_at' => now()->subDays(rand(1, 30)),
-                ...$articleData,
-            ]);
+        foreach (Institution::orderBy('id')->get() as $institution) {
+            app()->instance('currentInstitutionId', $institution->id);
+
+            // Each institution's KB is authored by its own IT support account.
+            $itUser = User::where('role', 'it-support')->first();
+
+            if (!$itUser) {
+                app()->forgetInstance('currentInstitutionId');
+                continue;
+            }
+
+            foreach ($articles as $articleData) {
+                Article::create([
+                    'author_id' => $itUser->id,
+                    'published_at' => now()->subDays(rand(1, 30)),
+                    ...$articleData,
+                ]);
+            }
+
+            app()->forgetInstance('currentInstitutionId');
         }
 
-        $this->command->info('Sample articles created successfully!');
+        $this->command->info('KB articles created for every institution.');
     }
 }

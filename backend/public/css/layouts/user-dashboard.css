@@ -18,7 +18,7 @@
 .welcome-section h1 {
     font-size: var(--font-size-4xl);
     margin-bottom: var(--spacing-sm);
-    background: linear-gradient(135deg, #ffffff 0%, var(--color-primary) 100%);
+    background: linear-gradient(135deg, var(--color-text-primary) 0%, var(--color-primary-dark) 100%);
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;

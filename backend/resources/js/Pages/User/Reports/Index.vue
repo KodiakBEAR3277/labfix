@@ -156,9 +156,9 @@ function statusLabel(s) {
               </tr>
             </template>
             <tr v-else>
-              <td colspan="8" style="text-align:center;padding:3rem;color:#9ca3af;">
+              <td colspan="8" style="text-align:center;padding:3rem;color:var(--color-text-muted);">
                 <div style="font-size:2rem;margin-bottom:1rem;">📋</div>
-                <h3 style="color:#d1d5db;">No reports found</h3>
+                <h3 style="color:var(--color-text-primary);">No reports found</h3>
                 <p>{{ search || status !== 'all' ? 'Try adjusting your filters' : 'Report your first issue to get started' }}</p>
                 <Link v-if="search || status !== 'all'" href="/user/reports" class="btn btn-primary" style="margin-top:1rem;">Clear Filters</Link>
                 <Link v-else href="/user/reports/create" class="btn btn-primary" style="margin-top:1rem;">+ Report Issue</Link>

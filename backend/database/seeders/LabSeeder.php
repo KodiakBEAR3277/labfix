@@ -2,68 +2,50 @@
 
 namespace Database\Seeders;
 
+use App\Models\Institution;
 use App\Models\Lab;
 use Illuminate\Database\Seeder;
 
 class LabSeeder extends Seeder
 {
+    /**
+     * Labs per institution slug. Counts stay within each plan's max_labs
+     * (Free = 1, Standard = 5, Pro/Enterprise = unlimited).
+     *
+     * @var array<string, array<int, array<string, mixed>>>
+     */
+    private const LABS = [
+        'free' => [
+            ['name' => 'Computer Lab A', 'code' => 'LAB-A', 'location' => 'Main Building, 1st Floor', 'capacity' => 20, 'description' => 'General purpose computer laboratory'],
+        ],
+        'standard' => [
+            ['name' => 'Computer Lab A', 'code' => 'LAB-A', 'location' => 'Main Building, 1st Floor', 'capacity' => 20, 'description' => 'General purpose computer laboratory'],
+            ['name' => 'Computer Lab B', 'code' => 'LAB-B', 'location' => 'Main Building, 2nd Floor', 'capacity' => 25, 'description' => 'Large computer laboratory for programming courses'],
+        ],
+        'snsu' => [
+            ['name' => 'Computer Lab A', 'code' => 'LAB-A', 'location' => 'IT Building, 1st Floor', 'capacity' => 20, 'description' => 'General purpose computer laboratory'],
+            ['name' => 'Computer Lab B', 'code' => 'LAB-B', 'location' => 'IT Building, 2nd Floor', 'capacity' => 20, 'description' => 'Programming laboratory with development tools'],
+            ['name' => 'Networking Lab', 'code' => 'LAB-C', 'location' => 'IT Building, 3rd Floor', 'capacity' => 24, 'description' => 'Specialized networking laboratory'],
+        ],
+        'enterprise' => [
+            ['name' => 'Computer Lab A', 'code' => 'LAB-A', 'location' => 'Campus North, 1st Floor', 'capacity' => 20, 'description' => 'General purpose computer laboratory'],
+            ['name' => 'Programming Lab', 'code' => 'LAB-B', 'location' => 'Campus North, 2nd Floor', 'capacity' => 24, 'description' => 'Advanced programming laboratory'],
+            ['name' => 'Library Computer Area', 'code' => 'LAB-C', 'location' => 'Library, 2nd Floor', 'capacity' => 28, 'description' => 'Public access computers in the library'],
+        ],
+    ];
+
     public function run(): void
     {
-        $labs = [
-            [
-                'name' => 'Computer Lab A',
-                'code' => 'EB-202',
-                'location' => 'Building 1, 2nd Floor',
-                'capacity' => 20,
-                'description' => 'General purpose computer laboratory with standard desktop computers',
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Computer Lab B',
-                'code' => 'EB-203',
-                'location' => 'Building 2, 1st Floor',
-                'capacity' => 25,
-                'description' => 'Large computer laboratory for programming courses',
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Computer Lab C',
-                'code' => 'EB-204',
-                'location' => 'Building 1, 3rd Floor',
-                'capacity' => 20,
-                'description' => 'Computer laboratory with high-performance workstations',
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Networking Lab',
-                'code' => 'EB-311',
-                'location' => 'Building 3, 3rd Floor',
-                'capacity' => 15,
-                'description' => 'Specialized lab for multimedia and design work',
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Programming Lab',
-                'code' => 'EB-306',
-                'location' => 'Building 2, 3rd Floor',
-                'capacity' => 18,
-                'description' => 'Advanced programming laboratory with development tools',
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Library Computer Area',
-                'code' => 'LRC',
-                'location' => 'Library, 2nd Floor',
-                'capacity' => 12,
-                'description' => 'Public access computers in the library',
-                'is_active' => true,
-            ],
-        ];
+        foreach (Institution::orderBy('id')->get() as $institution) {
+            app()->instance('currentInstitutionId', $institution->id);
 
-        foreach ($labs as $labData) {
-            Lab::create($labData);
+            foreach (self::LABS[$institution->slug] ?? [] as $lab) {
+                Lab::create($lab + ['is_active' => true]);
+            }
+
+            app()->forgetInstance('currentInstitutionId');
         }
 
-        $this->command->info('Labs created successfully!');
+        $this->command->info('Labs created for every institution.');
     }
 }

@@ -13,7 +13,7 @@
  * On success:
  *   1. Token + user are saved to SecureStore via saveAuth()
  *   2. User is redirected to their role-appropriate dashboard
- *      (admin → /(admin)/dashboard, it-support → /(it)/dashboard,
+ *      (it-support and admin → /(it)/dashboard,
  *       student/staff → /(tabs)/dashboard)
  *
  * On failure:
@@ -24,8 +24,9 @@
  * UX details that match the web page:
  *   - Password is cleared on any error (same as Login.vue onError callback)
  *   - Email field retains its value on error
- *   - "Don't have an account?" → /register
  *   - Logo links back to / (Landing)
+ *
+ * No sign-up here — all registration is handled by the web app.
  */
 
 import React, { useState, useRef } from 'react';
@@ -286,21 +287,6 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
-  },
-  navHint: {
-    fontSize: font.xs,
-    color: colors.textMuted,
-  },
-  navBtn: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.xs + 1,
-    borderRadius: radius.full,
-  },
-  navBtnText: {
-    fontSize: font.xs,
-    fontWeight: font.bold,
-    color: '#fff',
   },
 
   // ── Keyboard avoiding + scroll ───────────────────────────────────────────

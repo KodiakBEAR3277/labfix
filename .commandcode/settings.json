@@ -3,7 +3,14 @@
     "allow": [
       "Shell(npx expo install expo-audio)",
       "Shell(php artisan migrate)",
-      "Shell(git:*)"
+      "Shell(git:*)",
+      "Shell(set:*)",
+      "Shell(npx tsc --noEmit)",
+      "Shell(npx eslint app/(tabs)/report.tsx components/ui/UserTabBar.tsx components/ui/ITTabBar.tsx)",
+      "Shell(npx expo export --platform android --output-dir dist-check --clear)",
+      "Shell(rmdir:*)",
+      "Shell(npm:*)",
+      "Shell(findstr:*)"
     ],
     "deny": [],
     "defaultMode": "default"

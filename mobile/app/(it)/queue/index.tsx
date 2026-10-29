@@ -281,7 +281,7 @@ function FilterPill({
 const fp = StyleSheet.create({
   pill:       { backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border, borderRadius: radius.full, paddingHorizontal: spacing.md, paddingVertical: spacing.xs + 2, marginRight: spacing.xs },
   pillActive: { backgroundColor: colors.primaryLight, borderColor: colors.primary },
-  text:       { fontSize: font.xs, color: colors.textMuted, fontWeight: font.medium, whiteSpace: 'nowrap' },
+  text:       { fontSize: font.xs, color: colors.textMuted, fontWeight: font.medium },
   textActive: { color: colors.primary, fontWeight: font.semibold },
 });
 
