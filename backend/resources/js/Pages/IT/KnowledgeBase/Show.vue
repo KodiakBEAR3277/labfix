@@ -6,6 +6,7 @@
 import AppLayout from '../../../Layouts/AppLayout.vue'
 import NavIT from '../../../Components/Nav/NavIT.vue'
 import { Link, useForm, router } from '@inertiajs/vue3'
+import Icon from '../../../Components/Icon.vue'
 
 const props = defineProps({
   article: Object,
@@ -51,7 +52,7 @@ function diffForHumans(d) {
     <template #nav><NavIT /></template>
 
     <div class="container">
-      <Link href="/it/knowledge-base" class="back-btn">← Back to Knowledge Base</Link>
+      <Link href="/it/knowledge-base" class="back-btn"><Icon name="arrow-left" /> Back to Knowledge Base</Link>
 
       <div class="page-header">
         <h1>Article Preview</h1>
@@ -79,10 +80,10 @@ function diffForHumans(d) {
               {{ article.title }}
             </h1>
             <div style="display:flex;gap:1.5rem;color:#9ca3af;font-size:0.9rem;flex-wrap:wrap;">
-              <div>👁️ {{ article.views.toLocaleString() }} views</div>
-              <div>👍 {{ article.helpfulness_percentage }}% helpful</div>
-              <div>✏️ By {{ article.author?.first_name }} {{ article.author?.last_name }}</div>
-              <div>📅 Updated {{ diffForHumans(article.updated_at) }}</div>
+              <div><Icon name="eye" /> {{ article.views.toLocaleString() }} views</div>
+              <div><Icon name="check" /> {{ article.helpfulness_percentage }}% helpful</div>
+              <div><Icon name="edit" /> By {{ article.author?.first_name }} {{ article.author?.last_name }}</div>
+              <div><Icon name="calendar" /> Updated {{ diffForHumans(article.updated_at) }}</div>
             </div>
           </div>
 

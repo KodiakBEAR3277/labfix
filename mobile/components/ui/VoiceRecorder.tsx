@@ -28,6 +28,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { colors, spacing, radius, font } from '@/constants/theme';
+import Icon from '@/components/ui/Icon';
 import { getAudio, isAudioAvailable } from '@/utils/audio';
 
 type Phase = 'idle' | 'recording' | 'paused';
@@ -50,7 +51,7 @@ export default function VoiceRecorder(props: Props) {
   if (!isAudioAvailable) {
     return (
       <View style={s.wrap}>
-        <Text style={s.micGlyph}>🔇</Text>
+        <Icon name="mic-off" size={26} />
         <Text style={s.hint}>
           Voice recording needs an app build that includes expo-audio.
         </Text>
@@ -160,7 +161,7 @@ function VoiceRecorderInner({ onAdd, maxSeconds = 60 }: Props) {
     return (
       <View style={s.wrap}>
         <TouchableOpacity style={s.micBtn} onPress={handleStart} activeOpacity={0.85}>
-          <Text style={s.micGlyph}>🎙️</Text>
+          <Icon name="mic" size={26} color="#ffffff" />
         </TouchableOpacity>
         <Text style={s.hint}>
           Tap to record a voice note
@@ -196,16 +197,25 @@ function VoiceRecorderInner({ onAdd, maxSeconds = 60 }: Props) {
       <View style={s.actions}>
         {phase === 'recording' ? (
           <TouchableOpacity style={s.secondaryBtn} onPress={handlePause} activeOpacity={0.8}>
-            <Text style={s.secondaryText}>❚❚ Pause</Text>
+            <View style={s.inlineRow}>
+              <Icon name="pause" size={13} color={colors.primary} />
+              <Text style={s.secondaryText}>Pause</Text>
+            </View>
           </TouchableOpacity>
         ) : (
           <TouchableOpacity style={s.secondaryBtn} onPress={handleResume} activeOpacity={0.8}>
-            <Text style={s.secondaryText}>▶ Resume</Text>
+            <View style={s.inlineRow}>
+              <Icon name="play" size={13} color={colors.primary} />
+              <Text style={s.secondaryText}>Resume</Text>
+            </View>
           </TouchableOpacity>
         )}
 
         <TouchableOpacity style={s.primaryBtn} onPress={handleStop} activeOpacity={0.85}>
-          <Text style={s.primaryText}>■ Stop &amp; Attach</Text>
+          <View style={s.inlineRow}>
+            <Icon name="close" size={13} color="#ffffff" />
+            <Text style={s.primaryText}>Stop &amp; Attach</Text>
+          </View>
         </TouchableOpacity>
       </View>
 
@@ -219,6 +229,11 @@ function VoiceRecorderInner({ onAdd, maxSeconds = 60 }: Props) {
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 const s = StyleSheet.create({
+  inlineRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
   wrap: {
     alignItems: 'center',
     gap: spacing.sm,

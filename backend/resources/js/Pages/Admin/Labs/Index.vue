@@ -15,6 +15,7 @@ import AppLayout from '../../../Layouts/AppLayout.vue'
 import NavAdmin from '../../../Components/Nav/NavAdmin.vue'
 import { Link, useForm, router } from '@inertiajs/vue3'
 import { ref, computed } from 'vue'
+import Icon from '../../../Components/Icon.vue'
 
 const props = defineProps({
   labs:       Array,
@@ -168,7 +169,7 @@ function equipmentClass(status) {
 }
 
 function equipmentIcon(type) {
-  return { computer: '💻', printer: '🖨️', projector: '📽️' }[type] ?? '🖥️'
+  return { computer: 'laptop', printer: 'printer', projector: 'videocam' }[type] ?? 'desktop'
 }
 </script>
 
@@ -184,7 +185,7 @@ function equipmentIcon(type) {
           &nbsp;·&nbsp; Labs: {{ planLimits.labs.current }}/{{ planLimits.labs.max ?? '∞' }}
           &nbsp;·&nbsp; Equipment: {{ planLimits.equipment.current }}/{{ planLimits.equipment.max ?? '∞' }}
         </span>
-        <a href="/admin/upgrade" class="view-all-link">Upgrade →</a>
+        <a href="/admin/upgrade" class="view-all-link">Upgrade <Icon name="arrow-right" /></a>
       </div>
 
       <div class="page-header">
@@ -228,7 +229,7 @@ function equipmentIcon(type) {
 
             <div class="lab-header">
               <div class="lab-title-section">
-                <div class="lab-icon">💻</div>
+                <div class="lab-icon"><Icon name="laptop" /></div>
                 <div>
                   <h2 class="lab-title">{{ lab.name }}</h2>
                   <p style="color:#9ca3af;font-size:0.85rem;">{{ lab.code }}</p>
@@ -298,7 +299,7 @@ function equipmentIcon(type) {
                       <span v-if="eq.brand || eq.model"><br>{{ eq.brand }} {{ eq.model }}</span>
                       <span v-if="eq.notes"><br>{{ eq.notes.substring(0, 50) }}</span>
                     </div>
-                    <div class="equipment-icon">{{ equipmentIcon(eq.type) }}</div>
+                    <div class="equipment-icon"><Icon :name="equipmentIcon(eq.type)" /></div>
                     <div class="equipment-id">{{ eq.equipment_code }}</div>
                   </div>
                 </template>
@@ -323,7 +324,7 @@ function equipmentIcon(type) {
         </template>
 
         <div v-else class="empty-state" style="grid-column:1/-1;">
-          <div class="empty-icon">🏫</div>
+          <div class="empty-icon"><Icon name="school" /></div>
           <h3>No Labs Configured</h3>
           <p>Create your first lab to get started</p>
           <button

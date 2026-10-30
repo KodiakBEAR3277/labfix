@@ -32,6 +32,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { colors, spacing, radius, font } from '@/constants/theme';
 import { loadAuth } from '@/utils/auth';
 import { apiUrl } from '@/constants/api';
+import Icon, { IconName } from '@/components/ui/Icon';
 import VoiceMessage from '@/components/ui/VoiceMessage';
 import AttachmentList from '@/components/ui/AttachmentList';
 
@@ -102,12 +103,12 @@ function equipmentStatusStyle(s: string): { bg: string; text: string; border: st
   }
 }
 
-function txIcon(action: string): string {
-  const map: Record<string, string> = {
-    created: '🎫', status_changed: '🔄', assigned: '👤',
-    priority_changed: '⚠️', updated: '✏️', deleted: '🗑️', restored: '♻️',
+function txIcon(action: string): IconName {
+  const map: Record<string, IconName> = {
+    created: 'ticket', status_changed: 'refresh', assigned: 'user',
+    priority_changed: 'alert', updated: 'edit', deleted: 'trash', restored: 'restore',
   };
-  return map[action] ?? '📌';
+  return map[action] ?? 'pin';
 }
 
 function txTitle(action: string): string {
@@ -283,10 +284,14 @@ export default function ITAssignmentShowScreen() {
       <SafeAreaView style={s.root}>
         <StatusBar barStyle="light-content" backgroundColor={colors.bgPrimary} />
         <View style={s.centered}>
-          <Text style={s.errorIcon}>⚠️</Text>
+          <Icon name="alert" size={36} color={colors.warning} />
           <Text style={s.errorText}>{error ?? 'Ticket not found.'}</Text>
-          <TouchableOpacity style={s.retryBtn} onPress={() => router.replace('/(it)/assignments' as any)}>
-            <Text style={s.retryText}>← Go Back</Text>
+          <TouchableOpacity
+            style={[s.retryBtn, s.inlineRow]}
+            onPress={() => router.replace('/(it)/assignments' as any)}
+          >
+            <Icon name="arrow-left" size={14} color="#ffffff" />
+            <Text style={s.retryText}>Go Back</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -304,8 +309,13 @@ export default function ITAssignmentShowScreen() {
 
       {/* ── Top Nav ── */}
       <View style={s.nav}>
-        <TouchableOpacity onPress={() => router.replace('/(it)/assignments' as any)} activeOpacity={0.7}>
-          <Text style={s.navBack}>← My Assignments</Text>
+        <TouchableOpacity
+          style={s.inlineRow}
+          onPress={() => router.replace('/(it)/assignments' as any)}
+          activeOpacity={0.7}
+        >
+          <Icon name="arrow-left" size={13} color={colors.primary} />
+          <Text style={s.navBack}>My Assignments</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={s.updateBtn}
@@ -389,7 +399,10 @@ export default function ITAssignmentShowScreen() {
               >
                 {startingWork
                   ? <ActivityIndicator size="small" color={colors.primary} />
-                  : <Text style={s.outlineBtnText}>🚀 Start Working</Text>}
+                  : <View style={s.inlineRow}>
+                      <Icon name="rocket" size={14} color={colors.primary} />
+                      <Text style={s.outlineBtnText}>Start Working</Text>
+                    </View>}
               </TouchableOpacity>
             )}
 
@@ -402,7 +415,10 @@ export default function ITAssignmentShowScreen() {
               >
                 {resolving
                   ? <ActivityIndicator size="small" color={colors.primary} />
-                  : <Text style={s.outlineBtnText}>✅ Mark as Resolved</Text>}
+                  : <View style={s.inlineRow}>
+                      <Icon name="check-circle" size={14} color={colors.success} />
+                      <Text style={s.outlineBtnText}>Mark as Resolved</Text>
+                    </View>}
               </TouchableOpacity>
             )}
           </View>
@@ -485,18 +501,22 @@ export default function ITAssignmentShowScreen() {
               </Text>
               {ticket.reporter?.email && (
                 <TouchableOpacity
+                  style={s.inlineRow}
                   onPress={() => Linking.openURL(`mailto:${ticket.reporter!.email}`)}
                   activeOpacity={0.7}
                 >
-                  <Text style={s.reporterContact}>📧 {ticket.reporter.email}</Text>
+                  <Icon name="mail" size={11} color={colors.primary} />
+                  <Text style={s.reporterContact}>{ticket.reporter.email}</Text>
                 </TouchableOpacity>
               )}
               {ticket.reporter?.phone && (
                 <TouchableOpacity
+                  style={s.inlineRow}
                   onPress={() => Linking.openURL(`tel:${ticket.reporter!.phone}`)}
                   activeOpacity={0.7}
                 >
-                  <Text style={s.reporterContact}>📞 {ticket.reporter.phone}</Text>
+                  <Icon name="phone" size={11} color={colors.primary} />
+                  <Text style={s.reporterContact}>{ticket.reporter.phone}</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -535,8 +555,9 @@ export default function ITAssignmentShowScreen() {
                   </View>
                   <View style={s.tlContent}>
                     <View style={s.tlHeader}>
+                      <Icon name={txIcon(tx.action)} size={13} />
                       <Text style={s.tlTitle}>
-                        {txIcon(tx.action)} {txTitle(tx.action)}
+                        {txTitle(tx.action)}
                       </Text>
                       <Text style={s.tlTime}>{formatDate(tx.created_at)}</Text>
                     </View>
@@ -545,7 +566,7 @@ export default function ITAssignmentShowScreen() {
                       <View style={s.tlChange}>
                         {tx.old_value && <Text style={s.tlOld}>{tx.old_value}</Text>}
                         {tx.old_value && tx.new_value && (
-                          <Text style={s.tlArrow}> → </Text>
+                          <Icon name="arrow-right" size={11} color={colors.textMuted} />
                         )}
                         {tx.new_value && <Text style={s.tlNew}>{tx.new_value}</Text>}
                       </View>
@@ -567,7 +588,8 @@ export default function ITAssignmentShowScreen() {
                 </View>
                 <View style={s.tlContent}>
                   <View style={s.tlHeader}>
-                    <Text style={s.tlTitle}>🎫 Ticket Created</Text>
+                    <Icon name="ticket" size={13} />
+                    <Text style={s.tlTitle}>Ticket Created</Text>
                     <Text style={s.tlTime}>{formatDate(ticket.created_at)}</Text>
                   </View>
                   <Text style={s.tlText}>
@@ -582,14 +604,20 @@ export default function ITAssignmentShowScreen() {
         {/* ── Next Steps hint ── */}
         {isResolved ? (
           <View style={[s.hintCard, s.hintCardGreen]}>
-            <Text style={[s.hintTitle, { color: '#10b981' }]}>✅ Great Job!</Text>
+            <View style={s.hintTitleRow}>
+              <Icon name="check-circle" size={14} color={colors.success} />
+              <Text style={[s.hintTitle, { color: '#10b981' }]}>Great Job!</Text>
+            </View>
             <Text style={s.hintText}>
               You've successfully resolved this ticket. The reporter has been notified.
             </Text>
           </View>
         ) : (
           <View style={[s.hintCard, s.hintCardTeal]}>
-            <Text style={[s.hintTitle, { color: colors.primary }]}>💡 Next Steps</Text>
+            <View style={s.hintTitleRow}>
+              <Icon name="lightbulb" size={14} color={colors.primary} />
+              <Text style={[s.hintTitle, { color: colors.primary }]}>Next Steps</Text>
+            </View>
             {ticket.status === 'assigned' ? (
               <Text style={s.hintText}>
                 Start working on this ticket to let the reporter know you're actively resolving their issue.
@@ -617,6 +645,7 @@ export default function ITAssignmentShowScreen() {
 const s = StyleSheet.create({
   root:    { flex: 1, backgroundColor: colors.bgPrimary },
   scroll:  { paddingBottom: spacing.lg },
+  inlineRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   centered:{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.md, padding: spacing.lg },
 
   // Nav
@@ -723,6 +752,7 @@ const s = StyleSheet.create({
   hintCardTeal:  { backgroundColor: 'rgba(45,212,191,0.08)', borderWidth: 1, borderColor: 'rgba(45,212,191,0.2)' },
   hintCardGreen: { backgroundColor: 'rgba(16,185,129,0.08)', borderWidth: 1, borderColor: 'rgba(16,185,129,0.2)' },
   hintTitle: { fontSize: font.base, fontWeight: font.bold, marginBottom: 2 },
+  hintTitleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   hintText:  { fontSize: font.sm, color: colors.textMuted, lineHeight: 20 },
 
   // Error / states

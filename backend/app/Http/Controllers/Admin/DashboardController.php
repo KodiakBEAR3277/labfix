@@ -49,7 +49,7 @@ class DashboardController extends Controller
         $recentUsers = User::latest()->take(3)->get();
         foreach ($recentUsers as $user) {
             $activities[] = [
-                'icon'  => '👤',
+                'icon'  => 'user',
                 'title' => "New user registered: {$user->full_name} (" . ucfirst($user->role) . ")",
                 'time'  => $user->created_at->diffForHumans(),
             ];
@@ -64,7 +64,7 @@ class DashboardController extends Controller
 
         foreach ($recentResolved as $ticket) {
             $activities[] = [
-                'icon'  => '✅',
+                'icon'  => 'check-circle',
                 'title' => "Ticket {$ticket->ticket_number} resolved",
                 'time'  => $ticket->updated_at->diffForHumans(),
             ];

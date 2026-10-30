@@ -28,6 +28,7 @@ import { router } from 'expo-router';
 import { colors, spacing, radius, font } from '@/constants/theme';
 import { loadAuth, AuthUser } from '@/utils/auth';
 import { apiUrl } from '@/constants/api';
+import Icon from '@/components/ui/Icon';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -91,10 +92,6 @@ function priorityColor(p: string): string {
   return p === 'high' ? colors.danger : p === 'medium' ? colors.warning : colors.success;
 }
 
-function priorityEmoji(p: string): string {
-  return p === 'high' ? '🔴' : p === 'medium' ? '🟡' : '🟢';
-}
-
 function diffForHumans(iso: string): string {
   const sec = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
   if (sec < 60)    return `${sec}s ago`;
@@ -142,20 +139,29 @@ function TicketCard({
       {/* Meta */}
       <View style={card.metaRow}>
         {ticket.reporter && (
-          <Text style={card.meta}>
-            👤 {ticket.reporter.first_name} {ticket.reporter.last_name}
-          </Text>
+          <View style={card.metaItem}>
+            <Icon name="user" size={11} />
+            <Text style={card.meta}>
+              {ticket.reporter.first_name} {ticket.reporter.last_name}
+            </Text>
+          </View>
         )}
         {ticket.equipment?.lab?.name && (
-          <Text style={card.meta}>📍 {ticket.equipment.lab.name}</Text>
+          <View style={card.metaItem}>
+            <Icon name="map-pin" size={11} />
+            <Text style={card.meta}>{ticket.equipment.lab.name}</Text>
+          </View>
         )}
         {ticket.equipment?.equipment_code && (
           <Text style={card.meta}>{ticket.equipment.equipment_code}</Text>
         )}
         <View style={[card.priorityPill, { borderColor: pc + '66' }]}>
-          <Text style={[card.priorityText, { color: pc }]}>
-            {priorityEmoji(ticket.priority)} {ticket.priority.charAt(0).toUpperCase() + ticket.priority.slice(1)}
-          </Text>
+          <View style={card.priorityInner}>
+            <Icon name="circle" size={10} color={pc} />
+            <Text style={[card.priorityText, { color: pc }]}>
+              {ticket.priority.charAt(0).toUpperCase() + ticket.priority.slice(1)}
+            </Text>
+          </View>
         </View>
         <Text style={[card.meta, { marginLeft: 'auto' }]}>
           {diffForHumans(ticket.created_at)}
@@ -164,13 +170,22 @@ function TicketCard({
 
       {/* Assignment label */}
       {isMyTicket ? (
-        <Text style={card.assignedToYou}>👤 Assigned to You</Text>
+        <View style={card.metaItem}>
+          <Icon name="user" size={11} color={colors.primary} />
+          <Text style={card.assignedToYou}>Assigned to You</Text>
+        </View>
       ) : ticket.assigned_to && ticket.assigned_to_user ? (
-        <Text style={card.assignedToOther}>
-          👤 {ticket.assigned_to_user.first_name} {ticket.assigned_to_user.last_name}
-        </Text>
+        <View style={card.metaItem}>
+          <Icon name="user" size={11} />
+          <Text style={card.assignedToOther}>
+            {ticket.assigned_to_user.first_name} {ticket.assigned_to_user.last_name}
+          </Text>
+        </View>
       ) : (
-        <Text style={card.unassigned}>⏳ Unassigned</Text>
+        <View style={card.metaItem}>
+          <Icon name="hourglass" size={11} />
+          <Text style={card.unassigned}>Unassigned</Text>
+        </View>
       )}
 
       {/* Action buttons */}
@@ -227,8 +242,10 @@ const card = StyleSheet.create({
   statusText:   { fontSize: font.xs - 1, fontWeight: font.semibold },
   title:        { fontSize: font.base, fontWeight: font.medium, color: colors.textPrimary, lineHeight: 21 },
   metaRow:      { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, flexWrap: 'wrap' },
+  metaItem:     { flexDirection: 'row', alignItems: 'center', gap: 4 },
   meta:         { fontSize: font.xs, color: colors.textMuted },
   priorityPill: { borderWidth: 1, borderRadius: radius.full, paddingHorizontal: 7, paddingVertical: 2 },
+  priorityInner:{ flexDirection: 'row', alignItems: 'center', gap: 4 },
   priorityText: { fontSize: font.xs - 1, fontWeight: font.semibold },
   assignedToYou:   { fontSize: font.xs, color: colors.primary, fontWeight: font.semibold },
   assignedToOther: { fontSize: font.xs, color: colors.textMuted },
@@ -472,7 +489,7 @@ export default function ITQueueScreen() {
 
             {/* Info banner */}
             <View style={s.infoBanner}>
-              <Text style={s.infoBannerIcon}>ℹ️</Text>
+              <Icon name="info" size={15} color={colors.infoLight} />
               <Text style={s.infoBannerText}>
                 <Text style={{ fontWeight: font.bold, color: colors.infoLight }}>IT Support View: </Text>
                 You can view all tickets and assign unassigned ones to yourself.{' '}
@@ -480,14 +497,15 @@ export default function ITQueueScreen() {
                   style={{ color: colors.primary, fontWeight: font.semibold }}
                   onPress={() => router.push('/(it)/assignments' as any)}
                 >
-                  View My Assignments →
+                  View My Assignments
                 </Text>
+                <Icon name="arrow-right" size={11} color={colors.primary} />
               </Text>
             </View>
 
             {/* Search */}
             <View style={s.searchBar}>
-              <Text style={s.searchIcon}>🔍</Text>
+              <Icon name="search" size={15} />
               <TextInput
                 style={s.searchInput}
                 value={search}
@@ -548,7 +566,7 @@ export default function ITQueueScreen() {
         }
         ListEmptyComponent={
           <View style={s.emptyState}>
-            <Text style={s.emptyIcon}>📋</Text>
+            <Icon name="clipboard" size={36} />
             <Text style={s.emptyTitle}>No tickets found</Text>
             <Text style={s.emptySub}>
               {search || status !== 'all' || priority !== 'all' || lab !== 'all'
@@ -567,21 +585,23 @@ export default function ITQueueScreen() {
                 </Text>
                 <View style={s.pageControls}>
                   <TouchableOpacity
-                    style={[s.pageBtn, !pagination.prev_page_url && s.pageBtnDisabled]}
+                    style={[s.pageBtn, s.pageBtnRow, !pagination.prev_page_url && s.pageBtnDisabled]}
                     onPress={() => handlePage(page - 1)}
                     disabled={!pagination.prev_page_url || pageLoading}
                   >
-                    <Text style={s.pageBtnText}>← Prev</Text>
+                    <Icon name="arrow-left" size={13} />
+                    <Text style={s.pageBtnText}>Prev</Text>
                   </TouchableOpacity>
                   <View style={s.pageCurrent}>
                     <Text style={s.pageCurrentText}>{page}</Text>
                   </View>
                   <TouchableOpacity
-                    style={[s.pageBtn, !pagination.next_page_url && s.pageBtnDisabled]}
+                    style={[s.pageBtn, s.pageBtnRow, !pagination.next_page_url && s.pageBtnDisabled]}
                     onPress={() => handlePage(page + 1)}
                     disabled={!pagination.next_page_url || pageLoading}
                   >
-                    <Text style={s.pageBtnText}>Next →</Text>
+                    <Text style={s.pageBtnText}>Next</Text>
+                    <Icon name="arrow-right" size={13} />
                   </TouchableOpacity>
                 </View>
                 {pageLoading && <ActivityIndicator size="small" color={colors.primary} />}
@@ -597,7 +617,10 @@ export default function ITQueueScreen() {
               >
                 <Text style={s.summaryLabel}>My Active Tickets</Text>
                 <Text style={s.summaryValue}>{stats?.assigned ?? 0}</Text>
-                <Text style={s.summaryLink}>View My Assignments →</Text>
+                <View style={s.summaryLinkRow}>
+                  <Text style={s.summaryLink}>View My Assignments</Text>
+                  <Icon name="arrow-right" size={11} color={colors.primary} />
+                </View>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -609,7 +632,10 @@ export default function ITQueueScreen() {
                 <Text style={[s.summaryValue, { color: colors.textPrimary }]}>
                   {stats?.high_priority ?? 0}
                 </Text>
-                <Text style={[s.summaryLink, { color: '#b91c1c' }]}>View High Priority →</Text>
+                <View style={s.summaryLinkRow}>
+                  <Text style={[s.summaryLink, { color: '#b91c1c' }]}>View High Priority</Text>
+                  <Icon name="arrow-right" size={11} color="#b91c1c" />
+                </View>
               </TouchableOpacity>
             </View>
 
@@ -694,6 +720,7 @@ const s = StyleSheet.create({
   pageInfo:        { fontSize: font.sm, color: colors.textMuted },
   pageControls:    { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   pageBtn:         { paddingHorizontal: spacing.md, paddingVertical: spacing.xs + 2, borderRadius: radius.md, backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border },
+  pageBtnRow:      { flexDirection: 'row', alignItems: 'center', gap: 4 },
   pageBtnDisabled: { opacity: 0.4 },
   pageBtnText:     { fontSize: font.sm, color: colors.textSecondary },
   pageCurrent:     { width: 32, height: 32, borderRadius: radius.full, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
@@ -707,5 +734,6 @@ const s = StyleSheet.create({
   summaryCardDanger: { backgroundColor: 'rgba(239,68,68,0.07)', borderColor: 'rgba(239,68,68,0.25)' },
   summaryLabel: { fontSize: font.xs, fontWeight: font.bold, color: colors.primary, marginBottom: spacing.xs },
   summaryValue: { fontSize: font.xl3, fontWeight: font.bold, color: colors.textPrimary, lineHeight: 32 },
-  summaryLink:  { fontSize: font.xs, color: colors.primary, marginTop: spacing.xs },
+  summaryLink:  { fontSize: font.xs, color: colors.primary },
+  summaryLinkRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginTop: spacing.xs },
 });

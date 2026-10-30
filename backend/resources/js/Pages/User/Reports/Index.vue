@@ -7,6 +7,7 @@ import AppLayout from '../../../Layouts/AppLayout.vue'
 import NavUser from '../../../Components/Nav/NavUser.vue'
 import { Link, router } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
+import Icon from '../../../Components/Icon.vue'
 
 const props = defineProps({
   reports: Object,
@@ -46,6 +47,15 @@ function statusColor(status) {
 function statusLabel(s) {
   return s.replace('-', ' ').replace(/\b\w/g, c => c.toUpperCase())
 }
+
+function priorityColor(priority) {
+  const map = {
+    high:   'var(--color-danger)',
+    medium: 'var(--color-warning)',
+    low:    'var(--color-success)',
+  }
+  return map[priority] ?? 'var(--color-text-muted)'
+}
 </script>
 
 <template>
@@ -81,7 +91,7 @@ function statusLabel(s) {
       <!-- Filter bar -->
       <div class="filter-bar">
         <div class="search-box">
-          <span class="search-icon">🔍</span>
+          <span class="search-icon"><Icon name="search" /></span>
           <input
             v-model="search"
             type="text"
@@ -131,7 +141,7 @@ function statusLabel(s) {
                 </td>
                 <td>
                   <span class="priority-badge" :class="`priority-${report.priority}`">
-                    {{ report.priority === 'high' ? '🔴' : report.priority === 'medium' ? '🟡' : '🟢' }}
+                    <Icon name="circle" class="priority-dot" :style="{ color: priorityColor(report.priority) }" />
                     {{ report.priority.charAt(0).toUpperCase() + report.priority.slice(1) }}
                   </span>
                 </td>
@@ -149,7 +159,7 @@ function statusLabel(s) {
                       >Cancel</button>
                     </template>
                     <template v-else>
-                      <span class="action-btn" style="opacity:0.5;cursor:not-allowed;" title="Ticket is assigned">🔒 Locked</span>
+                      <span class="action-btn" style="opacity:0.5;cursor:not-allowed;" title="Ticket is assigned"><Icon name="lock" /> Locked</span>
                     </template>
                   </div>
                 </td>
@@ -157,7 +167,7 @@ function statusLabel(s) {
             </template>
             <tr v-else>
               <td colspan="8" style="text-align:center;padding:3rem;color:var(--color-text-muted);">
-                <div style="font-size:2rem;margin-bottom:1rem;">📋</div>
+                <div style="font-size:2rem;margin-bottom:1rem;"><Icon name="clipboard" /></div>
                 <h3 style="color:var(--color-text-primary);">No reports found</h3>
                 <p>{{ search || status !== 'all' ? 'Try adjusting your filters' : 'Report your first issue to get started' }}</p>
                 <Link v-if="search || status !== 'all'" href="/user/reports" class="btn btn-primary" style="margin-top:1rem;">Clear Filters</Link>
@@ -177,7 +187,7 @@ function statusLabel(s) {
               class="page-btn"
               :disabled="!reports.prev_page_url"
               @click="router.get(reports.prev_page_url)"
-            >← Previous</button>
+            ><Icon name="arrow-left" /> Previous</button>
             <button
               v-for="p in reports.last_page"
               :key="p"
@@ -189,7 +199,7 @@ function statusLabel(s) {
               class="page-btn"
               :disabled="!reports.next_page_url"
               @click="router.get(reports.next_page_url)"
-            >Next →</button>
+            >Next <Icon name="arrow-right" /></button>
           </div>
         </div>
       </div>
@@ -197,7 +207,7 @@ function statusLabel(s) {
       <!-- Info banner -->
       <div style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);padding:1rem;border-radius:8px;margin-top:1.5rem;">
         <div style="display:flex;align-items:center;gap:0.75rem;color:#60a5fa;">
-          <span style="font-size:1.5rem;">ℹ️</span>
+          <span style="font-size:1.5rem;"><Icon name="info" /></span>
           <div>
             <strong>Note:</strong> You can edit or cancel tickets before they're assigned to a technician.
             Once assigned, contact the technician to make changes.

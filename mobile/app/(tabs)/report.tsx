@@ -53,6 +53,7 @@ import { loadAuth } from '@/utils/auth';
 import { apiUrl } from '@/constants/api';
 import VoiceRecorder, { Recording } from '@/components/ui/VoiceRecorder';
 import VoiceMessage from '@/components/ui/VoiceMessage';
+import Icon, { IconName } from '@/components/ui/Icon';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -72,7 +73,7 @@ type Equipment = {
 
 type Category = {
   value: 'hardware' | 'software' | 'network' | 'other';
-  icon:  string;
+  icon:  IconName;
   label: string;
   desc:  string;
 };
@@ -100,10 +101,10 @@ type FieldErrors = {
 const TOTAL_STEPS = 5;
 
 const CATEGORIES: Category[] = [
-  { value: 'hardware', icon: '🔧', label: 'Hardware',  desc: 'Physical component issues'  },
-  { value: 'software', icon: '💾', label: 'Software',  desc: 'Programs & applications'     },
-  { value: 'network',  icon: '🌐', label: 'Network',   desc: 'Internet & connectivity'     },
-  { value: 'other',    icon: '❓', label: 'Other',     desc: 'Other technical issues'      },
+  { value: 'hardware', icon: 'wrench', label: 'Hardware',  desc: 'Physical component issues'  },
+  { value: 'software', icon: 'cpu',    label: 'Software',  desc: 'Programs & applications'     },
+  { value: 'network',  icon: 'globe',  label: 'Network',   desc: 'Internet & connectivity'     },
+  { value: 'other',    icon: 'help',   label: 'Other',     desc: 'Other technical issues'      },
 ];
 
 const STEP_LABELS = ['Lab', 'Equipment', 'Type', 'Describe', 'Review'];
@@ -138,7 +139,7 @@ function StepProgress({ current }: { current: number }) {
             <View style={sp.node}>
               <View style={[sp.circle, done && sp.circleDone, active && sp.circleActive]}>
                 {done ? (
-                  <Text style={sp.circleCheckText}>✓</Text>
+                  <Icon name="check" size={12} color="#fff" />
                 ) : (
                   <Text style={[sp.circleText, active && sp.circleTextActive]}>
                     {stepNum}
@@ -239,21 +240,24 @@ function ReviewRow({ label, value }: { label: string; value: string }) {
 function StepNav({
   onBack,
   onNext,
-  nextLabel = 'Next Step →',
+  nextLabel = 'Next Step',
   nextDisabled = false,
   loading = false,
+  nextArrow = true,
 }: {
   onBack?: () => void;
   onNext: () => void;
   nextLabel?: string;
   nextDisabled?: boolean;
   loading?: boolean;
+  nextArrow?: boolean;
 }) {
   return (
     <View style={s.stepNav}>
       {onBack ? (
         <TouchableOpacity style={s.backBtn} onPress={onBack} activeOpacity={0.8}>
-          <Text style={s.backBtnText}>← Back</Text>
+          <Icon name="arrow-left" size={16} color={colors.textSecondary} />
+          <Text style={s.backBtnText}>Back</Text>
         </TouchableOpacity>
       ) : (
         <View style={{ flex: 1 }} />
@@ -267,7 +271,10 @@ function StepNav({
         {loading ? (
           <ActivityIndicator color="#fff" size="small" />
         ) : (
-          <Text style={s.nextBtnText}>{nextLabel}</Text>
+          <View style={s.nextBtnRow}>
+            <Text style={s.nextBtnText}>{nextLabel}</Text>
+            {nextArrow && <Icon name="arrow-right" size={16} color="#fff" />}
+          </View>
         )}
       </TouchableOpacity>
     </View>
@@ -545,7 +552,10 @@ export default function ReportScreen() {
             );
           }
         }}>
-          <Text style={s.navBack}>{step > 1 ? '← Back' : '✕'}</Text>
+          <View style={s.navBackRow}>
+            <Icon name={step > 1 ? 'arrow-left' : 'close'} size={16} color={colors.primary} />
+            {step > 1 && <Text style={s.navBack}>Back</Text>}
+          </View>
         </TouchableOpacity>
 
         <Text style={s.navTitle}>Report Issue</Text>
@@ -556,7 +566,7 @@ export default function ReportScreen() {
       {/* ── Maintenance Notice ── */}
       {maintenance ? (
         <View style={s.maintWrap}>
-          <Text style={s.maintIcon}>🔧</Text>
+          <Icon name="wrench" size={48} color={colors.warning} />
           <Text style={s.maintTitle}>System Maintenance</Text>
           <Text style={s.maintMsg}>{maintMsg || 'Ticket submission is temporarily disabled.'}</Text>
           <TouchableOpacity style={s.maintBtn} onPress={() => router.replace('/(tabs)/' as any)}>
@@ -603,7 +613,7 @@ export default function ReportScreen() {
                   </View>
                 ) : labs.length === 0 ? (
                   <View style={s.centered}>
-                    <Text style={s.emptyIcon}>🏫</Text>
+                    <Icon name="school" size={32} style={{ opacity: 0.4 }} />
                     <Text style={s.emptyText}>No active labs found.</Text>
                   </View>
                 ) : (
@@ -621,7 +631,7 @@ export default function ReportScreen() {
                           onPress={() => selectLab(lab)}
                           activeOpacity={0.75}
                         >
-                          <Text style={s.labIcon}>💻</Text>
+                          <Icon name="laptop" size={26} />
                           <Text style={[s.labName, selected && s.labNameSelected]}>
                             {lab.name}
                           </Text>
@@ -636,7 +646,7 @@ export default function ReportScreen() {
                           </View>
                           {selected && (
                             <View style={s.labCheckmark}>
-                              <Text style={s.labCheckmarkText}>✓</Text>
+                              <Icon name="check" size={12} color="#fff" />
                             </View>
                           )}
                         </TouchableOpacity>
@@ -676,7 +686,7 @@ export default function ReportScreen() {
                   activeOpacity={0.75}
                 >
                   <View style={s.equipOptionLeft}>
-                    <Text style={s.equipIcon}>❓</Text>
+                    <Icon name="help" size={22} />
                     <View>
                       <Text style={[
                         s.equipCode,
@@ -690,7 +700,7 @@ export default function ReportScreen() {
                     </View>
                   </View>
                   {!form.equipment_id && (
-                    <Text style={s.equipCheck}>✓</Text>
+                    <Icon name="check" size={16} color={colors.primary} />
                   )}
                 </TouchableOpacity>
 
@@ -728,12 +738,15 @@ export default function ReportScreen() {
                           activeOpacity={0.75}
                         >
                           <View style={s.equipOptionLeft}>
-                            <Text style={s.equipIcon}>
-                              {eq.type === 'computer'  ? '💻'
-                               : eq.type === 'printer'  ? '🖨️'
-                               : eq.type === 'projector' ? '📽️'
-                               : '🖥️'}
-                            </Text>
+                            <Icon
+                              name={
+                                eq.type === 'computer'  ? 'laptop'
+                                : eq.type === 'printer'  ? 'printer'
+                                : eq.type === 'projector' ? 'videocam'
+                                : 'desktop'
+                              }
+                              size={22}
+                            />
                             <View>
                               <Text style={[
                                 s.equipCode,
@@ -754,7 +767,7 @@ export default function ReportScreen() {
                             </View>
                           </View>
                           {selected && (
-                            <Text style={s.equipCheck}>✓</Text>
+                            <Icon name="check" size={16} color={colors.primary} />
                           )}
                         </TouchableOpacity>
                       );
@@ -787,14 +800,14 @@ export default function ReportScreen() {
                         onPress={() => selectCategory(cat.value)}
                         activeOpacity={0.75}
                       >
-                        <Text style={s.catIcon}>{cat.icon}</Text>
+                        <Icon name={cat.icon} size={26} />
                         <Text style={[s.catLabel, selected && s.catLabelSelected]}>
                           {cat.label}
                         </Text>
                         <Text style={s.catDesc}>{cat.desc}</Text>
                         {selected && (
                           <View style={s.catCheck}>
-                            <Text style={s.catCheckText}>✓</Text>
+                            <Icon name="check" size={12} color="#fff" />
                           </View>
                         )}
                       </TouchableOpacity>
@@ -807,10 +820,12 @@ export default function ReportScreen() {
                   <Text style={s.summaryTitle}>Selected so far</Text>
                   <View style={s.summaryPills}>
                     <View style={s.summaryPill}>
-                      <Text style={s.summaryPillText}>🏫 {selectedLabName}</Text>
+                      <Icon name="school" size={12} color={colors.primary} />
+                      <Text style={s.summaryPillText}>{selectedLabName}</Text>
                     </View>
                     <View style={s.summaryPill}>
-                      <Text style={s.summaryPillText}>🖥️ {selectedEquipName}</Text>
+                      <Icon name="desktop" size={12} color={colors.primary} />
+                      <Text style={s.summaryPillText}>{selectedEquipName}</Text>
                     </View>
                   </View>
                 </View>
@@ -910,7 +925,10 @@ export default function ReportScreen() {
 
                 {/* Tips card */}
                 <View style={s.tipsCard}>
-                  <Text style={s.tipsTitle}>💡 Helpful tips</Text>
+                  <View style={s.tipsTitleRow}>
+                    <Icon name="lightbulb" size={14} color="#60a5fa" />
+                    <Text style={s.tipsTitle}>Helpful tips</Text>
+                  </View>
                   <Text style={s.tipItem}>• Mention any error messages you saw</Text>
                   <Text style={s.tipItem}>• Describe when the issue started</Text>
                   <Text style={s.tipItem}>• Note if other workstations are affected</Text>
@@ -921,7 +939,7 @@ export default function ReportScreen() {
                   onNext={() => {
                     if (validateStep4()) goNext();
                   }}
-                  nextLabel="Review & Submit →"
+                  nextLabel="Review & Submit"
                   nextDisabled={!form.title.trim() || form.description.trim().length < 10}
                 />
               </ScrollView>
@@ -995,6 +1013,7 @@ export default function ReportScreen() {
                   onBack={goBack}
                   onNext={handleSubmit}
                   nextLabel="Submit Report"
+                  nextArrow={false}
                   loading={submitting}
                 />
 
@@ -1028,11 +1047,16 @@ const s = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
+  navBackRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    width: 60,
+  },
   navBack: {
     fontSize: font.sm,
     fontWeight: font.semibold,
     color: colors.primary,
-    width: 60,
   },
   navTitle: {
     fontSize: font.base,
@@ -1344,6 +1368,9 @@ const s = StyleSheet.create({
     gap: spacing.xs,
   },
   summaryPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     backgroundColor: colors.primaryLight,
     borderWidth: 1,
     borderColor: colors.border,
@@ -1415,11 +1442,16 @@ const s = StyleSheet.create({
     marginBottom: spacing.md,
     gap: spacing.xs,
   },
+  tipsTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: spacing.xs - 2,
+  },
   tipsTitle: {
     fontSize: font.sm,
     fontWeight: font.semibold,
     color: '#60a5fa',
-    marginBottom: spacing.xs - 2,
   },
   tipItem: {
     fontSize: font.xs,
@@ -1512,6 +1544,9 @@ const s = StyleSheet.create({
   },
   backBtn: {
     flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 6,
     backgroundColor: colors.bgCard,
     borderWidth: 1,
     borderColor: colors.border,
@@ -1543,5 +1578,10 @@ const s = StyleSheet.create({
     fontSize: font.base,
     fontWeight: font.bold,
     color: '#fff',
+  },
+  nextBtnRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
 });

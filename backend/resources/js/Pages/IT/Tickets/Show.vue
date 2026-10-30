@@ -8,6 +8,7 @@ import NavIT from '../../../Components/Nav/NavIT.vue'
 import VoiceMessage from '../../../Components/VoiceMessage.vue'
 import { Link, useForm, usePage } from '@inertiajs/vue3'
 import { computed } from 'vue'
+import Icon from '../../../Components/Icon.vue'
 
 const props = defineProps({
   ticket: Object,
@@ -45,7 +46,7 @@ function equipmentStatusClass(s) {
 }
 
 function transactionIcon(action) {
-  return { created: '🎫', status_changed: '🔄', assigned: '👤', priority_changed: '⚠️', updated: '✏️', deleted: '🗑️', restored: '♻️' }[action] ?? '📌'
+  return { created: 'ticket', status_changed: 'refresh', assigned: 'user', priority_changed: 'alert', updated: 'edit', deleted: 'trash', restored: 'restore' }[action] ?? 'pin'
 }
 
 function transactionTitle(action) {
@@ -72,7 +73,7 @@ function diffForHumans(d) {
     <template #nav><NavIT /></template>
 
     <div id="it-ticket-detail" class="container">
-      <Link href="/it/tickets" class="back-btn">← Back to Queue</Link>
+      <Link href="/it/tickets" class="back-btn"><Icon name="arrow-left" /> Back to Queue</Link>
 
       <!-- Ticket header -->
       <div class="ticket-header">
@@ -151,7 +152,7 @@ function diffForHumans(d) {
             <h2 class="card-title">Attachments</h2>
             <div class="attachments-grid">
               <a v-for="att in ticket.attachments" :key="att" :href="`/storage/${att}`" target="_blank" class="attachment-item">
-                <div class="attachment-icon">{{ att.endsWith('.pdf') ? '📄' : '🖼️' }}</div>
+                <div class="attachment-icon"><Icon :name="att.endsWith('.pdf') ? 'file' : 'image'" /></div>
                 <div class="attachment-name">{{ att.split('/').pop() }}</div>
               </a>
             </div>
@@ -166,13 +167,13 @@ function diffForHumans(d) {
                   <div class="timeline-dot"></div>
                   <div class="timeline-content">
                     <div class="timeline-header">
-                      <span class="timeline-title">{{ transactionIcon(tx.action) }} {{ transactionTitle(tx.action) }}</span>
+                      <span class="timeline-title"><Icon :name="transactionIcon(tx.action)" /> {{ transactionTitle(tx.action) }}</span>
                       <span class="timeline-time">{{ formatDate(tx.created_at) }}</span>
                     </div>
                     <p class="timeline-text">{{ tx.description }}</p>
                     <div v-if="tx.old_value || tx.new_value" style="margin-top:0.5rem;padding:0.5rem;background:rgba(45,212,191,0.1);border-radius:4px;font-size:0.85rem;">
                       <span v-if="tx.old_value" style="color:#ef4444;">{{ tx.old_value }}</span>
-                      <span v-if="tx.old_value && tx.new_value" style="color:#9ca3af;"> → </span>
+                      <span v-if="tx.old_value && tx.new_value" style="color:#9ca3af;"><Icon name="arrow-right" /></span>
                       <span v-if="tx.new_value" style="color:#10b981;">{{ tx.new_value }}</span>
                     </div>
                     <div style="margin-top:0.25rem;font-size:0.85rem;color:#9ca3af;">by {{ tx.user?.first_name }} {{ tx.user?.last_name }}</div>
@@ -243,7 +244,7 @@ function diffForHumans(d) {
           <div v-else class="card">
             <h2 class="card-title">Assignment Status</h2>
             <div style="text-align:center;padding:1rem 0;color:#9ca3af;">
-              <div style="font-size:2rem;margin-bottom:0.5rem;">⏳</div>
+              <div style="font-size:2rem;margin-bottom:0.5rem;"><Icon name="hourglass" /></div>
               <p>Not yet assigned</p>
               <button type="button" class="btn btn-primary" style="margin-top:1rem;" @click="assignToSelf">
                 Assign to Me

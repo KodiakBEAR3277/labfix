@@ -13,6 +13,7 @@ import NavAdmin from '../../Components/Nav/NavAdmin.vue'
 import { Link, useForm, router } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import { usePage } from '@inertiajs/vue3'
+import Icon from '../../Components/Icon.vue'
 
 const props = defineProps({
   user: Object,
@@ -102,7 +103,7 @@ const dashboardHref = computed(() => {
     </template>
 
     <div class="container">
-      <Link :href="dashboardHref" class="back-btn">← Back to Dashboard</Link>
+      <Link :href="dashboardHref" class="back-btn"><Icon name="arrow-left" /> Back to Dashboard</Link>
 
       <div class="page-header">
         <h1>My Profile</h1>

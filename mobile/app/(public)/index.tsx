@@ -25,6 +25,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Link } from 'expo-router';
+import Icon from '@/components/ui/Icon';
 import { colors, spacing, radius, font } from '@/constants/theme';
 import { landingScrollEmitter } from '@/utils/landingScrollEmitter';
 
@@ -32,37 +33,37 @@ import { landingScrollEmitter } from '@/utils/landingScrollEmitter';
 
 const FEATURES = [
   {
-    icon: '🎫',
+    icon: 'ticket',
     title: 'Easy Ticket Submission',
     description:
       'Submit lab equipment issues in minutes with our guided multi-step form.',
   },
   {
-    icon: '⚡',
+    icon: 'bolt',
     title: 'Real-Time Tracking',
     description:
       'Track your ticket status in real time from submission to resolution.',
   },
   {
-    icon: '🔧',
+    icon: 'wrench',
     title: 'IT Support Queue',
     description:
       'IT staff get a prioritised queue with smart assignment. No more lost emails.',
   },
   {
-    icon: '📚',
+    icon: 'book',
     title: 'Knowledge Base',
     description:
       'Browse self-help articles before submitting. Common fixes are documented.',
   },
   {
-    icon: '🖥️',
+    icon: 'desktop',
     title: 'Lab Status Monitor',
     description:
       'Check which labs are operational before heading in.',
   },
   {
-    icon: '📊',
+    icon: 'chart',
     title: 'Admin Oversight',
     description:
       'Admins get full visibility into ticket volume and equipment health.',
@@ -137,7 +138,10 @@ export default function LandingScreen() {
 
           {/* Eyebrow badge */}
           <View style={s.badge}>
-            <Text style={s.badgeText}>✦  Equipment Issue Tracking</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <Icon name="sparkles" size={12} color={colors.primary} />
+              <Text style={s.badgeText}>Equipment Issue Tracking</Text>
+            </View>
           </View>
 
           {/* Headline */}
@@ -224,7 +228,7 @@ export default function LandingScreen() {
           <View style={s.featureGrid}>
             {FEATURES.map((f) => (
               <View key={f.title} style={s.featureCard}>
-                <Text style={s.featureIcon}>{f.icon}</Text>
+                <Icon name={f.icon} size={26} />
                 <Text style={s.featureTitle}>{f.title}</Text>
                 <Text style={s.featureDesc}>{f.description}</Text>
               </View>

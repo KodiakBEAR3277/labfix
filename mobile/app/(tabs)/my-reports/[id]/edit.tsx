@@ -33,6 +33,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { colors, spacing, radius, font } from '@/constants/theme';
 import { loadAuth } from '@/utils/auth';
 import { apiUrl } from '@/constants/api';
+import Icon, { IconName } from '@/components/ui/Icon';
 
 // Where the back / cancel / discard actions return to. The tab bars navigate
 // with replace(), so there's no list entry in history for router.back() to pop
@@ -73,11 +74,11 @@ type FieldErrors = {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const CATEGORIES: { value: Category; icon: string; label: string }[] = [
-  { value: 'hardware', icon: '🔧', label: 'Hardware'  },
-  { value: 'software', icon: '💾', label: 'Software'  },
-  { value: 'network',  icon: '🌐', label: 'Network'   },
-  { value: 'other',    icon: '❓', label: 'Other'     },
+const CATEGORIES: { value: Category; icon: IconName; label: string }[] = [
+  { value: 'hardware', icon: 'wrench', label: 'Hardware'  },
+  { value: 'software', icon: 'cpu',    label: 'Software'  },
+  { value: 'network',  icon: 'globe',  label: 'Network'   },
+  { value: 'other',    icon: 'help',   label: 'Other'     },
 ];
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -267,7 +268,8 @@ export default function EditReportScreen() {
             {errors.general ?? 'Ticket not found.'}
           </Text>
           <TouchableOpacity style={s.retryBtn} onPress={() => router.replace(LIST_ROUTE as any)}>
-            <Text style={s.retryBtnText}>← Go Back</Text>
+            <Icon name="arrow-left" size={16} color="#fff" />
+            <Text style={s.retryBtnText}>Go Back</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -281,8 +283,9 @@ export default function EditReportScreen() {
 
       {/* ── Top Nav ── */}
       <View style={s.nav}>
-        <TouchableOpacity onPress={handleBack} activeOpacity={0.7}>
-          <Text style={s.navBack}>← Back</Text>
+        <TouchableOpacity onPress={handleBack} activeOpacity={0.7} style={s.navBack}>
+          <Icon name="arrow-left" size={15} color={colors.primary} />
+          <Text style={s.navBackText}>Back</Text>
         </TouchableOpacity>
         <Text style={s.navTitle}>Edit Report</Text>
         <View style={{ width: 60 }} />
@@ -367,7 +370,7 @@ export default function EditReportScreen() {
                       activeOpacity={0.75}
                       disabled={submitting}
                     >
-                      <Text style={s.catPillIcon}>{cat.icon}</Text>
+                      <Icon name={cat.icon} size={14} color={selected ? colors.primary : colors.textMuted} />
                       <Text style={[s.catPillText, selected && s.catPillTextSelected]}>
                         {cat.label}
                       </Text>
@@ -406,7 +409,7 @@ export default function EditReportScreen() {
 
           {/* ── Info note ── */}
           <View style={s.infoNote}>
-            <Text style={s.infoNoteIcon}>ℹ️</Text>
+            <Icon name="info" size={15} color="#2563eb" style={{ marginTop: 1 }} />
             <Text style={s.infoNoteText}>
               You can only edit this report before it's assigned to a technician.
               Once assigned, contact the assigned technician if you need to make changes.
@@ -471,10 +474,15 @@ const s = StyleSheet.create({
     borderBottomColor: colors.border,
   },
   navBack: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    width: 60,
+  },
+  navBackText: {
     fontSize: font.sm,
     fontWeight: font.semibold,
     color: colors.primary,
-    width: 60,
   },
   navTitle: {
     fontSize: font.base,
@@ -701,6 +709,10 @@ const s = StyleSheet.create({
     textAlign: 'center',
   },
   retryBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
     backgroundColor: colors.primary,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm + 2,

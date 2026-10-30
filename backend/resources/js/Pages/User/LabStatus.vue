@@ -6,6 +6,7 @@
 import AppLayout from '../../Layouts/AppLayout.vue'
 import NavUser from '../../Components/Nav/NavUser.vue'
 import { ref, computed } from 'vue'
+import Icon from '../../Components/Icon.vue'
 
 const props = defineProps({
   labs: Array,   // each lab has equipment array with status
@@ -54,8 +55,8 @@ function maintenanceCount(lab) {
 }
 
 function equipmentIcon(type) {
-  const map = { computer: '💻', printer: '🖨️', projector: '📽️' }
-  return map[type] ?? '🖥️'
+  const map = { computer: 'laptop', printer: 'printer', projector: 'videocam' }
+  return map[type] ?? 'desktop'
 }
 </script>
 
@@ -97,7 +98,7 @@ function equipmentIcon(type) {
           <!-- Lab header -->
           <div class="lab-header">
             <div class="lab-title-section">
-              <div class="lab-icon">💻</div>
+              <div class="lab-icon"><Icon name="laptop" /></div>
               <div>
                 <h2 class="lab-title">{{ selectedLab.name }}</h2>
                 <p style="color:#9ca3af;font-size:0.85rem;">{{ selectedLab.location ?? 'Location not specified' }}</p>
@@ -144,7 +145,7 @@ function equipmentIcon(type) {
                   {{ eq.equipment_code }}: {{ eq.status.replace('-', ' ') }}
                   <span v-if="eq.notes"><br>{{ eq.notes }}</span>
                 </div>
-                <div class="equipment-icon">{{ equipmentIcon(eq.type) }}</div>
+                <div class="equipment-icon"><Icon :name="equipmentIcon(eq.type)" /></div>
                 <div class="equipment-id">{{ eq.equipment_code }}</div>
               </div>
             </div>

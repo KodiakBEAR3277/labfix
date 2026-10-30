@@ -7,6 +7,7 @@ import AppLayout from '../../../Layouts/AppLayout.vue'
 import NavIT from '../../../Components/Nav/NavIT.vue'
 import { Link, router } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
+import Icon from '../../../Components/Icon.vue'
 
 const props = defineProps({
   tickets: Object,
@@ -104,16 +105,16 @@ function diffForHumans(d) {
                 <h3 class="ticket-title">{{ ticket.title }}</h3>
               </div>
               <span class="priority-badge" :class="`priority-${ticket.priority}`">
-                {{ ticket.priority === 'high' ? '🔴' : ticket.priority === 'medium' ? '🟡' : '🟢' }}
+                <Icon name="circle" :style="{ color: ticket.priority === 'high' ? 'var(--color-danger)' : ticket.priority === 'medium' ? 'var(--color-warning)' : 'var(--color-success)' }" />
                 {{ ticket.priority.charAt(0).toUpperCase() + ticket.priority.slice(1) }}
               </span>
             </div>
 
             <div class="ticket-meta">
-              <div class="meta-item"><span>👤</span> {{ ticket.reporter?.first_name }} {{ ticket.reporter?.last_name }}</div>
-              <div class="meta-item"><span>📍</span> {{ ticket.equipment?.lab?.name }}, {{ ticket.equipment?.equipment_code }}</div>
-              <div class="meta-item"><span>🕒</span> {{ diffForHumans(ticket.created_at) }}</div>
-              <div class="meta-item"><span>🏷️</span> {{ ticket.category.charAt(0).toUpperCase() + ticket.category.slice(1) }}</div>
+              <div class="meta-item"><span><Icon name="user" /></span> {{ ticket.reporter?.first_name }} {{ ticket.reporter?.last_name }}</div>
+              <div class="meta-item"><span><Icon name="map-pin" /></span> {{ ticket.equipment?.lab?.name }}, {{ ticket.equipment?.equipment_code }}</div>
+              <div class="meta-item"><span><Icon name="clock" /></span> {{ diffForHumans(ticket.created_at) }}</div>
+              <div class="meta-item"><span><Icon name="tag" /></span> {{ ticket.category.charAt(0).toUpperCase() + ticket.category.slice(1) }}</div>
             </div>
 
             <p class="ticket-description" style="color:#9ca3af;font-size:0.9rem;margin:0.75rem 0;line-height:1.5;">
@@ -133,7 +134,7 @@ function diffForHumans(d) {
         </template>
 
         <div v-else class="empty-state">
-          <div class="empty-icon">📋</div>
+          <div class="empty-icon"><Icon name="clipboard" /></div>
           <h3>No assignments yet</h3>
           <p>You don't have any tickets assigned to you at the moment</p>
           <Link href="/it/tickets" class="btn btn-primary" style="margin-top:1rem;">View Ticket Queue</Link>
@@ -146,13 +147,13 @@ function diffForHumans(d) {
           Showing {{ tickets.from ?? 0 }}–{{ tickets.to ?? 0 }} of {{ tickets.total }} tickets
         </div>
         <div class="page-controls">
-          <button class="page-btn" :disabled="!tickets.prev_page_url" @click="router.get(tickets.prev_page_url)">← Previous</button>
+          <button class="page-btn" :disabled="!tickets.prev_page_url" @click="router.get(tickets.prev_page_url)"><Icon name="arrow-left" /> Previous</button>
           <button
             v-for="p in tickets.last_page" :key="p"
             class="page-btn" :class="{ active: p === tickets.current_page }"
             @click="router.get(tickets.path + '?page=' + p)"
           >{{ p }}</button>
-          <button class="page-btn" :disabled="!tickets.next_page_url" @click="router.get(tickets.next_page_url)">Next →</button>
+          <button class="page-btn" :disabled="!tickets.next_page_url" @click="router.get(tickets.next_page_url)">Next <Icon name="arrow-right" /></button>
         </div>
       </div>
 

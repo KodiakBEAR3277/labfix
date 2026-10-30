@@ -35,6 +35,7 @@ import {
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { router, usePathname } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Icon, { IconName } from '@/components/ui/Icon';
 import { colors, font, spacing, radius } from '@/constants/theme';
 
 // ─── Tab definitions ──────────────────────────────────────────────────────────
@@ -43,7 +44,7 @@ type TabDef = {
   /** Unique key — also used to match the active path segment */
   key:    string;
   label:  string;
-  icon:   string;
+  icon:   IconName;
   /** Full Expo Router route string */
   route:  string;
 };
@@ -52,25 +53,25 @@ const TABS: TabDef[] = [
   {
     key:   'dashboard',
     label: 'Dashboard',
-    icon:  '📊',
+    icon:  'chart',
     route: '/(it)/dashboard',
   },
   {
     key:   'queue',
     label: 'Queue',
-    icon:  '🎫',
+    icon:  'ticket',
     route: '/(it)/queue',
   },
   {
     key:   'assignments',
     label: 'Assigned',
-    icon:  '👤',
+    icon:  'user',
     route: '/(it)/assignments',
   },
   {
     key:   'knowledge-base',
     label: 'KB Mgmt',
-    icon:  '📚',
+    icon:  'book',
     route: '/(it)/knowledge-base',
   },
 ];
@@ -114,15 +115,9 @@ export function ITTabBar(_props: BottomTabBarProps) {
             {/* Active top indicator dot */}
             {active && <View style={s.activeDot} />}
 
-            <Text
-              style={[
-                s.icon,
-                // Subtle glow on iOS for active icon
-                active && Platform.OS === 'ios' && s.iconActiveIOS,
-              ]}
-            >
-              {tab.icon}
-            </Text>
+            <View style={active && Platform.OS === 'ios' ? s.iconActiveIOS : undefined}>
+              <Icon name={tab.icon} size={19} color="#ffffff" />
+            </View>
 
             <Text style={[s.label, active && s.labelActive]}>
               {tab.label}

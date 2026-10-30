@@ -7,6 +7,7 @@ import AppLayout from '../../../Layouts/AppLayout.vue'
 import NavAdmin from '../../../Components/Nav/NavAdmin.vue'
 import { Link, router } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
+import Icon from '../../../Components/Icon.vue'
 
 const props = defineProps({
   transactions: Object,
@@ -43,14 +44,14 @@ watch([action, user, dateFrom, dateTo], applyFilters)
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function actionIcon(a) {
   return {
-    created:          '🎫',
-    status_changed:   '🔄',
-    assigned:         '👤',
-    priority_changed: '⚠️',
-    updated:          '✏️',
-    deleted:          '🗑️',
-    restored:         '♻️',
-  }[a] ?? '📌'
+    created:          'ticket',
+    status_changed:   'refresh',
+    assigned:         'user',
+    priority_changed: 'alert',
+    updated:          'edit',
+    deleted:          'trash',
+    restored:         'restore',
+  }[a] ?? 'pin'
 }
 
 function actionLabel(a) {
@@ -76,7 +77,7 @@ function formatDate(d) {
           <h1>Ticket History</h1>
           <p style="color:#9ca3af;">Full audit log of all ticket activity</p>
         </div>
-        <Link href="/admin/tickets" class="btn btn-secondary">← Back to Tickets</Link>
+        <Link href="/admin/tickets" class="btn btn-secondary"><Icon name="arrow-left" /> Back to Tickets</Link>
       </div>
 
       <!-- Stats -->
@@ -103,7 +104,7 @@ function formatDate(d) {
       <div class="filter-bar">
         <div class="filter-row" style="flex-wrap:wrap;">
           <div class="search-box">
-            <span class="search-icon">🔍</span>
+            <span class="search-icon"><Icon name="search" /></span>
             <input v-model="search" type="text" placeholder="Search by action, description, ticket, or user...">
           </div>
           <div class="filter-group">
@@ -151,7 +152,7 @@ function formatDate(d) {
               <tr v-for="tx in transactions.data" :key="tx.id">
                 <td>
                   <span style="display:flex;align-items:center;gap:0.5rem;">
-                    {{ actionIcon(tx.action) }}
+                    <Icon :name="actionIcon(tx.action)" />
                     <span style="font-size:0.85rem;color:#d1d5db;">{{ actionLabel(tx.action) }}</span>
                   </span>
                 </td>
@@ -176,7 +177,7 @@ function formatDate(d) {
                 <td>
                   <div v-if="tx.old_value || tx.new_value" style="font-size:0.85rem;">
                     <span v-if="tx.old_value" style="color:#ef4444;">{{ tx.old_value }}</span>
-                    <span v-if="tx.old_value && tx.new_value" style="color:#9ca3af;"> → </span>
+                    <span v-if="tx.old_value && tx.new_value" style="color:#9ca3af;"><Icon name="arrow-right" /></span>
                     <span v-if="tx.new_value" style="color:#10b981;">{{ tx.new_value }}</span>
                   </div>
                   <span v-else style="color:#9ca3af;">—</span>
@@ -186,7 +187,7 @@ function formatDate(d) {
             </template>
             <tr v-else>
               <td colspan="6" style="text-align:center;padding:3rem;color:#9ca3af;">
-                <div style="font-size:2rem;margin-bottom:1rem;">📜</div>
+                <div style="font-size:2rem;margin-bottom:1rem;"><Icon name="restore" /></div>
                 <h3 style="color:#d1d5db;">No transactions found</h3>
                 <p>{{ filters.search || filters.action || filters.user ? 'Try adjusting your filters' : 'No activity recorded yet' }}</p>
                 <Link v-if="filters.search || filters.action || filters.user" href="/admin/transactions" class="btn btn-primary" style="margin-top:1rem;">
@@ -203,13 +204,13 @@ function formatDate(d) {
             Showing {{ transactions.from ?? 0 }}–{{ transactions.to ?? 0 }} of {{ transactions.total }} transactions
           </div>
           <div class="page-controls">
-            <button class="page-btn" :disabled="!transactions.prev_page_url" @click="router.get(transactions.prev_page_url)">← Previous</button>
+            <button class="page-btn" :disabled="!transactions.prev_page_url" @click="router.get(transactions.prev_page_url)"><Icon name="arrow-left" /> Previous</button>
             <button
               v-for="p in transactions.last_page" :key="p"
               class="page-btn" :class="{ active: p === transactions.current_page }"
               @click="router.get(transactions.path + '?page=' + p)"
             >{{ p }}</button>
-            <button class="page-btn" :disabled="!transactions.next_page_url" @click="router.get(transactions.next_page_url)">Next →</button>
+            <button class="page-btn" :disabled="!transactions.next_page_url" @click="router.get(transactions.next_page_url)">Next <Icon name="arrow-right" /></button>
           </div>
         </div>
       </div>

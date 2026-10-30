@@ -15,6 +15,7 @@
 import { ref } from 'vue'
 import { Link } from '@inertiajs/vue3'
 import LandingLayout from '../Layouts/LandingLayout.vue'
+import Icon from '../Components/Icon.vue'
 
 const annual = ref(false)
 
@@ -187,7 +188,7 @@ function cardStyle(tier) {
                 :key="feature"
                 style="display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.9rem; color: var(--color-text-secondary); margin-bottom: 0.65rem;"
               >
-                <span style="color: var(--color-primary); font-weight: 700;">✓</span> {{ feature }}
+                <Icon name="check" style="color: var(--color-primary); flex-shrink: 0; margin-top: 1px;" /> {{ feature }}
               </li>
             </ul>
 

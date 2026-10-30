@@ -32,6 +32,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
+import Icon from '@/components/ui/Icon';
 import { colors, spacing, radius, font } from '@/constants/theme';
 import { loadAuth, clearAuth, AuthUser } from '@/utils/auth';
 import { apiUrl } from '@/constants/api';
@@ -104,25 +105,25 @@ function getFirstName(name: string): string {
 
 const QUICK_ACTIONS = [
   {
-    icon:  '🎫',
+    icon:  'ticket',
     title: 'Report Issue',
     desc:  'Submit a new equipment issue',
     route: '/(tabs)/report',
   },
   {
-    icon:  '📋',
+    icon:  'clipboard',
     title: 'My Reports',
     desc:  'View all your submitted tickets',
     route: '/(tabs)/my-reports',
   },
   {
-    icon:  '📚',
+    icon:  'book',
     title: 'Knowledge Base',
     desc:  'Browse self-help articles',
     route: '/(tabs)/knowledge-base',
   },
   {
-    icon:  '🖥️',
+    icon:  'desktop',
     title: 'Lab Status',
     desc:  'Check which labs are operational',
     route: '/(tabs)/lab-status',
@@ -209,7 +210,7 @@ export default function UserDashboard() {
       <SafeAreaView style={s.root}>
         <StatusBar barStyle="light-content" backgroundColor={colors.bgPrimary} />
         <View style={s.centered}>
-          <Text style={s.errorIcon}>⚠️</Text>
+          <Icon name="alert" size={36} color={colors.warning} />
           <Text style={s.errorText}>{error}</Text>
           <TouchableOpacity
             style={s.retryBtn}
@@ -296,7 +297,7 @@ export default function UserDashboard() {
               onPress={() => router.push(action.route as any)}
               activeOpacity={0.75}
             >
-              <Text style={s.actionIcon}>{action.icon}</Text>
+              <Icon name={action.icon} size={26} />
               <Text style={s.actionTitle}>{action.title}</Text>
               <Text style={s.actionDesc}>{action.desc}</Text>
             </TouchableOpacity>
@@ -308,16 +309,22 @@ export default function UserDashboard() {
           <View style={s.cardHeader}>
             <Text style={s.sectionTitle}>Recent Reports</Text>
             <TouchableOpacity onPress={() => router.push('/(tabs)/my-reports' as any)}>
-              <Text style={s.viewAll}>View All →</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <Text style={s.viewAll}>View All</Text>
+                <Icon name="arrow-right" size={14} color={colors.primary} />
+              </View>
             </TouchableOpacity>
           </View>
 
           {tickets.length === 0 ? (
             <View style={s.emptyState}>
-              <Text style={s.emptyIcon}>📋</Text>
+              <Icon name="clipboard" size={32} color={colors.textMuted} />
               <Text style={s.emptyText}>No reports yet.</Text>
               <TouchableOpacity onPress={() => router.push('/(tabs)/report' as any)}>
-                <Text style={s.emptyLink}>Report your first issue →</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <Text style={s.emptyLink}>Report your first issue</Text>
+                  <Icon name="arrow-right" size={14} color={colors.primary} />
+                </View>
               </TouchableOpacity>
             </View>
           ) : (

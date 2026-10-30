@@ -6,6 +6,7 @@
 import AppLayout from '../../../Layouts/AppLayout.vue'
 import NavIT from '../../../Components/Nav/NavIT.vue'
 import { Link, useForm } from '@inertiajs/vue3'
+import Icon from '../../../Components/Icon.vue'
 
 const props = defineProps({
   selectedTickets: Array,
@@ -75,7 +76,7 @@ function submitClose() {
 
         <div class="operation-card">
           <div class="operation-header">
-            <div class="operation-icon">👤</div>
+            <div class="operation-icon"><Icon name="user" /></div>
             <h3 class="operation-title">Assign Tickets</h3>
           </div>
           <p class="operation-description">Assign all selected tickets to a specific technician</p>
@@ -97,7 +98,7 @@ function submitClose() {
 
         <div class="operation-card">
           <div class="operation-header">
-            <div class="operation-icon">🔄</div>
+            <div class="operation-icon"><Icon name="refresh" /></div>
             <h3 class="operation-title">Update Status</h3>
           </div>
           <p class="operation-description">Change the status of all selected tickets</p>
@@ -119,7 +120,7 @@ function submitClose() {
 
         <div class="operation-card">
           <div class="operation-header">
-            <div class="operation-icon">⚠️</div>
+            <div class="operation-icon"><Icon name="alert" /></div>
             <h3 class="operation-title">Change Priority</h3>
           </div>
           <p class="operation-description">Adjust priority level for all selected tickets</p>
@@ -141,7 +142,7 @@ function submitClose() {
 
         <div class="operation-card">
           <div class="operation-header">
-            <div class="operation-icon">✅</div>
+            <div class="operation-icon"><Icon name="check-circle" /></div>
             <h3 class="operation-title">Close Tickets</h3>
           </div>
           <p class="operation-description">Mark all selected tickets as closed</p>

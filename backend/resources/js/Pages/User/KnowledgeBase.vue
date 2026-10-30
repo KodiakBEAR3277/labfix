@@ -6,6 +6,7 @@ import AppLayout from '../../Layouts/AppLayout.vue'
 import NavUser from '../../Components/Nav/NavUser.vue'
 import { Link, router } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
+import Icon from '../../Components/Icon.vue'
 
 const props = defineProps({
   articles:        Object,
@@ -33,12 +34,12 @@ watch(search, () => {
 watch(category, applyFilters)
 
 const categoryIcons = {
-  hardware:    '🔧',
-  software:    '💾',
-  network:     '🌐',
-  display:     '🖥️',
-  peripherals: '🖱️',
-  general:     '📋',
+  hardware:    'wrench',
+  software:    'cpu',
+  network:     'globe',
+  display:     'desktop',
+  peripherals: 'mouse',
+  general:     'clipboard',
 }
 
 function categoryLabel(key) {
@@ -63,7 +64,7 @@ function formatDate(dateStr) {
         <h1>Knowledge Base</h1>
         <p>Find answers to common lab equipment issues before submitting a ticket</p>
         <div class="search-container">
-          <span class="search-icon" style="position:absolute;left:1.2rem;top:50%;transform:translateY(-50%);color:#9ca3af;">🔍</span>
+          <span class="search-icon" style="position:absolute;left:1.2rem;top:50%;transform:translateY(-50%);color:#9ca3af;"><Icon name="search" /></span>
           <input
             v-model="search"
             type="text"
@@ -85,7 +86,7 @@ function formatDate(dateStr) {
             @click="category = category === key ? 'all' : key"
             style="cursor:pointer;"
           >
-            <div class="category-icon">{{ categoryIcons[key] ?? '📄' }}</div>
+            <div class="category-icon"><Icon :name="categoryIcons[key] ?? 'file'" /></div>
             <div class="category-title">{{ categoryLabel(key) }}</div>
             <div class="category-count">{{ count }} article{{ count !== 1 ? 's' : '' }}</div>
           </div>
@@ -106,7 +107,7 @@ function formatDate(dateStr) {
               class="view-all"
               @click="search = ''; category = 'all'"
             >
-              Clear filters ×
+              Clear filters <Icon name="close" />
             </button>
           </div>
 
@@ -130,20 +131,20 @@ function formatDate(dateStr) {
                   </div>
                   <div class="article-title">{{ article.title }}</div>
                   <div class="article-meta">
-                    <span>👁️ {{ article.views }} views</span>
-                    <span>✍️ {{ article.author?.full_name }}</span>
-                    <span>📅 {{ formatDate(article.published_at) }}</span>
+                    <span><Icon name="eye" /> {{ article.views }} views</span>
+                    <span><Icon name="user" /> {{ article.author?.full_name }}</span>
+                    <span><Icon name="calendar" /> {{ formatDate(article.published_at) }}</span>
                   </div>
                   <p v-if="article.excerpt" style="color:#9ca3af;font-size:0.9rem;margin-top:0.5rem;line-height:1.5;">
                     {{ article.excerpt.substring(0, 120) }}{{ article.excerpt.length > 120 ? '…' : '' }}
                   </p>
                 </div>
-                <div class="article-icon">→</div>
+                <div class="article-icon"><Icon name="arrow-right" /></div>
               </Link>
             </template>
 
             <div v-else style="text-align:center;padding:3rem;color:#9ca3af;">
-              <div style="font-size:2rem;margin-bottom:1rem;">🔍</div>
+              <div style="font-size:2rem;margin-bottom:1rem;"><Icon name="search" /></div>
               <h3 style="color:#d1d5db;">No articles found</h3>
               <p>Try a different search term or category</p>
             </div>
@@ -160,7 +161,7 @@ function formatDate(dateStr) {
                 class="page-btn"
                 :disabled="!articles.prev_page_url"
                 @click="router.get(articles.prev_page_url)"
-              >← Previous</button>
+              ><Icon name="arrow-left" /> Previous</button>
               <button
                 v-for="p in articles.last_page"
                 :key="p"
@@ -172,7 +173,7 @@ function formatDate(dateStr) {
                 class="page-btn"
                 :disabled="!articles.next_page_url"
                 @click="router.get(articles.next_page_url)"
-              >Next →</button>
+              >Next <Icon name="arrow-right" /></button>
             </div>
           </div>
         </div>
@@ -192,7 +193,7 @@ function formatDate(dateStr) {
                     :href="`/user/knowledge-base/${article.slug}`"
                     class="link-item"
                   >
-                    <span>{{ categoryIcons[article.category] ?? '📄' }}</span>
+                    <span><Icon :name="categoryIcons[article.category] ?? 'file'" /></span>
                     {{ article.title }}
                   </Link>
                 </div>

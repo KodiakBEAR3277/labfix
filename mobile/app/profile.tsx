@@ -36,6 +36,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
+import Icon from '@/components/ui/Icon';
 import { colors, spacing, radius, font } from '@/constants/theme';
 import { loadAuth, clearAuth, AuthUser } from '@/utils/auth';
 import { apiUrl } from '@/constants/api';
@@ -379,7 +380,10 @@ export default function ProfileScreen() {
       {/* ── Top Nav ── */}
       <View style={s.nav}>
         <TouchableOpacity onPress={() => router.back()} activeOpacity={0.7}>
-          <Text style={s.navBack}>← Back</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <Icon name="arrow-left" size={13} color={colors.primary} />
+            <Text style={s.navBack}>Back</Text>
+          </View>
         </TouchableOpacity>
         <Text style={s.navTitle}>My Profile</Text>
         <View style={{ width: 60 }} />
@@ -424,12 +428,19 @@ export default function ProfileScreen() {
           <View style={s.stripDivider} />
           <View style={s.stripItem}>
             <Text style={s.stripLabel}>Ticket Submission</Text>
-            <Text style={[
-              s.stripValue,
-              { color: user.can_submit_tickets ? colors.successLight : '#b91c1c' },
-            ]}>
-              {user.can_submit_tickets ? '✅ Enabled' : '❌ Disabled'}
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <Icon
+                name={user.can_submit_tickets ? 'check-circle' : 'close-circle'}
+                size={12}
+                color={user.can_submit_tickets ? colors.successLight : '#b91c1c'}
+              />
+              <Text style={[
+                s.stripValue,
+                { color: user.can_submit_tickets ? colors.successLight : '#b91c1c' },
+              ]}>
+                {user.can_submit_tickets ? 'Enabled' : 'Disabled'}
+              </Text>
+            </View>
           </View>
           <View style={s.stripDivider} />
           <View style={s.stripItem}>
@@ -443,7 +454,14 @@ export default function ProfileScreen() {
           <SectionTitle title="Profile Information" />
 
           {/* Flash */}
-          {!!profFlash && <View style={s.flash}><Text style={s.flashText}>✓ {profFlash}</Text></View>}
+          {!!profFlash && (
+            <View style={s.flash}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <Icon name="check" size={13} color={colors.successLight} />
+                <Text style={s.flashText}>{profFlash}</Text>
+              </View>
+            </View>
+          )}
 
           {/* Name row */}
           <View style={s.fieldRow}>
@@ -532,7 +550,14 @@ export default function ProfileScreen() {
         <View style={s.card}>
           <SectionTitle title="Change Password" />
 
-          {!!pwFlash && <View style={s.flash}><Text style={s.flashText}>✓ {pwFlash}</Text></View>}
+          {!!pwFlash && (
+            <View style={s.flash}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <Icon name="check" size={13} color={colors.successLight} />
+                <Text style={s.flashText}>{pwFlash}</Text>
+              </View>
+            </View>
+          )}
 
           <View style={s.fieldGroup}>
             <Text style={s.label}>Current Password</Text>

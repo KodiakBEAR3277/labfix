@@ -26,6 +26,7 @@ import {
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { router, usePathname } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Icon, { IconName } from '@/components/ui/Icon';
 import { colors, font, spacing } from '@/constants/theme';
 import { landingScrollEmitter } from '@/utils/landingScrollEmitter';
 
@@ -34,7 +35,7 @@ import { landingScrollEmitter } from '@/utils/landingScrollEmitter';
 type TabDef = {
   key: string;
   label: string;
-  icon: string;
+  icon: IconName;
   /** If set, fires a scroll event instead of navigating */
   scrollTarget?: 'features' | 'about';
   /** Route to push (relative to the public group) */
@@ -45,25 +46,25 @@ const TABS: TabDef[] = [
   {
     key: 'index',
     label: 'Home',
-    icon: '🏠',
+    icon: 'home',
     route: '/',
   },
   {
     key: 'features',
     label: 'Features',
-    icon: '✦',
+    icon: 'sparkles',
     scrollTarget: 'features',
   },
   {
     key: 'about',
     label: 'About',
-    icon: 'ℹ',
+    icon: 'info',
     scrollTarget: 'about',
   },
   {
     key: 'contact',
     label: 'Contact',
-    icon: '📞',
+    icon: 'phone',
     route: '/contact',
   },
 ];
@@ -117,7 +118,9 @@ export function PublicTabBar(_props: BottomTabBarProps) {
             onPress={() => handlePress(tab)}
             activeOpacity={0.7}
           >
-            <Text style={[s.icon, active && s.iconActive]}>{tab.icon}</Text>
+            <View style={active ? s.iconActive : undefined}>
+              <Icon name={tab.icon} size={18} color={colors.textMuted} />
+            </View>
             <Text style={[s.label, active && s.labelActive]}>{tab.label}</Text>
             {active && <View style={s.activeDot} />}
           </TouchableOpacity>

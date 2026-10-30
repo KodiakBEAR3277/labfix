@@ -34,6 +34,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Link } from 'expo-router';
+import Icon from '@/components/ui/Icon';
 import { colors, spacing, radius, font } from '@/constants/theme';
 import { apiUrl } from '@/constants/api';
 
@@ -54,10 +55,10 @@ const FALLBACK: ContactInfo = {
 // ─── Static data ──────────────────────────────────────────────────────────────
 
 const SOCIAL_LINKS = [
-  { icon: '📘', label: 'Facebook',  href: '#' },
-  { icon: '🐦', label: 'Twitter',   href: '#' },
-  { icon: '💼', label: 'LinkedIn',  href: '#' },
-  { icon: '📸', label: 'Instagram', href: '#' },
+  { icon: 'facebook', label: 'Facebook',  href: '#' },
+  { icon: 'twitter', label: 'Twitter',   href: '#' },
+  { icon: 'linkedin', label: 'LinkedIn',  href: '#' },
+  { icon: 'instagram', label: 'Instagram', href: '#' },
 ] as const;
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -134,7 +135,7 @@ export default function ContactScreen() {
 
           {/* Email */}
           <View style={s.card}>
-            <Text style={s.cardIcon}>📧</Text>
+            <Icon name="mail" size={28} />
             <View style={s.cardBody}>
               <Text style={s.cardTitle}>Email Support</Text>
               <Text style={s.cardText}>
@@ -161,7 +162,7 @@ export default function ContactScreen() {
 
           {/* Phone */}
           <View style={s.card}>
-            <Text style={s.cardIcon}>📞</Text>
+            <Icon name="phone" size={28} />
             <View style={s.cardBody}>
               <Text style={s.cardTitle}>Phone Support</Text>
               <Text style={s.cardText}>
@@ -191,7 +192,7 @@ export default function ContactScreen() {
 
           {/* Visit */}
           <View style={s.card}>
-            <Text style={s.cardIcon}>📍</Text>
+            <Icon name="map-pin" size={28} />
             <View style={s.cardBody}>
               <Text style={s.cardTitle}>Visit Us</Text>
               <Text style={s.cardText}>
@@ -219,7 +220,7 @@ export default function ContactScreen() {
                   if (social.href !== '#') Linking.openURL(social.href);
                 }}
               >
-                <Text style={s.socialIcon}>{social.icon}</Text>
+                <Icon name={social.icon} size={24} />
               </TouchableOpacity>
             ))}
           </View>

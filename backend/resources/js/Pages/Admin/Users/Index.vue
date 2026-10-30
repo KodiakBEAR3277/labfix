@@ -7,6 +7,7 @@ import AppLayout from '../../../Layouts/AppLayout.vue'
 import NavAdmin from '../../../Components/Nav/NavAdmin.vue'
 import { Link, router } from '@inertiajs/vue3'
 import { ref, watch, computed } from 'vue'
+import Icon from '../../../Components/Icon.vue'
 
 const props = defineProps({
   users:      Object,
@@ -64,7 +65,7 @@ function roleLabel(r) {
           <strong style="color:var(--color-primary-dark);">{{ planLimits.plan }} plan</strong>
           &nbsp;·&nbsp; Users: {{ planLimits.users.current }}/{{ planLimits.users.max ?? '∞' }}
         </span>
-        <a href="/admin/upgrade" class="view-all-link">Upgrade →</a>
+        <a href="/admin/upgrade" class="view-all-link">Upgrade <Icon name="arrow-right" /></a>
       </div>
 
       <div class="page-header">
@@ -108,7 +109,7 @@ function roleLabel(r) {
       <!-- Filters -->
       <div class="filter-bar">
         <div class="search-box">
-          <span class="search-icon">🔍</span>
+          <span class="search-icon"><Icon name="search" /></span>
           <input v-model="search" type="text" placeholder="Search users by name or email...">
         </div>
         <div class="filter-tabs">
@@ -175,7 +176,7 @@ function roleLabel(r) {
             </template>
             <tr v-else>
               <td colspan="6" style="text-align:center;padding:3rem;color:#9ca3af;">
-                <div style="font-size:2rem;margin-bottom:1rem;">👥</div>
+                <div style="font-size:2rem;margin-bottom:1rem;"><Icon name="users" /></div>
                 <h3 style="color:#d1d5db;">No users found</h3>
                 <p>{{ filters.search || filters.role || filters.status ? 'Try adjusting your filters' : 'No users registered yet' }}</p>
                 <Link v-if="filters.search || filters.role || filters.status" href="/admin/users" class="btn btn-primary" style="margin-top:1rem;">
@@ -192,13 +193,13 @@ function roleLabel(r) {
             Showing {{ users.from ?? 0 }}–{{ users.to ?? 0 }} of {{ users.total }} users
           </div>
           <div class="page-controls">
-            <button class="page-btn" :disabled="!users.prev_page_url" @click="router.get(users.prev_page_url)">← Previous</button>
+            <button class="page-btn" :disabled="!users.prev_page_url" @click="router.get(users.prev_page_url)"><Icon name="arrow-left" /> Previous</button>
             <button
               v-for="p in users.last_page" :key="p"
               class="page-btn" :class="{ active: p === users.current_page }"
               @click="router.get(users.path + '?page=' + p)"
             >{{ p }}</button>
-            <button class="page-btn" :disabled="!users.next_page_url" @click="router.get(users.next_page_url)">Next →</button>
+            <button class="page-btn" :disabled="!users.next_page_url" @click="router.get(users.next_page_url)">Next <Icon name="arrow-right" /></button>
           </div>
         </div>
       </div>

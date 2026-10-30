@@ -39,6 +39,10 @@ class AutoCloseResolvedTickets extends Command
         $totalClosed = 0;
 
         foreach (Institution::where('is_active', true)->get() as $institution) {
+            if (! $institution->hasAutoRules()) {
+                continue;
+            }
+
             app()->instance('currentInstitutionId', $institution->id);
 
             $days = Setting::get('auto_close_resolved_after_days', 7);

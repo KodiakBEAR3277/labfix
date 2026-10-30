@@ -15,6 +15,7 @@
 import { Link, useForm } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
 import AuthLayout from '../../Layouts/AuthLayout.vue'
+import Icon from '../../Components/Icon.vue'
 
 const props = defineProps({
   plan: String,
@@ -307,11 +308,11 @@ function submit() {
 
         <div class="auth-social-buttons">
           <a href="#" class="auth-social-btn">
-            <div class="auth-social-icon auth-google-icon"></div>
+            <Icon name="google" :size="20" />
             Google
           </a>
           <a href="#" class="auth-social-btn">
-            <div class="auth-social-icon auth-facebook-icon"></div>
+            <Icon name="facebook" :size="20" />
             Facebook
           </a>
         </div>

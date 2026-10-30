@@ -28,6 +28,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { colors, spacing, radius, font } from '@/constants/theme';
 import { loadAuth } from '@/utils/auth';
 import { apiUrl } from '@/constants/api';
+import Icon, { IconName } from '@/components/ui/Icon';
 
 // Where the back / cancel actions return to. The tab bars navigate with
 // replace(), so there's no list entry in history for router.back() to pop
@@ -75,10 +76,10 @@ const STATUS_OPTIONS = [
   { value: 'resolved',    label: 'Resolved',    desc: "Issue is fixed — reporter notified" },
 ];
 
-const PRIORITY_OPTIONS = [
-  { value: 'low',    label: 'Low',    emoji: '🟢', color: colors.success },
-  { value: 'medium', label: 'Medium', emoji: '🟡', color: colors.warning },
-  { value: 'high',   label: 'High',   emoji: '🔴', color: colors.danger  },
+const PRIORITY_OPTIONS: { value: string; label: string; emoji: IconName; color: string }[] = [
+  { value: 'low',    label: 'Low',    emoji: 'circle', color: colors.success },
+  { value: 'medium', label: 'Medium', emoji: 'circle', color: colors.warning },
+  { value: 'high',   label: 'High',   emoji: 'circle', color: colors.danger  },
 ];
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -277,8 +278,12 @@ export default function ITAssignmentEditScreen() {
         <StatusBar barStyle="light-content" backgroundColor={colors.bgPrimary} />
         <View style={s.centered}>
           <Text style={s.errorText}>{errors.general ?? 'Ticket not found.'}</Text>
-          <TouchableOpacity style={s.retryBtn} onPress={() => router.replace(LIST_ROUTE as any)}>
-            <Text style={s.retryText}>← Go Back</Text>
+          <TouchableOpacity
+            style={[s.retryBtn, s.inlineRow]}
+            onPress={() => router.replace(LIST_ROUTE as any)}
+          >
+            <Icon name="arrow-left" size={14} color="#ffffff" />
+            <Text style={s.retryText}>Go Back</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -296,8 +301,13 @@ export default function ITAssignmentEditScreen() {
 
       {/* ── Top Nav ── */}
       <View style={s.nav}>
-        <TouchableOpacity onPress={() => router.replace(LIST_ROUTE as any)} activeOpacity={0.7}>
-          <Text style={s.navBack}>← Assignment</Text>
+        <TouchableOpacity
+          style={s.inlineRow}
+          onPress={() => router.replace(LIST_ROUTE as any)}
+          activeOpacity={0.7}
+        >
+          <Icon name="arrow-left" size={13} color={colors.primary} />
+          <Text style={s.navBack}>Assignment</Text>
         </TouchableOpacity>
         <Text style={s.navTitle}>Update Assignment</Text>
         <View style={{ width: 80 }} />
@@ -397,7 +407,7 @@ export default function ITAssignmentEditScreen() {
 
                       {selected && (
                         <View style={[s.statusCheckBadge, { backgroundColor: sc.bg, borderColor: sc.border }]}>
-                          <Text style={[s.statusCheckText, { color: sc.text }]}>✓</Text>
+                          <Icon name="check" size={11} color={sc.text} />
                         </View>
                       )}
                     </TouchableOpacity>
@@ -432,7 +442,7 @@ export default function ITAssignmentEditScreen() {
                       }}
                       activeOpacity={0.75}
                     >
-                      <Text style={{ fontSize: 16 }}>{opt.emoji}</Text>
+                      <Icon name={opt.emoji} size={10} color={opt.color} />
                       <Text style={[
                         s.priorityOptText,
                         selected && { color: opt.color, fontWeight: font.bold },
@@ -450,9 +460,10 @@ export default function ITAssignmentEditScreen() {
             </View>
 
             {/* Notification hint */}
-            <View style={s.notifHint}>
-              <Text style={s.notifHintText}>
-                💡 The reporter will be automatically notified when you update this ticket.
+            <View style={[s.notifHint, s.inlineRow]}>
+              <Icon name="lightbulb" size={13} color={colors.successLight} />
+              <Text style={[s.notifHintText, { flex: 1 }]}>
+                The reporter will be automatically notified when you update this ticket.
               </Text>
             </View>
 
@@ -496,7 +507,10 @@ export default function ITAssignmentEditScreen() {
                 >
                   {quickLoading === 'start'
                     ? <ActivityIndicator size="small" color={colors.textSecondary} />
-                    : <Text style={s.quickBtnText}>🚀 Start Working</Text>}
+                    : <View style={s.inlineRow}>
+                        <Icon name="rocket" size={14} color={colors.textSecondary} />
+                        <Text style={s.quickBtnText}>Start Working</Text>
+                      </View>}
                 </TouchableOpacity>
               )}
 
@@ -509,7 +523,10 @@ export default function ITAssignmentEditScreen() {
                 >
                   {quickLoading === 'resolve'
                     ? <ActivityIndicator size="small" color={colors.textSecondary} />
-                    : <Text style={s.quickBtnText}>✅ Mark Resolved</Text>}
+                    : <View style={s.inlineRow}>
+                        <Icon name="check-circle" size={14} color={colors.success} />
+                        <Text style={s.quickBtnText}>Mark Resolved</Text>
+                      </View>}
                 </TouchableOpacity>
               )}
 
@@ -522,9 +539,12 @@ export default function ITAssignmentEditScreen() {
                 >
                   {quickLoading === 'escalate'
                     ? <ActivityIndicator size="small" color="#b91c1c" />
-                    : <Text style={[s.quickBtnText, { color: '#b91c1c' }]}>
-                        🔴 Escalate Priority
-                      </Text>}
+                    : <View style={s.inlineRow}>
+                        <Icon name="circle" size={10} color={colors.danger} />
+                        <Text style={[s.quickBtnText, { color: '#b91c1c' }]}>
+                          Escalate Priority
+                        </Text>
+                      </View>}
                 </TouchableOpacity>
               )}
 
@@ -533,7 +553,10 @@ export default function ITAssignmentEditScreen() {
 
           {/* ── Status guidelines ── */}
           <View style={s.guidelinesCard}>
-            <Text style={s.guidelinesTitle}>📋 Status Guidelines</Text>
+            <View style={s.inlineRow}>
+              <Icon name="clipboard" size={13} color={colors.infoLight} />
+              <Text style={s.guidelinesTitle}>Status Guidelines</Text>
+            </View>
             {STATUS_OPTIONS.map((opt) => {
               const sc = statusStyle(opt.value);
               return (
@@ -572,7 +595,10 @@ export default function ITAssignmentEditScreen() {
               onPress={() => router.push(`/(it)/assignments/${ticket.id}` as any)}
               activeOpacity={0.75}
             >
-              <Text style={s.viewFullBtnText}>View Full Ticket Details →</Text>
+              <View style={s.inlineRow}>
+                <Text style={s.viewFullBtnText}>View Full Ticket Details</Text>
+                <Icon name="arrow-right" size={13} color={colors.primary} />
+              </View>
             </TouchableOpacity>
           </SectionCard>
 
@@ -616,6 +642,7 @@ export default function ITAssignmentEditScreen() {
 
 const s = StyleSheet.create({
   root:    { flex: 1, backgroundColor: colors.bgPrimary },
+  inlineRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   centered:{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.md, padding: spacing.lg },
   scroll:  { paddingHorizontal: spacing.lg, paddingBottom: spacing.lg },
 

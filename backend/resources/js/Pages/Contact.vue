@@ -9,6 +9,7 @@
 import { ref, onMounted } from 'vue'
 import { Link } from '@inertiajs/vue3'
 import LandingLayout from '../Layouts/LandingLayout.vue'
+import Icon from '../Components/Icon.vue'
 
 const contactInfo = ref({
   system_name:   'LabFix',
@@ -32,10 +33,10 @@ onMounted(async () => {
 })
 
 const socialLinks = [
-  { icon: '📘', label: 'Facebook',  href: '#' },
-  { icon: '🐦', label: 'Twitter',   href: '#' },
-  { icon: '💼', label: 'LinkedIn',  href: '#' },
-  { icon: '📸', label: 'Instagram', href: '#' },
+  { icon: 'facebook',  label: 'Facebook',  href: '#' },
+  { icon: 'twitter',   label: 'Twitter',   href: '#' },
+  { icon: 'linkedin',  label: 'LinkedIn',  href: '#' },
+  { icon: 'instagram', label: 'Instagram', href: '#' },
 ]
 </script>
 
@@ -43,7 +44,7 @@ const socialLinks = [
     <div class="contact-page">
       <div class="contact-container">
 
-        <Link href="/" class="back-link">← Back to Home</Link>
+        <Link href="/" class="back-link"><Icon name="arrow-left" /> Back to Home</Link>
 
         <div class="contact-header">
           <h1>Contact Us</h1>
@@ -58,7 +59,7 @@ const socialLinks = [
         <div class="contact-grid">
 
           <div class="contact-card">
-            <div class="contact-icon">📧</div>
+            <div class="contact-icon"><Icon name="mail" /></div>
             <h3>Email Support</h3>
             <p>Send us an email and we'll get back to you within 24 hours during business days.</p>
             <a
@@ -70,7 +71,7 @@ const socialLinks = [
           </div>
 
           <div class="contact-card">
-            <div class="contact-icon">📞</div>
+            <div class="contact-icon"><Icon name="phone" /></div>
             <h3>Phone Support</h3>
             <p>Call us during office hours, Monday to Friday, 8AM to 5PM.</p>
             <a
@@ -83,7 +84,7 @@ const socialLinks = [
           </div>
 
           <div class="contact-card">
-            <div class="contact-icon">📍</div>
+            <div class="contact-icon"><Icon name="map-pin" /></div>
             <h3>Visit Us</h3>
             <p>Find us at the IT Support office on campus during office hours.</p>
             <span class="contact-link">IT Department Office</span>
@@ -100,7 +101,7 @@ const socialLinks = [
               :href="social.href"
               :title="social.label"
               class="social-btn"
-            >{{ social.icon }}</a>
+            ><Icon :name="social.icon" /></a>
           </div>
         </div>
 

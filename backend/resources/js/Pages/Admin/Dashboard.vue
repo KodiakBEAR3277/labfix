@@ -11,6 +11,7 @@ import NavAdmin from '../../Components/Nav/NavAdmin.vue'
 import { Link } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import { usePage } from '@inertiajs/vue3'
+import Icon from '../../Components/Icon.vue'
 
 const props = defineProps({
   stats:          Object,
@@ -49,7 +50,7 @@ function healthBadgeClass(color) {
         <div class="stat-card">
           <div class="stat-header">
             <span class="stat-label">Total Users</span>
-            <span class="stat-icon">👥</span>
+            <span class="stat-icon"><Icon name="users" /></span>
           </div>
           <div class="stat-value">{{ stats.total_users }}</div>
           <div class="stat-detail">
@@ -60,7 +61,7 @@ function healthBadgeClass(color) {
         <div class="stat-card">
           <div class="stat-header">
             <span class="stat-label">Open Tickets</span>
-            <span class="stat-icon">🎫</span>
+            <span class="stat-icon"><Icon name="ticket" /></span>
           </div>
           <div class="stat-value">{{ stats.open_tickets }}</div>
           <div class="stat-detail">Across all labs</div>
@@ -69,7 +70,7 @@ function healthBadgeClass(color) {
         <div class="stat-card">
           <div class="stat-header">
             <span class="stat-label">High Priority</span>
-            <span class="stat-icon">🔴</span>
+            <span class="stat-icon"><Icon name="circle" style="color:var(--color-danger);" /></span>
           </div>
           <div class="stat-value">{{ stats.high_priority }}</div>
           <div class="stat-detail" :class="stats.high_priority > 5 ? 'stat-change negative' : 'stat-change'">
@@ -80,7 +81,7 @@ function healthBadgeClass(color) {
         <div class="stat-card">
           <div class="stat-header">
             <span class="stat-label">System Uptime</span>
-            <span class="stat-icon">⚡</span>
+            <span class="stat-icon"><Icon name="bolt" /></span>
           </div>
           <div class="stat-value">{{ stats.system_uptime }}%</div>
           <div class="stat-detail">Last 30 days</div>
@@ -89,7 +90,7 @@ function healthBadgeClass(color) {
         <div class="stat-card">
           <div class="stat-header">
             <span class="stat-label">Active Labs</span>
-            <span class="stat-icon">🏫</span>
+            <span class="stat-icon"><Icon name="school" /></span>
           </div>
           <div class="stat-value">{{ stats.total_labs }}</div>
           <div class="stat-detail">{{ stats.total_workstations }} total workstations</div>
@@ -104,7 +105,7 @@ function healthBadgeClass(color) {
         <div class="section-card">
           <div class="section-header">
             <h2 class="section-title">Recent Activity</h2>
-            <Link href="/admin/tickets" class="view-all-link">View Tickets →</Link>
+            <Link href="/admin/tickets" class="view-all-link">View Tickets <Icon name="arrow-right" /></Link>
           </div>
 
           <div class="activity-feed">
@@ -114,7 +115,7 @@ function healthBadgeClass(color) {
                 :key="index"
                 class="activity-item"
               >
-                <div class="activity-icon">{{ activity.icon }}</div>
+                <div class="activity-icon"><Icon :name="activity.icon" /></div>
                 <div class="activity-content">
                   <div class="activity-title">{{ activity.title }}</div>
                   <div class="activity-time">{{ activity.time }}</div>
@@ -137,35 +138,35 @@ function healthBadgeClass(color) {
             </div>
             <div class="activity-feed">
               <Link href="/admin/tickets" class="activity-item" style="text-decoration:none;">
-                <div class="activity-icon">🎫</div>
+                <div class="activity-icon"><Icon name="ticket" /></div>
                 <div class="activity-content">
                   <div class="activity-title">Ticket Management</div>
                   <div class="activity-desc">{{ stats.open_tickets }} open tickets</div>
                 </div>
               </Link>
               <Link href="/admin/users" class="activity-item" style="text-decoration:none;">
-                <div class="activity-icon">👥</div>
+                <div class="activity-icon"><Icon name="users" /></div>
                 <div class="activity-content">
                   <div class="activity-title">User Management</div>
                   <div class="activity-desc">{{ stats.total_users }} registered users</div>
                 </div>
               </Link>
               <Link href="/admin/labs" class="activity-item" style="text-decoration:none;">
-                <div class="activity-icon">🏫</div>
+                <div class="activity-icon"><Icon name="school" /></div>
                 <div class="activity-content">
                   <div class="activity-title">Lab Configuration</div>
                   <div class="activity-desc">{{ stats.total_labs }} active labs</div>
                 </div>
               </Link>
               <Link href="/admin/settings" class="activity-item" style="text-decoration:none;">
-                <div class="activity-icon">⚙️</div>
+                <div class="activity-icon"><Icon name="settings" /></div>
                 <div class="activity-content">
                   <div class="activity-title">System Settings</div>
                   <div class="activity-desc">Configure LabFix</div>
                 </div>
               </Link>
               <Link href="/admin/transactions" class="activity-item" style="text-decoration:none;">
-                <div class="activity-icon">📜</div>
+                <div class="activity-icon"><Icon name="restore" /></div>
                 <div class="activity-content">
                   <div class="activity-title">Ticket History</div>
                   <div class="activity-desc">View all transactions</div>
@@ -210,7 +211,7 @@ function healthBadgeClass(color) {
       <div class="section-card" style="margin-top:2rem;">
         <div class="section-header">
           <h2 class="section-title">User Breakdown</h2>
-          <Link href="/admin/users" class="view-all-link">Manage Users →</Link>
+          <Link href="/admin/users" class="view-all-link">Manage Users <Icon name="arrow-right" /></Link>
         </div>
         <div class="system-stats" style="margin-bottom:0;">
           <div class="stat-card">

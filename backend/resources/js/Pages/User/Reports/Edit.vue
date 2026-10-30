@@ -18,6 +18,7 @@ import AppLayout from '../../../Layouts/AppLayout.vue'
 import NavUser from '../../../Components/Nav/NavUser.vue'
 import { Link, useForm } from '@inertiajs/vue3'
 import { ref } from 'vue'
+import Icon from '../../../Components/Icon.vue'
 
 const props = defineProps({
   report: Object,
@@ -49,7 +50,7 @@ function submit() {
     <template #nav><NavUser /></template>
 
     <div class="container">
-      <Link :href="`/user/reports/${report.id}`" class="back-btn">← Back to Report</Link>
+      <Link :href="`/user/reports/${report.id}`" class="back-btn"><Icon name="arrow-left" /> Back to Report</Link>
 
       <div class="page-header">
         <h1>Edit Report</h1>
@@ -95,7 +96,7 @@ function submit() {
                   :key="att"
                   style="background:rgba(45,212,191,0.1);padding:0.5rem 1rem;border-radius:6px;font-size:0.9rem;color:#2dd4bf;"
                 >
-                  📎 {{ att.split('/').pop() }}
+                  <Icon name="paperclip" /> {{ att.split('/').pop() }}
                 </div>
               </div>
               <p v-else style="color:#9ca3af;font-size:0.9rem;">No attachments</p>
@@ -130,7 +131,7 @@ function submit() {
       </div>
 
       <div class="card" style="max-width:800px;margin:1.5rem auto;background:rgba(59,130,246,0.1);border-color:rgba(59,130,246,0.3);">
-        <h3 style="color:#3b82f6;margin-bottom:0.5rem;">ℹ️ Note</h3>
+        <h3 style="color:#3b82f6;margin-bottom:0.5rem;"><Icon name="info" /> Note</h3>
         <p style="color:#d1d5db;font-size:0.9rem;line-height:1.6;margin:0;">
           You can only edit this report before it's assigned to a technician.
           Once assigned, please contact the assigned technician if you need to make changes.

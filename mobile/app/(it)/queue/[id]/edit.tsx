@@ -29,6 +29,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { colors, spacing, radius, font } from '@/constants/theme';
 import { loadAuth, AuthUser } from '@/utils/auth';
 import { apiUrl } from '@/constants/api';
+import Icon from '@/components/ui/Icon';
 
 // Where the back / cancel actions return to. The tab bars navigate with
 // replace(), so there's no list entry in history for router.back() to pop
@@ -305,8 +306,12 @@ export default function ITQueueEditScreen() {
         <StatusBar barStyle="light-content" backgroundColor={colors.bgPrimary} />
         <View style={s.centered}>
           <Text style={s.errorText}>{errors.general ?? 'Ticket not found.'}</Text>
-          <TouchableOpacity style={s.retryBtn} onPress={() => router.replace(LIST_ROUTE as any)}>
-            <Text style={s.retryText}>← Go Back</Text>
+          <TouchableOpacity
+            style={[s.retryBtn, s.inlineRow]}
+            onPress={() => router.replace(LIST_ROUTE as any)}
+          >
+            <Icon name="arrow-left" size={14} color="#ffffff" />
+            <Text style={s.retryText}>Go Back</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -324,10 +329,12 @@ export default function ITQueueEditScreen() {
       {/* ── Top Nav ── */}
       <View style={s.nav}>
         <TouchableOpacity
+          style={s.inlineRow}
           onPress={() => router.replace(LIST_ROUTE as any)}
           activeOpacity={0.7}
         >
-          <Text style={s.navBack}>← Ticket</Text>
+          <Icon name="arrow-left" size={13} color={colors.primary} />
+          <Text style={s.navBack}>Ticket</Text>
         </TouchableOpacity>
         <Text style={s.navTitle}>Edit Ticket</Text>
         <View style={{ width: 60 }} />
@@ -428,9 +435,7 @@ export default function ITQueueEditScreen() {
                       onPress={() => setForm(f => ({ ...f, priority: opt.value }))}
                       activeOpacity={0.75}
                     >
-                      <Text style={{ fontSize: 14 }}>
-                        {opt.value === 'high' ? '🔴' : opt.value === 'medium' ? '🟡' : '🟢'}
-                      </Text>
+                      <Icon name="circle" size={10} color={opt.color} />
                       <Text style={[
                         s.priorityOptionText,
                         selected && { color: opt.color, fontWeight: font.bold },
@@ -475,7 +480,7 @@ export default function ITQueueEditScreen() {
                       Myself ({authUser.name.split(' ')[0]})
                     </Text>
                     {form.assigned_to === authUser.id && (
-                      <Text style={{ fontSize: 12, color: colors.primary }}> ✓</Text>
+                      <Icon name="check" size={12} color={colors.primary} />
                     )}
                   </TouchableOpacity>
                 )}
@@ -567,7 +572,10 @@ export default function ITQueueEditScreen() {
               onPress={() => router.push(`/(it)/queue/${ticket.id}` as any)}
               activeOpacity={0.75}
             >
-              <Text style={s.viewFullBtnText}>View Full Ticket Details →</Text>
+              <View style={s.inlineRow}>
+                <Text style={s.viewFullBtnText}>View Full Ticket Details</Text>
+                <Icon name="arrow-right" size={13} color={colors.primary} />
+              </View>
             </TouchableOpacity>
           </SectionCard>
 
@@ -628,6 +636,7 @@ export default function ITQueueEditScreen() {
 
 const s = StyleSheet.create({
   root:    { flex: 1, backgroundColor: colors.bgPrimary },
+  inlineRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   centered:{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.md, padding: spacing.lg },
   scroll:  { paddingHorizontal: spacing.lg, paddingBottom: spacing.lg },
 

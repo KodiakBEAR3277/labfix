@@ -38,6 +38,7 @@ import { loadAuth } from '@/utils/auth';
 import { apiUrl } from '@/constants/api';
 import VoiceMessage from '@/components/ui/VoiceMessage';
 import AttachmentList from '@/components/ui/AttachmentList';
+import Icon, { IconName } from '@/components/ui/Icon';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -117,17 +118,17 @@ function diffForHumans(iso: string): string {
   return `${Math.floor(seconds / 86400)}d ago`;
 }
 
-function txIcon(action: string): string {
-  const map: Record<string, string> = {
-    created:          '🎫',
-    status_changed:   '🔄',
-    assigned:         '👤',
-    priority_changed: '⚠️',
-    updated:          '✏️',
-    deleted:          '🗑️',
-    restored:         '♻️',
+function txIcon(action: string): IconName {
+  const map: Record<string, IconName> = {
+    created:          'ticket',
+    status_changed:   'refresh',
+    assigned:         'user',
+    priority_changed: 'alert',
+    updated:          'edit',
+    deleted:          'trash',
+    restored:         'restore',
   };
-  return map[action] ?? '📌';
+  return map[action] ?? 'pin';
 }
 
 function txTitle(action: string): string {
@@ -280,7 +281,8 @@ export default function TicketShowScreen() {
         <View style={s.centered}>
           <Text style={s.errorText}>{error ?? 'Ticket not found.'}</Text>
           <TouchableOpacity style={s.retryBtn} onPress={() => router.replace('/(tabs)/my-reports' as any)}>
-            <Text style={s.retryText}>← Go Back</Text>
+            <Icon name="arrow-left" size={16} color="#fff" />
+            <Text style={s.retryText}>Go Back</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -297,8 +299,9 @@ export default function TicketShowScreen() {
 
       {/* ── Top Nav ── */}
       <View style={s.nav}>
-        <TouchableOpacity onPress={() => router.replace('/(tabs)/my-reports' as any)}>
-          <Text style={s.navBack}>← My Reports</Text>
+        <TouchableOpacity onPress={() => router.replace('/(tabs)/my-reports' as any)} style={s.navBackRow}>
+          <Icon name="arrow-left" size={15} color={colors.primary} />
+          <Text style={s.navBack}>My Reports</Text>
         </TouchableOpacity>
         <Text style={s.navTicketNum}>{ticket.ticket_number}</Text>
         <View style={{ width: 80 }} />
@@ -413,7 +416,10 @@ export default function TicketShowScreen() {
         {/* ── Manage Report ── */}
         {locked ? (
           <View style={[s.card, s.assignedNotice]}>
-            <Text style={s.assignedNoticeTitle}>✓ Ticket Assigned</Text>
+            <View style={s.assignedTitleRow}>
+              <Icon name="check" size={16} color={colors.primary} />
+              <Text style={s.assignedNoticeTitle}>Ticket Assigned</Text>
+            </View>
             <Text style={s.assignedNoticeText}>
               This ticket has been assigned and can no longer be edited.
             </Text>
@@ -477,7 +483,7 @@ export default function TicketShowScreen() {
           <View style={s.card}>
             <Text style={s.cardTitle}>Assignment Status</Text>
             <View style={s.awaitingWrap}>
-              <Text style={s.awaitingIcon}>⏳</Text>
+              <Icon name="hourglass" size={32} color={colors.textMuted} />
               <Text style={s.awaitingText}>Awaiting assignment to a technician</Text>
             </View>
           </View>
@@ -511,9 +517,10 @@ export default function TicketShowScreen() {
                   </View>
                   <View style={s.tlContent}>
                     <View style={s.tlHeader}>
-                      <Text style={s.tlTitle}>
-                        {txIcon(tx.action)} {txTitle(tx.action)}
-                      </Text>
+                      <View style={s.tlTitleRow}>
+                        <Icon name={txIcon(tx.action)} size={14} color={colors.primary} />
+                        <Text style={s.tlTitle}>{txTitle(tx.action)}</Text>
+                      </View>
                       <Text style={s.tlTime}>{formatDate(tx.created_at)}</Text>
                     </View>
                     <Text style={s.tlText}>{tx.description}</Text>
@@ -523,7 +530,7 @@ export default function TicketShowScreen() {
                           <Text style={s.tlOld}>{tx.old_value}</Text>
                         )}
                         {tx.old_value && tx.new_value && (
-                          <Text style={s.tlArrow}> → </Text>
+                          <Icon name="arrow-right" size={12} color={colors.textMuted} style={{ marginHorizontal: 2 }} />
                         )}
                         {tx.new_value && (
                           <Text style={s.tlNew}>{tx.new_value}</Text>
@@ -544,7 +551,10 @@ export default function TicketShowScreen() {
                 </View>
                 <View style={s.tlContent}>
                   <View style={s.tlHeader}>
-                    <Text style={s.tlTitle}>🎫 Ticket Created</Text>
+                    <View style={s.tlTitleRow}>
+                      <Icon name="ticket" size={14} color={colors.primary} />
+                      <Text style={s.tlTitle}>Ticket Created</Text>
+                    </View>
                     <Text style={s.tlTime}>{formatDate(ticket.created_at)}</Text>
                   </View>
                   <Text style={s.tlText}>
@@ -579,11 +589,16 @@ const s = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
+  navBackRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    width: 80,
+  },
   navBack: {
     fontSize: font.sm,
     fontWeight: font.semibold,
     color: colors.primary,
-    width: 80,
   },
   navTicketNum: {
     fontSize: font.sm,
@@ -722,11 +737,16 @@ const s = StyleSheet.create({
     backgroundColor: 'rgba(45,212,191,0.08)',
     borderColor: 'rgba(45,212,191,0.3)',
   },
+  assignedTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: spacing.xs,
+  },
   assignedNoticeTitle: {
     fontSize: font.base,
     fontWeight: font.bold,
     color: colors.primary,
-    marginBottom: spacing.xs,
   },
   assignedNoticeText: {
     fontSize: font.sm,
@@ -822,6 +842,12 @@ const s = StyleSheet.create({
     flexWrap: 'wrap',
     gap: spacing.xs,
   },
+  tlTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    flex: 1,
+  },
   tlTitle: {
     fontSize: font.sm,
     fontWeight: font.semibold,
@@ -858,6 +884,10 @@ const s = StyleSheet.create({
   // Error
   errorText: { fontSize: font.base, color: colors.textSecondary, textAlign: 'center' },
   retryBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
     backgroundColor: colors.primary,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm + 2,

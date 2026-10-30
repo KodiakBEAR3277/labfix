@@ -17,6 +17,7 @@ import AppLayout from '../../../Layouts/AppLayout.vue'
 import NavUser from '../../../Components/Nav/NavUser.vue'
 import { Link, useForm } from '@inertiajs/vue3'
 import { ref, computed } from 'vue'
+import Icon from '../../../Components/Icon.vue'
 
 const props = defineProps({
   labs:        Array,
@@ -88,10 +89,10 @@ function submit() {
 
 // ── Category options ──────────────────────────────────────────────────────────
 const categories = [
-  { value: 'hardware', icon: '🔧', label: 'Hardware', desc: 'Physical components issues' },
-  { value: 'software', icon: '💾', label: 'Software', desc: 'Programs and applications'  },
-  { value: 'network',  icon: '🌐', label: 'Network',  desc: 'Internet and connectivity'  },
-  { value: 'other',    icon: '❓', label: 'Other',    desc: 'Other technical issues'      },
+  { value: 'hardware', icon: 'wrench', label: 'Hardware', desc: 'Physical components issues' },
+  { value: 'software', icon: 'cpu',    label: 'Software', desc: 'Programs and applications'  },
+  { value: 'network',  icon: 'globe',  label: 'Network',  desc: 'Internet and connectivity'  },
+  { value: 'other',    icon: 'help',   label: 'Other',    desc: 'Other technical issues'      },
 ]
 </script>
 
@@ -107,7 +108,7 @@ const categories = [
 
       <!-- Maintenance notice -->
       <div v-if="maintenance?.active" class="maintenance-notice">
-        <div class="maintenance-icon">🔧</div>
+        <div class="maintenance-icon"><Icon name="wrench" /></div>
         <h2>System Maintenance</h2>
         <p>{{ maintenance.message }}</p>
         <Link href="/user/dashboard" class="btn btn-primary">Back to Dashboard</Link>
@@ -147,7 +148,7 @@ const categories = [
                   @click="selectLab(lab)"
                   style="cursor:pointer;"
                 >
-                  <div class="lab-icon">💻</div>
+                  <div class="lab-icon"><Icon name="laptop" /></div>
                   <div class="lab-name">{{ lab.name }}</div>
                   <div style="font-size:0.8rem;color:#9ca3af;margin-top:0.25rem;">
                     {{ lab.operational_count ?? 0 }}/{{ lab.capacity }} operational
@@ -202,7 +203,7 @@ const categories = [
                   @click="form.category = cat.value"
                   style="cursor:pointer;"
                 >
-                  <div class="category-icon">{{ cat.icon }}</div>
+                  <div class="category-icon"><Icon :name="cat.icon" /></div>
                   <div class="category-info">
                     <h3>{{ cat.label }}</h3>
                     <p>{{ cat.desc }}</p>
@@ -256,7 +257,7 @@ const categories = [
                     style="display:none"
                     @change="handleFiles"
                   >
-                  <div class="upload-icon">📷</div>
+                  <div class="upload-icon"><Icon name="camera" /></div>
                   <p style="color:#9ca3af;">Click to upload screenshots or documents</p>
                   <p style="color:#6b7280;font-size:0.85rem;">PNG, JPG, PDF up to 5MB each</p>
                 </div>
@@ -266,7 +267,7 @@ const categories = [
                     :key="f.name"
                     style="padding:0.5rem;background:rgba(45,212,191,0.1);margin-bottom:0.5rem;border-radius:6px;color:#2dd4bf;"
                   >
-                    📎 {{ f.name }} ({{ (f.size / 1024).toFixed(2) }} KB)
+                    <Icon name="paperclip" /> {{ f.name }} ({{ (f.size / 1024).toFixed(2) }} KB)
                   </li>
                 </ul>
               </div>

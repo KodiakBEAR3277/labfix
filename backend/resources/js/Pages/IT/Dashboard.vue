@@ -7,6 +7,7 @@ import AppLayout from '../../Layouts/AppLayout.vue'
 import NavIT from '../../Components/Nav/NavIT.vue'
 import { Link, usePage } from '@inertiajs/vue3'
 import { computed } from 'vue'
+import Icon from '../../Components/Icon.vue'
 
 const props = defineProps({
   recentTickets:   Array,
@@ -52,7 +53,7 @@ function diffForHumans(d) {
         <div class="stat-card">
           <div class="stat-header">
             <span class="stat-label">Open Tickets</span>
-            <span class="stat-icon">📋</span>
+            <span class="stat-icon"><Icon name="clipboard" /></span>
           </div>
           <div class="stat-value">{{ stats.open_tickets }}</div>
           <div class="stat-change">{{ stats.open_tickets > 20 ? 'High volume' : 'Normal' }}</div>
@@ -61,7 +62,7 @@ function diffForHumans(d) {
         <div class="stat-card">
           <div class="stat-header">
             <span class="stat-label">My Assignments</span>
-            <span class="stat-icon">👤</span>
+            <span class="stat-icon"><Icon name="user" /></span>
           </div>
           <div class="stat-value">{{ stats.my_assignments }}</div>
           <div class="stat-change">Active tasks</div>
@@ -70,7 +71,7 @@ function diffForHumans(d) {
         <div class="stat-card">
           <div class="stat-header">
             <span class="stat-label">High Priority</span>
-            <span class="stat-icon">🔴</span>
+            <span class="stat-icon" style="color: var(--color-danger)"><Icon name="circle" /></span>
           </div>
           <div class="stat-value">{{ stats.high_priority }}</div>
           <div class="stat-change" :class="stats.high_priority > 5 ? 'negative' : ''">
@@ -81,7 +82,7 @@ function diffForHumans(d) {
         <div class="stat-card">
           <div class="stat-header">
             <span class="stat-label">Resolved Today</span>
-            <span class="stat-icon">✅</span>
+            <span class="stat-icon"><Icon name="check-circle" /></span>
           </div>
           <div class="stat-value">{{ stats.resolved_today }}</div>
           <div class="stat-change">Great progress!</div>
@@ -90,7 +91,7 @@ function diffForHumans(d) {
         <div class="stat-card">
           <div class="stat-header">
             <span class="stat-label">Avg Response Time</span>
-            <span class="stat-icon">⏱️</span>
+            <span class="stat-icon"><Icon name="clock" /></span>
           </div>
           <div class="stat-value">{{ stats.avg_response_time }}h</div>
           <div class="stat-change">Last 7 days</div>
@@ -99,7 +100,7 @@ function diffForHumans(d) {
         <div class="stat-card">
           <div class="stat-header">
             <span class="stat-label">Team Performance</span>
-            <span class="stat-icon">📊</span>
+            <span class="stat-icon"><Icon name="chart" /></span>
           </div>
           <div class="stat-value">{{ stats.team_satisfaction }}%</div>
           <div class="stat-change">Resolution rate</div>
@@ -110,7 +111,7 @@ function diffForHumans(d) {
       <div v-if="priorityAlerts.length" class="alerts-section">
         <div class="alerts-header">
           <div class="alerts-title">
-            ⚠️ High Priority Alerts
+            <Icon name="alert" /> High Priority Alerts
             <span class="alert-badge">{{ priorityAlerts.length }}</span>
           </div>
         </div>
@@ -132,7 +133,7 @@ function diffForHumans(d) {
         <div class="section-card">
           <div class="section-header">
             <h2 class="section-title">Recent Tickets</h2>
-            <Link href="/it/tickets" class="view-all-link">View All →</Link>
+            <Link href="/it/tickets" class="view-all-link">View All <Icon name="arrow-right" /></Link>
           </div>
           <div class="ticket-list">
             <template v-if="recentTickets.length">
@@ -167,21 +168,21 @@ function diffForHumans(d) {
             </div>
             <div class="quick-actions">
               <Link href="/it/tickets?status=new" class="activity-item" style="text-decoration:none;">
-                <span class="activity-icon">🔥</span>
+                <span class="activity-icon"><Icon name="fire" /></span>
                 <div class="activity-time">
                   <h4 class="activity-title">View Unassigned</h4>
                   <p class="activity-desc">{{ unassignedCount }} tickets waiting</p>
                 </div>
               </Link>
               <Link href="/it/assignments" class="activity-item" style="text-decoration:none;">
-                <span class="activity-icon">👤</span>
+                <span class="activity-icon"><Icon name="user" /></span>
                 <div class="activity-time">
                   <h4 class="activity-title">My Assignments</h4>
                   <p class="activity-desc">{{ stats.my_assignments }} active</p>
                 </div>
               </Link>
               <Link href="/it/knowledge-base" class="activity-item" style="text-decoration:none;">
-                <span class="activity-icon">📚</span>
+                <span class="activity-icon"><Icon name="book" /></span>
                 <div class="activity-time">
                   <h4 class="activity-title">Knowledge Base</h4>
                   <p class="activity-desc">Manage articles</p>
@@ -198,7 +199,7 @@ function diffForHumans(d) {
             <div class="activity-feed">
               <template v-if="recentResolved.length">
                 <div v-for="(resolved, i) in recentResolved" :key="i" class="activity-item">
-                  <div class="activity-icon">✅</div>
+                  <div class="activity-icon"><Icon name="check-circle" /></div>
                   <div class="activity-content">
                     <div class="activity-title">Ticket {{ resolved.ticket_number }} resolved</div>
                     <div class="activity-time">{{ resolved.resolved_at }}</div>

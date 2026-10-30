@@ -30,6 +30,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
+import Icon, { IconName } from '@/components/ui/Icon';
 import { colors, spacing, radius, font } from '@/constants/theme';
 import { loadAuth } from '@/utils/auth';
 import { apiUrl } from '@/constants/api';
@@ -76,12 +77,12 @@ function equipmentStyle(status: Equipment['status']): { bg: string; border: stri
   }
 }
 
-function equipmentIcon(type: string): string {
+function equipmentIcon(type: string): IconName {
   switch (type) {
-    case 'computer':  return '💻';
-    case 'printer':   return '🖨️';
-    case 'projector': return '📽️';
-    default:          return '🖥️';
+    case 'computer':  return 'laptop';
+    case 'printer':   return 'printer';
+    case 'projector': return 'videocam';
+    default:          return 'desktop';
   }
 }
 
@@ -104,7 +105,7 @@ function EquipmentItem({ eq }: { eq: Equipment }) {
       eq_s.wrap,
       { backgroundColor: style.bg, borderColor: style.border },
     ]}>
-      <Text style={eq_s.icon}>{equipmentIcon(eq.type)}</Text>
+      <Icon name={equipmentIcon(eq.type)} size={14} />
       <Text style={[eq_s.code, { color: style.text }]} numberOfLines={1}>
         {eq.equipment_code}
       </Text>
@@ -200,7 +201,7 @@ export default function LabStatusScreen() {
       <SafeAreaView style={s.root}>
         <StatusBar barStyle="light-content" backgroundColor={colors.bgPrimary} />
         <View style={s.centered}>
-          <Text style={s.errorIcon}>⚠️</Text>
+          <Icon name="alert" size={36} color={colors.warning} />
           <Text style={s.errorText}>{error}</Text>
           <TouchableOpacity style={s.retryBtn} onPress={() => token && fetchLabs(token)}>
             <Text style={s.retryText}>Try Again</Text>
@@ -241,7 +242,7 @@ export default function LabStatusScreen() {
 
         {labs.length === 0 ? (
           <View style={s.centered}>
-            <Text style={s.errorIcon}>🏫</Text>
+            <Icon name="school" size={36} color={colors.textMuted} />
             <Text style={s.errorText}>No labs available.</Text>
           </View>
         ) : (
@@ -293,7 +294,7 @@ export default function LabStatusScreen() {
                   <View style={s.labHeader}>
                     <View style={s.labHeaderLeft}>
                       <View style={s.labIconWrap}>
-                        <Text style={s.labIconText}>💻</Text>
+                        <Icon name="laptop" size={18} />
                       </View>
                       <View style={{ flex: 1 }}>
                         <Text style={s.labName}>{selectedLab.name}</Text>
@@ -400,16 +401,22 @@ export default function LabStatusScreen() {
                   {/* Notes for problem equipment */}
                   {selectedLab.equipment.some(e => e.notes && e.status !== 'operational') && (
                     <View style={s.notesSection}>
-                      <Text style={s.notesSectionTitle}>📋 Equipment Notes</Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                        <Icon name="clipboard" size={14} color={colors.warningLight} />
+                        <Text style={s.notesSectionTitle}>Equipment Notes</Text>
+                      </View>
                       {selectedLab.equipment
                         .filter(e => e.notes && e.status !== 'operational')
                         .map((eq) => {
                           const st = equipmentStyle(eq.status);
                           return (
                             <View key={eq.id} style={s.noteItem}>
-                              <Text style={[s.noteCode, { color: st.text }]}>
-                                {equipmentIcon(eq.type)} {eq.equipment_code}
-                              </Text>
+                              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                                <Icon name={equipmentIcon(eq.type)} size={14} color={st.text} />
+                                <Text style={[s.noteCode, { color: st.text }]}>
+                                  {eq.equipment_code}
+                                </Text>
+                              </View>
                               <Text style={s.noteText}>{eq.notes}</Text>
                             </View>
                           );
@@ -461,7 +468,7 @@ export default function LabStatusScreen() {
                         </Text>
                       </View>
                     </View>
-                    <Text style={s.overviewArrow}>→</Text>
+                    <Icon name="arrow-right" size={13} color={colors.primary} />
                   </TouchableOpacity>
                 );
               })}

@@ -29,6 +29,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { colors, spacing, radius, font } from '@/constants/theme';
 import { loadAuth } from '@/utils/auth';
 import { apiUrl } from '@/constants/api';
+import Icon, { IconName } from '@/components/ui/Icon';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -55,13 +56,13 @@ type FieldErrors = {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const CATEGORIES: { value: Category; label: string; icon: string }[] = [
-  { value: 'hardware',    label: 'Hardware',    icon: '🔧' },
-  { value: 'software',    label: 'Software',    icon: '💾' },
-  { value: 'network',     label: 'Network',     icon: '🌐' },
-  { value: 'display',     label: 'Display',     icon: '🖥️' },
-  { value: 'peripherals', label: 'Peripherals', icon: '🖱️' },
-  { value: 'general',     label: 'General',     icon: '📋' },
+const CATEGORIES: { value: Category; label: string; icon: IconName }[] = [
+  { value: 'hardware',    label: 'Hardware',    icon: 'wrench' },
+  { value: 'software',    label: 'Software',    icon: 'cpu' },
+  { value: 'network',     label: 'Network',     icon: 'globe' },
+  { value: 'display',     label: 'Display',     icon: 'desktop' },
+  { value: 'peripherals', label: 'Peripherals', icon: 'mouse' },
+  { value: 'general',     label: 'General',     icon: 'clipboard' },
 ];
 
 // ─── Small helpers ────────────────────────────────────────────────────────────
@@ -233,8 +234,12 @@ export default function ITKBEditScreen() {
           >
             <Text style={s.retryText}>Try Again</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.replace('/(it)/knowledge-base' as any)}>
-            <Text style={s.backLink}>← Go Back</Text>
+          <TouchableOpacity
+            style={s.inlineRow}
+            onPress={() => router.replace('/(it)/knowledge-base' as any)}
+          >
+            <Icon name="arrow-left" size={13} color={colors.primary} />
+            <Text style={s.backLink}>Go Back</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -249,10 +254,12 @@ export default function ITKBEditScreen() {
       {/* ── Top Nav ── */}
       <View style={s.nav}>
         <TouchableOpacity
+          style={s.inlineRow}
           onPress={() => router.push('/(it)/knowledge-base' as any)}
           activeOpacity={0.7}
         >
-          <Text style={s.navBack}>← Knowledge Base</Text>
+          <Icon name="arrow-left" size={13} color={colors.primary} />
+          <Text style={s.navBack}>Knowledge Base</Text>
         </TouchableOpacity>
         <Text style={s.navTitle}>Edit Article</Text>
         <View style={{ width: 110 }} />
@@ -271,7 +278,7 @@ export default function ITKBEditScreen() {
         {/* Draft → Published transition notice */}
         {originalStatus === 'draft' && status === 'published' && (
           <View style={s.publishNotice}>
-            <Text style={s.publishNoticeIcon}>🌐</Text>
+            <Icon name="globe" size={16} color={colors.successLight} />
             <Text style={s.publishNoticeText}>
               This article will be published and visible to all users once saved.
             </Text>
@@ -312,7 +319,7 @@ export default function ITKBEditScreen() {
                     activeOpacity={0.75}
                     disabled={submitting}
                   >
-                    <Text style={s.categoryIcon}>{cat.icon}</Text>
+                    <Icon name={cat.icon} size={14} />
                     <Text style={[s.categoryLabel, active && s.categoryLabelActive]}>
                       {cat.label}
                     </Text>
@@ -389,12 +396,19 @@ export default function ITKBEditScreen() {
                 activeOpacity={0.75}
                 disabled={submitting}
               >
-                <Text style={[
-                  s.statusPillText,
-                  status === 'draft' && s.statusPillTextDraft,
-                ]}>
-                  📝 Draft
-                </Text>
+                <View style={s.inlineRow}>
+                  <Icon
+                    name="edit"
+                    size={13}
+                    color={status === 'draft' ? colors.warningLight : colors.textMuted}
+                  />
+                  <Text style={[
+                    s.statusPillText,
+                    status === 'draft' && s.statusPillTextDraft,
+                  ]}>
+                    Draft
+                  </Text>
+                </View>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[s.statusPill, status === 'published' && s.statusPillPublished]}
@@ -402,12 +416,19 @@ export default function ITKBEditScreen() {
                 activeOpacity={0.75}
                 disabled={submitting}
               >
-                <Text style={[
-                  s.statusPillText,
-                  status === 'published' && s.statusPillTextPublished,
-                ]}>
-                  🌐 Published
-                </Text>
+                <View style={s.inlineRow}>
+                  <Icon
+                    name="globe"
+                    size={13}
+                    color={status === 'published' ? colors.successLight : colors.textMuted}
+                  />
+                  <Text style={[
+                    s.statusPillText,
+                    status === 'published' && s.statusPillTextPublished,
+                  ]}>
+                    Published
+                  </Text>
+                </View>
               </TouchableOpacity>
             </View>
             <Text style={s.helpText}>
@@ -453,6 +474,7 @@ export default function ITKBEditScreen() {
 const s = StyleSheet.create({
   root:    { flex: 1, backgroundColor: colors.bgPrimary },
   scroll:  { paddingBottom: spacing.lg },
+  inlineRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   centered:{
     flex: 1, alignItems: 'center', justifyContent: 'center',
     padding: spacing.lg, gap: spacing.md,

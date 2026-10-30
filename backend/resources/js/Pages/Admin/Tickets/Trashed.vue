@@ -8,6 +8,7 @@
 import AppLayout from '../../../Layouts/AppLayout.vue'
 import NavAdmin from '../../../Components/Nav/NavAdmin.vue'
 import { Link, useForm, router } from '@inertiajs/vue3'
+import Icon from '../../../Components/Icon.vue'
 
 const props = defineProps({
   tickets: Object,
@@ -38,7 +39,7 @@ function diffForHumans(d) {
     <template #nav><NavAdmin /></template>
 
     <div class="container">
-      <Link href="/admin/tickets" class="back-btn">← Back to Ticket Management</Link>
+      <Link href="/admin/tickets" class="back-btn"><Icon name="arrow-left" /> Back to Ticket Management</Link>
 
       <div class="page-header">
         <div>
@@ -50,7 +51,7 @@ function diffForHumans(d) {
       <!-- Info banner -->
       <div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);padding:1rem;border-radius:8px;margin-bottom:1.5rem;">
         <div style="display:flex;align-items:center;gap:0.75rem;color:#ef4444;">
-          <span style="font-size:1.5rem;">🗑️</span>
+          <span style="font-size:1.5rem;"><Icon name="trash" /></span>
           <div>
             <strong>Deleted Tickets Archive:</strong> These tickets were cancelled by users before assignment.
             You can restore them or permanently delete them.
@@ -83,7 +84,7 @@ function diffForHumans(d) {
                 <td>{{ ticket.category.charAt(0).toUpperCase() + ticket.category.slice(1) }}</td>
                 <td>
                   <span class="priority-badge" :class="`priority-${ticket.priority}`">
-                    {{ ticket.priority === 'high' ? '🔴' : ticket.priority === 'medium' ? '🟡' : '🟢' }}
+                    <Icon name="circle" :style="{ color: ticket.priority === 'high' ? 'var(--color-danger)' : ticket.priority === 'medium' ? 'var(--color-warning)' : 'var(--color-success)' }" />
                     {{ ticket.priority.charAt(0).toUpperCase() + ticket.priority.slice(1) }}
                   </span>
                 </td>
@@ -102,7 +103,7 @@ function diffForHumans(d) {
             </template>
             <tr v-else>
               <td colspan="8" style="text-align:center;padding:3rem;color:#9ca3af;">
-                <div style="font-size:2rem;margin-bottom:1rem;">✓</div>
+                <div style="font-size:2rem;margin-bottom:1rem;"><Icon name="check" /></div>
                 <h3 style="color:#d1d5db;">No Deleted Tickets</h3>
                 <p>All clear! There are no cancelled tickets in the trash.</p>
               </td>
@@ -116,13 +117,13 @@ function diffForHumans(d) {
             Showing {{ tickets.from ?? 0 }}–{{ tickets.to ?? 0 }} of {{ tickets.total }} deleted tickets
           </div>
           <div class="page-controls">
-            <button class="page-btn" :disabled="!tickets.prev_page_url" @click="router.get(tickets.prev_page_url)">← Previous</button>
+            <button class="page-btn" :disabled="!tickets.prev_page_url" @click="router.get(tickets.prev_page_url)"><Icon name="arrow-left" /> Previous</button>
             <button
               v-for="p in tickets.last_page" :key="p"
               class="page-btn" :class="{ active: p === tickets.current_page }"
               @click="router.get(tickets.path + '?page=' + p)"
             >{{ p }}</button>
-            <button class="page-btn" :disabled="!tickets.next_page_url" @click="router.get(tickets.next_page_url)">Next →</button>
+            <button class="page-btn" :disabled="!tickets.next_page_url" @click="router.get(tickets.next_page_url)">Next <Icon name="arrow-right" /></button>
           </div>
         </div>
       </div>

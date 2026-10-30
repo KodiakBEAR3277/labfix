@@ -6,6 +6,7 @@
 import AppLayout from '../../../Layouts/AppLayout.vue'
 import NavAdmin from '../../../Components/Nav/NavAdmin.vue'
 import { Link, useForm } from '@inertiajs/vue3'
+import Icon from '../../../Components/Icon.vue'
 
 const form = useForm({
   first_name:       '',
@@ -27,7 +28,7 @@ function submit() {
     <template #nav><NavAdmin /></template>
 
     <div class="container">
-      <Link href="/admin/users" class="back-btn">← Back to User Management</Link>
+      <Link href="/admin/users" class="back-btn"><Icon name="arrow-left" /> Back to User Management</Link>
 
       <div class="page-header">
         <h1>Add New User</h1>

@@ -7,6 +7,7 @@ import NavUser from '../../Components/Nav/NavUser.vue'
 import { Link, router } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import { usePage } from '@inertiajs/vue3'
+import Icon from '../../Components/Icon.vue'
 
 const props = defineProps({
   reports: Array,
@@ -67,22 +68,22 @@ function statusLabel(status) {
       <!-- Quick actions — Link wraps the whole card so the entire area is clickable -->
       <div class="quick-actions" style="margin-top:2rem;">
         <Link href="/user/reports/create" class="action-card">
-          <div class="action-icon">🎫</div>
+          <div class="action-icon"><Icon name="ticket" /></div>
           <div class="action-title">Report Issue</div>
           <div class="action-description">Submit a new equipment issue</div>
         </Link>
         <Link href="/user/reports" class="action-card">
-          <div class="action-icon">📋</div>
+          <div class="action-icon"><Icon name="clipboard" /></div>
           <div class="action-title">My Reports</div>
           <div class="action-description">View all your submitted tickets</div>
         </Link>
         <Link href="/user/knowledge-base" class="action-card">
-          <div class="action-icon">📚</div>
+          <div class="action-icon"><Icon name="book" /></div>
           <div class="action-title">Knowledge Base</div>
           <div class="action-description">Browse self-help articles</div>
         </Link>
         <Link href="/user/lab-status" class="action-card">
-          <div class="action-icon">🖥️</div>
+          <div class="action-icon"><Icon name="desktop" /></div>
           <div class="action-title">Lab Status</div>
           <div class="action-description">Check which labs are operational</div>
         </Link>
@@ -92,7 +93,7 @@ function statusLabel(status) {
       <div class="section-card">
         <div class="section-header">
           <h2 class="section-title">Recent Reports</h2>
-          <Link href="/user/reports" class="view-all-link">View All →</Link>
+          <Link href="/user/reports" class="view-all-link">View All <Icon name="arrow-right" /></Link>
         </div>
 
         <div class="reports-grid">
@@ -128,10 +129,10 @@ function statusLabel(status) {
           </template>
 
           <div v-else style="text-align:center;padding:3rem;color:#9ca3af;">
-            <div style="font-size:2rem;margin-bottom:1rem;">📋</div>
+            <div style="font-size:2rem;margin-bottom:1rem;"><Icon name="clipboard" /></div>
             <p>
               No reports yet.
-              <Link href="/user/reports/create" style="color:#2dd4bf;">Report your first issue →</Link>
+              <Link href="/user/reports/create" style="color:#2dd4bf;">Report your first issue <Icon name="arrow-right" /></Link>
             </p>
           </div>
         </div>

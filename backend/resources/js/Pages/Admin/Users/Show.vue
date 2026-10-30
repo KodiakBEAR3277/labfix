@@ -8,6 +8,7 @@ import NavAdmin from '../../../Components/Nav/NavAdmin.vue'
 import { Link, router } from '@inertiajs/vue3'
 import { usePage } from '@inertiajs/vue3'
 import { computed } from 'vue'
+import Icon from '../../../Components/Icon.vue'
 
 const props = defineProps({
   user: Object,
@@ -39,7 +40,7 @@ function deleteUser() {
     <template #nav><NavAdmin /></template>
 
     <div class="container">
-      <Link href="/admin/users" class="back-btn">← Back to User Management</Link>
+      <Link href="/admin/users" class="back-btn"><Icon name="arrow-left" /> Back to User Management</Link>
 
       <div class="page-header">
         <h1>User Details</h1>
@@ -151,11 +152,11 @@ function deleteUser() {
               </div>
               <div class="info-item">
                 <span class="info-label">Can Submit Tickets</span>
-                <span class="info-value">{{ user.can_submit_tickets ? '✅ Yes' : '❌ No' }}</span>
+                <span class="info-value"><Icon :name="user.can_submit_tickets ? 'check-circle' : 'close-circle'" /> {{ user.can_submit_tickets ? 'Yes' : 'No' }}</span>
               </div>
               <div class="info-item">
                 <span class="info-label">Email Notifications</span>
-                <span class="info-value">{{ user.email_notifications ? '✅ Enabled' : '❌ Disabled' }}</span>
+                <span class="info-value"><Icon :name="user.email_notifications ? 'check-circle' : 'close-circle'" /> {{ user.email_notifications ? 'Enabled' : 'Disabled' }}</span>
               </div>
             </div>
           </div>

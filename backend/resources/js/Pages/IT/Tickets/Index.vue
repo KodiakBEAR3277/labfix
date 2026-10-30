@@ -7,6 +7,7 @@ import AppLayout from '../../../Layouts/AppLayout.vue'
 import NavIT from '../../../Components/Nav/NavIT.vue'
 import { Link, router, useForm, usePage } from '@inertiajs/vue3'
 import { ref, watch, computed } from 'vue'
+import Icon from '../../../Components/Icon.vue'
 
 const props = defineProps({
   tickets: Object,
@@ -98,10 +99,10 @@ function diffForHumans(d) {
       <!-- Info banner -->
       <div style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);padding:1rem;border-radius:8px;margin-bottom:1.5rem;">
         <div style="display:flex;align-items:center;gap:0.75rem;color:#60a5fa;">
-          <span style="font-size:1.5rem;">ℹ️</span>
+          <span style="font-size:1.5rem;"><Icon name="info" /></span>
           <div>
             <strong>IT Support View:</strong> You can view all tickets and assign unassigned tickets to yourself.
-            <Link href="/it/assignments" style="color:#2dd4bf;text-decoration:none;font-weight:600;"> View My Assignments →</Link>
+            <Link href="/it/assignments" style="color:#2dd4bf;text-decoration:none;font-weight:600;"> View My Assignments <Icon name="arrow-right" /></Link>
           </div>
         </div>
       </div>
@@ -110,7 +111,7 @@ function diffForHumans(d) {
       <div class="filter-bar">
         <div class="filter-row">
           <div class="search-box">
-            <span class="search-icon">🔍</span>
+            <span class="search-icon"><Icon name="search" /></span>
             <input v-model="search" type="text" placeholder="Search tickets by ID, title, or location...">
           </div>
           <div class="filter-group">
@@ -175,7 +176,7 @@ function diffForHumans(d) {
                 </td>
                 <td>
                   <span class="priority-badge" :class="`priority-${ticket.priority}`">
-                    {{ ticket.priority === 'high' ? '🔴' : ticket.priority === 'medium' ? '🟡' : '🟢' }}
+                    <Icon name="circle" :style="{ color: ticket.priority === 'high' ? 'var(--color-danger)' : ticket.priority === 'medium' ? 'var(--color-warning)' : 'var(--color-success)' }" />
                     {{ ticket.priority.charAt(0).toUpperCase() + ticket.priority.slice(1) }}
                   </span>
                 </td>
@@ -205,13 +206,13 @@ function diffForHumans(d) {
             <tr v-else>
               <td colspan="9" style="text-align:center;padding:3rem;color:#9ca3af;">
                 <template v-if="filters.search || filters.status || filters.priority || filters.lab">
-                  <div style="font-size:2rem;margin-bottom:1rem;">🔍</div>
+                  <div style="font-size:2rem;margin-bottom:1rem;"><Icon name="search" /></div>
                   <h3 style="color:#d1d5db;">No tickets found</h3>
                   <p>Try adjusting your filters or search terms</p>
                   <Link href="/it/tickets" class="btn btn-primary" style="margin-top:1rem;">Clear Filters</Link>
                 </template>
                 <template v-else>
-                  <div style="font-size:2rem;margin-bottom:1rem;">📋</div>
+                  <div style="font-size:2rem;margin-bottom:1rem;"><Icon name="clipboard" /></div>
                   <h3 style="color:#d1d5db;">No tickets yet</h3>
                   <p>All clear! No tickets in the queue.</p>
                 </template>
@@ -226,13 +227,13 @@ function diffForHumans(d) {
             Showing {{ tickets.from ?? 0 }}–{{ tickets.to ?? 0 }} of {{ tickets.total }} tickets
           </div>
           <div class="page-controls">
-            <button class="page-btn" :disabled="!tickets.prev_page_url" @click="router.get(tickets.prev_page_url)">← Previous</button>
+            <button class="page-btn" :disabled="!tickets.prev_page_url" @click="router.get(tickets.prev_page_url)"><Icon name="arrow-left" /> Previous</button>
             <button
               v-for="p in tickets.last_page" :key="p"
               class="page-btn" :class="{ active: p === tickets.current_page }"
               @click="router.get(tickets.path + '?page=' + p)"
             >{{ p }}</button>
-            <button class="page-btn" :disabled="!tickets.next_page_url" @click="router.get(tickets.next_page_url)">Next →</button>
+            <button class="page-btn" :disabled="!tickets.next_page_url" @click="router.get(tickets.next_page_url)">Next <Icon name="arrow-right" /></button>
           </div>
         </div>
       </div>
@@ -242,12 +243,12 @@ function diffForHumans(d) {
         <div style="background:rgba(45,212,191,0.1);border:1px solid rgba(45,212,191,0.3);padding:1.5rem;border-radius:8px;">
           <h3 style="color:#2dd4bf;margin-bottom:0.5rem;font-size:1rem;">My Active Tickets</h3>
           <div style="font-size:2rem;font-weight:bold;color:#ffffff;">{{ stats.assigned }}</div>
-          <Link href="/it/assignments" style="color:#2dd4bf;text-decoration:none;font-size:0.9rem;">View My Assignments →</Link>
+          <Link href="/it/assignments" style="color:#2dd4bf;text-decoration:none;font-size:0.9rem;">View My Assignments <Icon name="arrow-right" /></Link>
         </div>
         <div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);padding:1.5rem;border-radius:8px;">
           <h3 style="color:#ef4444;margin-bottom:0.5rem;font-size:1rem;">High Priority</h3>
           <div style="font-size:2rem;font-weight:bold;color:#ffffff;">{{ stats.high_priority }}</div>
-          <Link href="/it/tickets?priority=high" style="color:#ef4444;text-decoration:none;font-size:0.9rem;">View High Priority →</Link>
+          <Link href="/it/tickets?priority=high" style="color:#ef4444;text-decoration:none;font-size:0.9rem;">View High Priority <Icon name="arrow-right" /></Link>
         </div>
       </div>
 

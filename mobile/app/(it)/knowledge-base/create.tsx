@@ -32,6 +32,7 @@ import { router } from 'expo-router';
 import { colors, spacing, radius, font } from '@/constants/theme';
 import { loadAuth } from '@/utils/auth';
 import { apiUrl } from '@/constants/api';
+import Icon, { IconName } from '@/components/ui/Icon';
  
 // ─── Types ────────────────────────────────────────────────────────────────────
  
@@ -48,13 +49,13 @@ type FieldErrors = {
  
 // ─── Constants ────────────────────────────────────────────────────────────────
  
-const CATEGORIES: { value: Category; label: string; icon: string }[] = [
-  { value: 'hardware',    label: 'Hardware',    icon: '🔧' },
-  { value: 'software',    label: 'Software',    icon: '💾' },
-  { value: 'network',     label: 'Network',     icon: '🌐' },
-  { value: 'display',     label: 'Display',     icon: '🖥️' },
-  { value: 'peripherals', label: 'Peripherals', icon: '🖱️' },
-  { value: 'general',     label: 'General',     icon: '📋' },
+const CATEGORIES: { value: Category; label: string; icon: IconName }[] = [
+  { value: 'hardware',    label: 'Hardware',    icon: 'wrench' },
+  { value: 'software',    label: 'Software',    icon: 'cpu' },
+  { value: 'network',     label: 'Network',     icon: 'globe' },
+  { value: 'display',     label: 'Display',     icon: 'desktop' },
+  { value: 'peripherals', label: 'Peripherals', icon: 'mouse' },
+  { value: 'general',     label: 'General',     icon: 'clipboard' },
 ];
  
 // ─── Small helpers ────────────────────────────────────────────────────────────
@@ -167,10 +168,12 @@ export default function ITKBCreateScreen() {
       {/* ── Top Nav ── */}
       <View style={s.nav}>
         <TouchableOpacity
+          style={s.inlineRow}
           onPress={() => router.push('/(it)/knowledge-base' as any)}
           activeOpacity={0.7}
         >
-          <Text style={s.navBack}>← Knowledge Base</Text>
+          <Icon name="arrow-left" size={13} color={colors.primary} />
+          <Text style={s.navBack}>Knowledge Base</Text>
         </TouchableOpacity>
         <Text style={s.navTitle}>Create Article</Text>
         <View style={{ width: 110 }} />
@@ -220,7 +223,7 @@ export default function ITKBCreateScreen() {
                     }}
                     activeOpacity={0.75}
                   >
-                    <Text style={s.categoryIcon}>{cat.icon}</Text>
+                    <Icon name={cat.icon} size={14} />
                     <Text style={[s.categoryLabel, active && s.categoryLabelActive]}>
                       {cat.label}
                     </Text>
@@ -294,18 +297,32 @@ export default function ITKBCreateScreen() {
                 onPress={() => setStatus('draft')}
                 activeOpacity={0.75}
               >
-                <Text style={[s.statusPillText, status === 'draft' && s.statusPillTextActive]}>
-                  📝 Save as Draft
-                </Text>
+                <View style={s.inlineRow}>
+                  <Icon
+                    name="edit"
+                    size={13}
+                    color={status === 'draft' ? colors.warningLight : colors.textMuted}
+                  />
+                  <Text style={[s.statusPillText, status === 'draft' && s.statusPillTextActive]}>
+                    Save as Draft
+                  </Text>
+                </View>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[s.statusPill, status === 'published' && s.statusPillPublished]}
                 onPress={() => setStatus('published')}
                 activeOpacity={0.75}
               >
-                <Text style={[s.statusPillText, status === 'published' && s.statusPillTextPublished]}>
-                  🌐 Publish Now
-                </Text>
+                <View style={s.inlineRow}>
+                  <Icon
+                    name="globe"
+                    size={13}
+                    color={status === 'published' ? colors.successLight : colors.textMuted}
+                  />
+                  <Text style={[s.statusPillText, status === 'published' && s.statusPillTextPublished]}>
+                    Publish Now
+                  </Text>
+                </View>
               </TouchableOpacity>
             </View>
             <Text style={s.helpText}>
@@ -353,6 +370,7 @@ export default function ITKBCreateScreen() {
 const s = StyleSheet.create({
   root:   { flex: 1, backgroundColor: colors.bgPrimary },
   scroll: { paddingBottom: spacing.lg },
+  inlineRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
  
   // Nav
   nav: {

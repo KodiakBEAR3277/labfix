@@ -30,6 +30,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { colors, spacing, radius, font } from '@/constants/theme';
 import { loadAuth } from '@/utils/auth';
 import { apiUrl } from '@/constants/api';
+import Icon, { IconName } from '@/components/ui/Icon';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -53,13 +54,13 @@ type Article = {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const CATEGORY_ICONS: Record<string, string> = {
-  hardware:    '🔧',
-  software:    '💾',
-  network:     '🌐',
-  display:     '🖥️',
-  peripherals: '🖱️',
-  general:     '📋',
+const CATEGORY_ICONS: Record<string, IconName> = {
+  hardware:    'wrench',
+  software:    'cpu',
+  network:     'globe',
+  display:     'desktop',
+  peripherals: 'mouse',
+  general:     'clipboard',
 };
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
@@ -273,10 +274,14 @@ export default function ITKBShowScreen() {
       <SafeAreaView style={s.root}>
         <StatusBar barStyle="light-content" backgroundColor={colors.bgPrimary} />
         <View style={s.centered}>
-          <Text style={s.errorIcon}>📄</Text>
+          <Icon name="file" size={36} />
           <Text style={s.errorText}>{error ?? 'Article not found.'}</Text>
-          <TouchableOpacity style={s.retryBtn} onPress={() => router.back()}>
-            <Text style={s.retryText}>← Go Back</Text>
+          <TouchableOpacity
+            style={[s.retryBtn, s.inlineRow]}
+            onPress={() => router.back()}
+          >
+            <Icon name="arrow-left" size={14} color="#ffffff" />
+            <Text style={s.retryText}>Go Back</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -294,10 +299,12 @@ export default function ITKBShowScreen() {
       {/* ── Top Nav ── */}
       <View style={s.nav}>
         <TouchableOpacity
+          style={s.inlineRow}
           onPress={() => router.push('/(it)/knowledge-base' as any)}
           activeOpacity={0.7}
         >
-          <Text style={s.navBack}>← Knowledge Base</Text>
+          <Icon name="arrow-left" size={13} color={colors.primary} />
+          <Text style={s.navBack}>Knowledge Base</Text>
         </TouchableOpacity>
         <Text style={s.navTitle}>Article Preview</Text>
         <TouchableOpacity
@@ -326,10 +333,12 @@ export default function ITKBShowScreen() {
           {/* Category + status row */}
           <View style={s.badgeRow}>
             <View style={[s.categoryBadge, { backgroundColor: catColor.bg, borderColor: catColor.border }]}>
-              <Text style={[s.categoryBadgeText, { color: catColor.text }]}>
-                {CATEGORY_ICONS[article.category] ?? '📄'}{' '}
-                {article.category.charAt(0).toUpperCase() + article.category.slice(1)}
-              </Text>
+              <View style={s.inlineRow}>
+                <Icon name={CATEGORY_ICONS[article.category] ?? 'file'} size={11} color={catColor.text} />
+                <Text style={[s.categoryBadgeText, { color: catColor.text }]}>
+                  {article.category.charAt(0).toUpperCase() + article.category.slice(1)}
+                </Text>
+              </View>
             </View>
             <View style={[
               s.statusBadge,
@@ -351,22 +360,34 @@ export default function ITKBShowScreen() {
 
           {/* Meta */}
           <View style={s.metaRow}>
-            <Text style={s.metaText}>
-              👁️ {formatViews(article.views)} views
-            </Text>
+            <View style={s.metaItem}>
+              <Icon name="eye" size={11} />
+              <Text style={s.metaText}>
+                {formatViews(article.views)} views
+              </Text>
+            </View>
             <Text style={s.metaDot}>·</Text>
-            <Text style={s.metaText}>
-              👍 {article.helpfulness_percentage}% helpful
-            </Text>
+            <View style={s.metaItem}>
+              <Icon name="check-circle" size={11} color={colors.success} />
+              <Text style={s.metaText}>
+                {article.helpfulness_percentage}% helpful
+              </Text>
+            </View>
             <Text style={s.metaDot}>·</Text>
-            <Text style={s.metaText}>
-              ✏️ {article.author?.full_name ?? 'IT Support'}
-            </Text>
+            <View style={s.metaItem}>
+              <Icon name="edit" size={11} />
+              <Text style={s.metaText}>
+                {article.author?.full_name ?? 'IT Support'}
+              </Text>
+            </View>
           </View>
           <View style={s.metaRow}>
-            <Text style={s.metaText}>
-              📅 Updated {diffForHumans(article.updated_at)}
-            </Text>
+            <View style={s.metaItem}>
+              <Icon name="calendar" size={11} />
+              <Text style={s.metaText}>
+                Updated {diffForHumans(article.updated_at)}
+              </Text>
+            </View>
           </View>
         </View>
 
@@ -407,10 +428,12 @@ export default function ITKBShowScreen() {
           </InfoRow>
 
           <InfoRow label="Category">
-            <Text style={[s.statValue, { color: catColor.text }]}>
-              {CATEGORY_ICONS[article.category]}{' '}
-              {article.category.charAt(0).toUpperCase() + article.category.slice(1)}
-            </Text>
+            <View style={s.inlineRow}>
+              <Icon name={CATEGORY_ICONS[article.category] ?? 'file'} size={11} color={catColor.text} />
+              <Text style={[s.statValue, { color: catColor.text }]}>
+                {article.category.charAt(0).toUpperCase() + article.category.slice(1)}
+              </Text>
+            </View>
           </InfoRow>
 
           <InfoRow label="Total Views">
@@ -418,15 +441,21 @@ export default function ITKBShowScreen() {
           </InfoRow>
 
           <InfoRow label="Helpful Votes">
-            <Text style={[s.statValue, { color: colors.successLight }]}>
-              👍 {article.helpful_count}
-            </Text>
+            <View style={s.inlineRow}>
+              <Icon name="check-circle" size={11} color={colors.successLight} />
+              <Text style={[s.statValue, { color: colors.successLight }]}>
+                {article.helpful_count}
+              </Text>
+            </View>
           </InfoRow>
 
           <InfoRow label="Not Helpful">
-            <Text style={[s.statValue, { color: '#b91c1c' }]}>
-              👎 {article.not_helpful_count}
-            </Text>
+            <View style={s.inlineRow}>
+              <Icon name="close-circle" size={11} color="#b91c1c" />
+              <Text style={[s.statValue, { color: '#b91c1c' }]}>
+                {article.not_helpful_count}
+              </Text>
+            </View>
           </InfoRow>
 
           {/* Helpfulness bar */}
@@ -465,7 +494,10 @@ export default function ITKBShowScreen() {
             onPress={() => router.push(`/(it)/knowledge-base/${id}/edit` as any)}
             activeOpacity={0.85}
           >
-            <Text style={s.editBtnText}>✏️ Edit Article</Text>
+            <View style={s.inlineRow}>
+              <Icon name="edit" size={14} color="#ffffff" />
+              <Text style={s.editBtnText}>Edit Article</Text>
+            </View>
           </TouchableOpacity>
 
           {/* Publish Now — only if draft */}
@@ -478,7 +510,10 @@ export default function ITKBShowScreen() {
             >
               {publishing
                 ? <ActivityIndicator size="small" color={colors.successLight} />
-                : <Text style={s.publishBtnText}>🌐 Publish Now</Text>}
+                : <View style={s.inlineRow}>
+                    <Icon name="globe" size={14} color={colors.successLight} />
+                    <Text style={s.publishBtnText}>Publish Now</Text>
+                  </View>}
             </TouchableOpacity>
           )}
 
@@ -491,7 +526,10 @@ export default function ITKBShowScreen() {
           >
             {deleting
               ? <ActivityIndicator size="small" color="#b91c1c" />
-              : <Text style={s.deleteBtnText}>🗑️ Delete Article</Text>}
+              : <View style={s.inlineRow}>
+                  <Icon name="trash" size={14} color={colors.danger} />
+                  <Text style={s.deleteBtnText}>Delete Article</Text>
+                </View>}
           </TouchableOpacity>
         </View>
 
@@ -506,6 +544,7 @@ export default function ITKBShowScreen() {
 const s = StyleSheet.create({
   root:    { flex: 1, backgroundColor: colors.bgPrimary },
   scroll:  { paddingBottom: spacing.lg },
+  inlineRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   centered:{
     flex: 1, alignItems: 'center', justifyContent: 'center',
     padding: spacing.lg, gap: spacing.md,
@@ -575,6 +614,7 @@ const s = StyleSheet.create({
     flexWrap: 'wrap',
   },
   metaText: { fontSize: font.xs, color: colors.textMuted },
+  metaItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   metaDot:  { fontSize: font.xs, color: colors.textMuted },
 
   // Excerpt

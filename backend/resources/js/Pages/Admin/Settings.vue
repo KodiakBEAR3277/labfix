@@ -13,6 +13,7 @@
 import AppLayout from '../../Layouts/AppLayout.vue'
 import NavAdmin from '../../Components/Nav/NavAdmin.vue'
 import { Link, useForm } from '@inertiajs/vue3'
+import Icon from '../../Components/Icon.vue'
 
 const props = defineProps({
   values:   Object,   // flat map: { ticket_number_format: 'format_1', ... }
@@ -66,7 +67,7 @@ const ticketFormatOptions = [
           <!-- ── Ticket Settings ──────────────────────────────────────── -->
           <div class="settings-card">
             <div class="card-header">
-              <div class="card-icon">🎫</div>
+              <div class="card-icon"><Icon name="ticket" /></div>
               <div>
                 <h2 class="card-title" style="margin-bottom:0.25rem;">Ticket Settings</h2>
                 <p style="color:#9ca3af;font-size:0.9rem;">Numbering, priority and automatic rules</p>
@@ -102,9 +103,9 @@ const ticketFormatOptions = [
               v-if="!features.auto_rules"
               style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);border-radius:8px;padding:0.9rem 1rem;margin-bottom:1rem;font-size:0.9rem;color:var(--color-text-secondary);"
             >
-              🔒 Auto-close and auto-escalate are available on the Standard plan and above.
+              <Icon name="lock" /> Auto-close and auto-escalate are available on the Standard plan and above.
               You are on the <strong>{{ plan }}</strong> plan.
-              <Link href="/admin/upgrade" style="color:var(--color-primary-dark);font-weight:600;">See plans →</Link>
+              <Link href="/admin/upgrade" style="color:var(--color-primary-dark);font-weight:600;">See plans <Icon name="arrow-right" /></Link>
             </div>
 
             <div class="form-group">
@@ -133,7 +134,7 @@ const ticketFormatOptions = [
           <!-- ── Maintenance Mode ─────────────────────────────────────── -->
           <div class="settings-card">
             <div class="card-header">
-              <div class="card-icon">🔧</div>
+              <div class="card-icon"><Icon name="wrench" /></div>
               <div>
                 <h2 class="card-title" style="margin-bottom:0.25rem;">Maintenance Mode</h2>
                 <p style="color:#9ca3af;font-size:0.9rem;">Temporarily stop new ticket submissions</p>

@@ -6,6 +6,7 @@
 import AppLayout from '../../../Layouts/AppLayout.vue'
 import NavIT from '../../../Components/Nav/NavIT.vue'
 import { Link, useForm } from '@inertiajs/vue3'
+import Icon from '../../../Components/Icon.vue'
 
 const form = useForm({
   title:    '',
@@ -25,7 +26,7 @@ function submit() {
     <template #nav><NavIT /></template>
 
     <div class="container">
-      <Link href="/it/knowledge-base" class="back-btn">← Back to Knowledge Base</Link>
+      <Link href="/it/knowledge-base" class="back-btn"><Icon name="arrow-left" /> Back to Knowledge Base</Link>
 
       <div class="page-header">
         <h1>Create New Article</h1>

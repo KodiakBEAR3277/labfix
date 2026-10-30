@@ -29,6 +29,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, radius, font } from '@/constants/theme';
 import { storageUrl } from '@/constants/api';
 import { getAudio, isAudioAvailable } from '@/utils/audio';
+import Icon from './Icon';
 
 // ─── One-at-a-time playback ───────────────────────────────────────────────────
 // Holds the pause() of whichever VoiceMessage is currently playing.
@@ -80,7 +81,7 @@ export default function VoiceMessage(props: Props) {
         </View>
         {props.onRemove && (
           <TouchableOpacity style={s.removeBtn} onPress={props.onRemove} activeOpacity={0.7}>
-            <Text style={s.removeGlyph}>✕</Text>
+            <Icon name="close" size={12} color={colors.danger} />
           </TouchableOpacity>
         )}
       </View>
@@ -220,7 +221,7 @@ function VoiceMessagePlayer({ uri, path, duration, onRemove }: Props) {
       {/* Optional remove */}
       {onRemove && (
         <TouchableOpacity style={s.removeBtn} onPress={onRemove} activeOpacity={0.7}>
-          <Text style={s.removeGlyph}>✕</Text>
+          <Icon name="close" size={12} color={colors.danger} />
         </TouchableOpacity>
       )}
     </View>

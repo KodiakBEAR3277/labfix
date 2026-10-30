@@ -40,6 +40,7 @@ import { router } from 'expo-router';
 import { colors, spacing, radius, font } from '@/constants/theme';
 import { loadAuth, AuthUser } from '@/utils/auth';
 import { apiUrl } from '@/constants/api';
+import Icon, { IconName } from '@/components/ui/Icon';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -119,13 +120,15 @@ function getInitials(name: string): string {
 function StatCard({
   label,
   value,
-  icon,
+  name,
+  iconColor,
   detail,
   detailColor,
 }: {
   label:        string;
   value:        string | number;
-  icon:         string;
+  name:         IconName;
+  iconColor?:   string;
   detail?:      string;
   detailColor?: string;
 }) {
@@ -133,7 +136,7 @@ function StatCard({
     <View style={sc.card}>
       <View style={sc.header}>
         <Text style={sc.label}>{label}</Text>
-        <Text style={sc.icon}>{icon}</Text>
+        <Icon name={name} size={16} color={iconColor} />
       </View>
       <Text style={sc.value}>{value}</Text>
       {!!detail && (
@@ -256,24 +259,24 @@ const tr = StyleSheet.create({
 
 // Quick-action row item
 function QuickAction({
-  icon,
+  name,
   title,
   sub,
   onPress,
   iconBg,
 }: {
-  icon: string; title: string; sub: string; onPress: () => void; iconBg?: string;
+  name: IconName; title: string; sub: string; onPress: () => void; iconBg?: string;
 }) {
   return (
     <TouchableOpacity style={qa.wrap} onPress={onPress} activeOpacity={0.75}>
       <View style={[qa.iconBox, iconBg ? { backgroundColor: iconBg } : {}]}>
-        <Text style={qa.icon}>{icon}</Text>
+        <Icon name={name} size={16} />
       </View>
       <View style={{ flex: 1 }}>
         <Text style={qa.title}>{title}</Text>
         <Text style={qa.sub}>{sub}</Text>
       </View>
-      <Text style={qa.arrow}>→</Text>
+      <Icon name="arrow-right" size={13} color={colors.primary} />
     </TouchableOpacity>
   );
 }
@@ -371,7 +374,7 @@ export default function ITDashboardScreen() {
       <SafeAreaView style={s.root}>
         <StatusBar barStyle="light-content" backgroundColor={colors.bgPrimary} />
         <View style={s.centered}>
-          <Text style={s.errorIcon}>⚠️</Text>
+          <Icon name="alert" size={36} color={colors.warning} />
           <Text style={s.errorText}>{error ?? 'Something went wrong.'}</Text>
           <TouchableOpacity style={s.retryBtn} onPress={() => token && fetchDashboard(token)}>
             <Text style={s.retryText}>Try Again</Text>
@@ -434,19 +437,20 @@ export default function ITDashboardScreen() {
             <StatCard
               label="Open Tickets"
               value={stats.open_tickets}
-              icon="📋"
+              name="clipboard"
               detail={stats.open_tickets > 20 ? 'High volume' : 'Normal'}
             />
             <StatCard
               label="My Assignments"
               value={stats.my_assignments}
-              icon="👤"
+              name="user"
               detail="Active tasks"
             />
             <StatCard
               label="High Priority"
               value={stats.high_priority}
-              icon="🔴"
+              name="circle"
+              iconColor={colors.danger}
               detail={stats.high_priority > 5 ? 'Needs attention' : 'Under control'}
               detailColor={stats.high_priority > 5 ? colors.danger : undefined}
             />
@@ -455,20 +459,21 @@ export default function ITDashboardScreen() {
             <StatCard
               label="Resolved Today"
               value={stats.resolved_today}
-              icon="✅"
+              name="check-circle"
+              iconColor={colors.success}
               detail="Great progress!"
               detailColor={colors.successLight}
             />
             <StatCard
               label="Avg Response"
               value={`${stats.avg_response_time}h`}
-              icon="⏱️"
+              name="clock"
               detail="Last 7 days"
             />
             <StatCard
               label="Team Perf."
               value={`${stats.team_satisfaction}%`}
-              icon="📊"
+              name="chart"
               detail="Resolution rate"
             />
           </View>
@@ -479,8 +484,9 @@ export default function ITDashboardScreen() {
           <View style={s.section}>
             <View style={s.sectionHeader}>
               <View style={s.alertHeaderLeft}>
+                <Icon name="alert" size={13} color={colors.danger} />
                 <Text style={[s.sectionTitle, { color: colors.danger }]}>
-                  ⚠️ High Priority Alerts
+                  High Priority Alerts
                 </Text>
                 <View style={s.alertBadge}>
                   <Text style={s.alertBadgeText}>{priorityAlerts.length}</Text>
@@ -501,14 +507,18 @@ export default function ITDashboardScreen() {
         <View style={s.card}>
           <View style={s.cardHeader}>
             <Text style={s.cardTitle}>Recent Tickets</Text>
-            <TouchableOpacity onPress={() => router.push('/(it)/queue' as any)}>
-              <Text style={s.viewAll}>View All →</Text>
+            <TouchableOpacity
+              style={s.viewAllRow}
+              onPress={() => router.push('/(it)/queue' as any)}
+            >
+              <Text style={s.viewAll}>View All</Text>
+              <Icon name="arrow-right" size={13} color={colors.primary} />
             </TouchableOpacity>
           </View>
 
           {recentTickets.length === 0 ? (
             <View style={s.emptyState}>
-              <Text style={s.emptyIcon}>📋</Text>
+              <Icon name="clipboard" size={28} />
               <Text style={s.emptyText}>No recent tickets</Text>
             </View>
           ) : (
@@ -526,20 +536,20 @@ export default function ITDashboardScreen() {
         <View style={s.card}>
           <Text style={s.cardTitle}>Quick Actions</Text>
           <QuickAction
-            icon="🔥"
+            name="fire"
             title="View Unassigned"
             sub={`${unassignedCount} ticket${unassignedCount !== 1 ? 's' : ''} waiting`}
             iconBg="rgba(239,68,68,0.12)"
             onPress={() => router.push('/(it)/queue' as any)}
           />
           <QuickAction
-            icon="👤"
+            name="user"
             title="My Assignments"
             sub={`${stats.my_assignments} active`}
             onPress={() => router.push('/(it)/assignments' as any)}
           />
           <QuickAction
-            icon="📚"
+            name="book"
             title="Knowledge Base"
             sub="Manage articles"
             onPress={() => router.push('/(it)/knowledge-base' as any)}
@@ -563,7 +573,7 @@ export default function ITDashboardScreen() {
                 ]}
               >
                 <View style={[qa.iconBox, { backgroundColor: colors.successBg }]}>
-                  <Text style={{ fontSize: 15 }}>✅</Text>
+                  <Icon name="check-circle" size={15} color={colors.success} />
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={s.activityTitle}>
@@ -741,6 +751,11 @@ const s = StyleSheet.create({
     fontSize: font.sm,
     fontWeight: font.semibold,
     color: colors.primary,
+  },
+  viewAllRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
   },
 
   // ── Activity rows ─────────────────────────────────────────────────────────

@@ -7,6 +7,7 @@ import AppLayout from '../../../Layouts/AppLayout.vue'
 import NavIT from '../../../Components/Nav/NavIT.vue'
 import { Link, router } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
+import Icon from '../../../Components/Icon.vue'
 
 const props = defineProps({
   articles: Object,
@@ -94,7 +95,7 @@ function formatViews(n) {
       <!-- Filters -->
       <div class="filter-bar">
         <div class="search-box">
-          <span class="search-icon">🔍</span>
+          <span class="search-icon"><Icon name="search" /></span>
           <input v-model="search" type="text" placeholder="Search articles...">
         </div>
         <div class="filter-tabs">
@@ -121,11 +122,11 @@ function formatViews(n) {
                 </div>
               </div>
               <div class="article-meta">
-                <div class="meta-item"><span>📁</span> {{ article.category.charAt(0).toUpperCase() + article.category.slice(1) }}</div>
-                <div class="meta-item"><span>👁️</span> {{ article.views.toLocaleString() }} views</div>
-                <div class="meta-item"><span>👍</span> {{ article.helpfulness_percentage }}% helpful</div>
-                <div class="meta-item"><span>✏️</span> {{ article.author?.first_name }} {{ article.author?.last_name }}</div>
-                <div class="meta-item"><span>📅</span> {{ diffForHumans(article.updated_at) }}</div>
+                <div class="meta-item"><span><Icon name="file" /></span> {{ article.category.charAt(0).toUpperCase() + article.category.slice(1) }}</div>
+                <div class="meta-item"><span><Icon name="eye" /></span> {{ article.views.toLocaleString() }} views</div>
+                <div class="meta-item"><span><Icon name="check" /></span> {{ article.helpfulness_percentage }}% helpful</div>
+                <div class="meta-item"><span><Icon name="edit" /></span> {{ article.author?.first_name }} {{ article.author?.last_name }}</div>
+                <div class="meta-item"><span><Icon name="calendar" /></span> {{ diffForHumans(article.updated_at) }}</div>
               </div>
             </div>
             <div class="article-actions">
@@ -139,7 +140,7 @@ function formatViews(n) {
         </template>
 
         <div v-else class="empty-state">
-          <div class="empty-icon">📚</div>
+          <div class="empty-icon"><Icon name="book" /></div>
           <h3>No articles yet</h3>
           <p>Create your first knowledge base article</p>
           <Link href="/it/knowledge-base/create" class="btn btn-primary" style="margin-top:1rem;">+ Create Article</Link>
@@ -152,13 +153,13 @@ function formatViews(n) {
           Showing {{ articles.from ?? 0 }}–{{ articles.to ?? 0 }} of {{ articles.total }} articles
         </div>
         <div class="page-controls">
-          <button class="page-btn" :disabled="!articles.prev_page_url" @click="router.get(articles.prev_page_url)">← Previous</button>
+          <button class="page-btn" :disabled="!articles.prev_page_url" @click="router.get(articles.prev_page_url)"><Icon name="arrow-left" /> Previous</button>
           <button
             v-for="p in articles.last_page" :key="p"
             class="page-btn" :class="{ active: p === articles.current_page }"
             @click="router.get(articles.path + '?page=' + p)"
           >{{ p }}</button>
-          <button class="page-btn" :disabled="!articles.next_page_url" @click="router.get(articles.next_page_url)">Next →</button>
+          <button class="page-btn" :disabled="!articles.next_page_url" @click="router.get(articles.next_page_url)">Next <Icon name="arrow-right" /></button>
         </div>
       </div>
 

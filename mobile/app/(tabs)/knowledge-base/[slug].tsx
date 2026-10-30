@@ -31,6 +31,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
+import Icon, { IconName } from '@/components/ui/Icon';
 import { colors, spacing, radius, font } from '@/constants/theme';
 import { loadAuth } from '@/utils/auth';
 import { apiUrl } from '@/constants/api';
@@ -61,13 +62,13 @@ type RelatedArticle = {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const CATEGORY_ICONS: Record<string, string> = {
-  hardware:    '🔧',
-  software:    '💾',
-  network:     '🌐',
-  display:     '🖥️',
-  peripherals: '🖱️',
-  general:     '📋',
+const CATEGORY_ICONS: Record<string, IconName> = {
+  hardware:    'wrench',
+  software:    'cpu',
+  network:     'globe',
+  display:     'desktop',
+  peripherals: 'mouse',
+  general:     'clipboard',
 };
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
@@ -97,9 +98,12 @@ function CategoryBadge({ category }: { category: string }) {
   const c = CATEGORY_COLORS[category] ?? CATEGORY_COLORS.general;
   return (
     <View style={[badge.wrap, { backgroundColor: c.bg, borderColor: c.border }]}>
-      <Text style={[badge.text, { color: c.text }]}>
-        {CATEGORY_ICONS[category] ?? '📄'} {categoryLabel(category)}
-      </Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+        <Icon name={CATEGORY_ICONS[category] ?? 'file'} size={12} color={c.text} />
+        <Text style={[badge.text, { color: c.text }]}>
+          {categoryLabel(category)}
+        </Text>
+      </View>
     </View>
   );
 }
@@ -233,13 +237,16 @@ export default function KnowledgeBaseShowScreen() {
       <SafeAreaView style={s.root}>
         <StatusBar barStyle="light-content" backgroundColor={colors.bgPrimary} />
         <View style={s.centered}>
-          <Text style={s.errorIcon}>📄</Text>
+          <Icon name="file" size={36} color={colors.textMuted} />
           <Text style={s.errorText}>{error ?? 'Article not found.'}</Text>
           <TouchableOpacity
             style={s.retryBtn}
             onPress={() => router.back()}
           >
-            <Text style={s.retryText}>← Go Back</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <Icon name="arrow-left" size={14} color="#ffffff" />
+              <Text style={s.retryText}>Go Back</Text>
+            </View>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -257,7 +264,10 @@ export default function KnowledgeBaseShowScreen() {
           onPress={() => router.push('/(tabs)/knowledge-base' as any)}
           activeOpacity={0.7}
         >
-          <Text style={s.navBack}>← Knowledge Base</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <Icon name="arrow-left" size={13} color={colors.primary} />
+            <Text style={s.navBack}>Knowledge Base</Text>
+          </View>
         </TouchableOpacity>
         <View style={{ width: 100 }} />
       </View>
@@ -279,9 +289,10 @@ export default function KnowledgeBaseShowScreen() {
           {/* Category badge + views */}
           <View style={s.headerTopRow}>
             <CategoryBadge category={article.category} />
-            <Text style={s.viewsText}>
-              👁️ {article.views.toLocaleString()} views
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <Icon name="eye" size={12} color={colors.textMuted} />
+              <Text style={s.viewsText}>{article.views.toLocaleString()} views</Text>
+            </View>
           </View>
 
           {/* Title */}
@@ -289,13 +300,19 @@ export default function KnowledgeBaseShowScreen() {
 
           {/* Author + date */}
           <View style={s.metaRow}>
-            <Text style={s.metaText}>
-              ✍️ {article.author?.full_name ?? 'IT Support'}
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <Icon name="edit" size={12} color={colors.textMuted} />
+              <Text style={s.metaText}>
+                {article.author?.full_name ?? 'IT Support'}
+              </Text>
+            </View>
             <Text style={s.metaDot}>·</Text>
-            <Text style={s.metaText}>
-              📅 {formatDate(article.published_at)}
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <Icon name="calendar" size={12} color={colors.textMuted} />
+              <Text style={s.metaText}>
+                {formatDate(article.published_at)}
+              </Text>
+            </View>
           </View>
         </View>
 
@@ -328,12 +345,19 @@ export default function KnowledgeBaseShowScreen() {
               disabled={!!voted}
               activeOpacity={0.75}
             >
-              <Text style={[
-                s.yesBtnText,
-                voted === 'helpful' && { color: colors.primary },
-              ]}>
-                👍 Yes ({helpfulCount})
-              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <Icon
+                  name="check-circle"
+                  size={14}
+                  color={voted === 'helpful' ? colors.primary : colors.textSecondary}
+                />
+                <Text style={[
+                  s.yesBtnText,
+                  voted === 'helpful' && { color: colors.primary },
+                ]}>
+                  Yes ({helpfulCount})
+                </Text>
+              </View>
             </TouchableOpacity>
 
             {/* No button */}
@@ -347,18 +371,28 @@ export default function KnowledgeBaseShowScreen() {
               disabled={!!voted}
               activeOpacity={0.75}
             >
-              <Text style={[
-                s.noBtnText,
-                voted === 'not-helpful' && { color: colors.danger },
-              ]}>
-                👎 No ({notHelpfulCount})
-              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <Icon
+                  name="close-circle"
+                  size={14}
+                  color={voted === 'not-helpful' ? colors.danger : colors.textSecondary}
+                />
+                <Text style={[
+                  s.noBtnText,
+                  voted === 'not-helpful' && { color: colors.danger },
+                ]}>
+                  No ({notHelpfulCount})
+                </Text>
+              </View>
             </TouchableOpacity>
           </View>
 
           {/* Thank you message after voting */}
           {voted && (
-            <Text style={s.votedText}>Thanks for your feedback! 🙏</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+              <Text style={s.votedText}>Thanks for your feedback!</Text>
+              <Icon name="sparkles" size={14} color={colors.primary} />
+            </View>
           )}
 
           {/* Helpfulness bar */}
@@ -392,13 +426,11 @@ export default function KnowledgeBaseShowScreen() {
                   }
                   activeOpacity={0.75}
                 >
-                  <Text style={[s.relatedIcon, { color: c.text }]}>
-                    {CATEGORY_ICONS[rel.category] ?? '📄'}
-                  </Text>
+                  <Icon name={CATEGORY_ICONS[rel.category] ?? 'file'} size={16} color={c.text} />
                   <Text style={s.relatedTitle} numberOfLines={2}>
                     {rel.title}
                   </Text>
-                  <Text style={s.relatedArrow}>→</Text>
+                  <Icon name="arrow-right" size={13} color={colors.primary} />
                 </TouchableOpacity>
               );
             })}

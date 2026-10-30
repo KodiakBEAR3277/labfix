@@ -468,22 +468,6 @@
     border-color: var(--color-primary);
 }
 
-.auth-social-icon {
-    width: 20px;
-    height: 20px;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-}
-
-.auth-google-icon {
-    background-image: url('../assets/icons/google-icon.svg');
-}
-
-.auth-facebook-icon {
-    background-image: url('../assets/icons/facebook-icon.svg');
-}
-
 /* ============================================
    FOOTER TEXT
    ============================================ */

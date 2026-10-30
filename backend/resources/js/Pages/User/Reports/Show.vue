@@ -7,6 +7,7 @@ import AppLayout from '../../../Layouts/AppLayout.vue'
 import NavUser from '../../../Components/Nav/NavUser.vue'
 import VoiceMessage from '../../../Components/VoiceMessage.vue'
 import { Link, router } from '@inertiajs/vue3'
+import Icon from '../../../Components/Icon.vue'
 
 const props = defineProps({
   report: Object,
@@ -26,15 +27,15 @@ function statusLabel(s) {
 
 function transactionIcon(action) {
   const map = {
-    'created':          '🎫',
-    'status_changed':   '🔄',
-    'assigned':         '👤',
-    'priority_changed': '⚠️',
-    'updated':          '✏️',
-    'deleted':          '🗑️',
-    'restored':         '♻️',
+    'created':          'ticket',
+    'status_changed':   'refresh',
+    'assigned':         'user',
+    'priority_changed': 'alert',
+    'updated':          'edit',
+    'deleted':          'trash',
+    'restored':         'restore',
   }
-  return map[action] ?? '📌'
+  return map[action] ?? 'pin'
 }
 
 function transactionTitle(action) {
@@ -69,7 +70,7 @@ function cancelReport() {
     <template #nav><NavUser /></template>
 
     <div id="user-report-details" class="container">
-      <Link href="/user/reports" class="back-btn">← Back to My Reports</Link>
+      <Link href="/user/reports" class="back-btn"><Icon name="arrow-left" /> Back to My Reports</Link>
 
       <!-- Ticket header -->
       <div class="ticket-header">
@@ -127,7 +128,7 @@ function cancelReport() {
                 target="_blank"
                 class="attachment-item"
               >
-                <div class="attachment-icon">{{ att.endsWith('.pdf') ? '📄' : '🖼️' }}</div>
+                <div class="attachment-icon"><Icon :name="att.endsWith('.pdf') ? 'file' : 'image'" /></div>
                 <div class="attachment-name">{{ att.split('/').pop() }}</div>
               </a>
             </div>
@@ -160,13 +161,13 @@ function cancelReport() {
                   <div class="timeline-dot"></div>
                   <div class="timeline-content">
                     <div class="timeline-header">
-                      <span class="timeline-title">{{ transactionIcon(tx.action) }} {{ transactionTitle(tx.action) }}</span>
+                      <span class="timeline-title"><Icon :name="transactionIcon(tx.action)" /> {{ transactionTitle(tx.action) }}</span>
                       <span class="timeline-time">{{ formatDate(tx.created_at) }}</span>
                     </div>
                     <p class="timeline-text">{{ tx.description }}</p>
                     <div v-if="tx.old_value || tx.new_value" style="margin-top:0.5rem;padding:0.5rem;background:rgba(45,212,191,0.1);border-radius:4px;font-size:0.85rem;">
                       <span v-if="tx.old_value" style="color:#ef4444;">{{ tx.old_value }}</span>
-                      <span v-if="tx.old_value && tx.new_value" style="color:#9ca3af;"> → </span>
+                      <span v-if="tx.old_value && tx.new_value" style="color:#9ca3af;"> <Icon name="arrow-right" /> </span>
                       <span v-if="tx.new_value" style="color:#10b981;">{{ tx.new_value }}</span>
                     </div>
                     <div style="margin-top:0.25rem;font-size:0.85rem;color:#9ca3af;">by {{ tx.user?.full_name }}</div>
@@ -211,7 +212,7 @@ function cancelReport() {
             <p style="color:#9ca3af;font-size:0.85rem;margin-top:1rem;text-align:center;">Available until ticket is assigned</p>
           </div>
           <div v-else class="card" style="background:rgba(45,212,191,0.1);border-color:rgba(45,212,191,0.3);">
-            <h2 class="card-title" style="color:#2dd4bf;">✓ Ticket Assigned</h2>
+            <h2 class="card-title" style="color:#2dd4bf;"><Icon name="check" /> Ticket Assigned</h2>
             <p style="color:#d1d5db;font-size:0.9rem;line-height:1.6;">This ticket has been assigned and can no longer be edited.</p>
           </div>
 
@@ -229,7 +230,7 @@ function cancelReport() {
           <div v-else class="info-card">
             <h2 class="card-title">Status</h2>
             <div style="text-align:center;padding:1rem 0;color:#9ca3af;">
-              <div style="font-size:2rem;margin-bottom:0.5rem;">⏳</div>
+              <div style="font-size:2rem;margin-bottom:0.5rem;"><Icon name="hourglass" /></div>
               <p>Awaiting assignment to a technician</p>
             </div>
           </div>

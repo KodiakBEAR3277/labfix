@@ -91,6 +91,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
+import Icon, { IconName } from '@/components/ui/Icon';
 import { colors, spacing, radius, font } from '@/constants/theme';
 import { loadAuth } from '@/utils/auth';
 import { apiUrl } from '@/constants/api';
@@ -131,13 +132,13 @@ type CategoryKey = 'hardware' | 'software' | 'network' | 'display' | 'peripheral
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const CATEGORY_ICONS: Record<string, string> = {
-  hardware:    '🔧',
-  software:    '💾',
-  network:     '🌐',
-  display:     '🖥️',
-  peripherals: '🖱️',
-  general:     '📋',
+const CATEGORY_ICONS: Record<string, IconName> = {
+  hardware:    'wrench',
+  software:    'cpu',
+  network:     'globe',
+  display:     'desktop',
+  peripherals: 'mouse',
+  general:     'clipboard',
 };
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
@@ -165,9 +166,12 @@ function CategoryPill({ category }: { category: string }) {
   const c = CATEGORY_COLORS[category] ?? CATEGORY_COLORS.general;
   return (
     <View style={[pill.wrap, { backgroundColor: c.bg, borderColor: c.border }]}>
-      <Text style={[pill.text, { color: c.text }]}>
-        {CATEGORY_ICONS[category] ?? '📄'} {categoryLabel(category)}
-      </Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+        <Icon name={CATEGORY_ICONS[category] ?? 'file'} size={12} color={c.text} />
+        <Text style={[pill.text, { color: c.text }]}>
+          {categoryLabel(category)}
+        </Text>
+      </View>
     </View>
   );
 }
@@ -197,7 +201,10 @@ function ArticleCard({ article }: { article: Article }) {
       <View style={s.articleCardInner}>
         <View style={s.articleTop}>
           <CategoryPill category={article.category} />
-          <Text style={s.articleViews}>👁️ {article.views.toLocaleString()}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <Icon name="eye" size={12} color={colors.textMuted} />
+            <Text style={s.articleViews}>{article.views.toLocaleString()}</Text>
+          </View>
         </View>
 
         <Text style={s.articleTitle} numberOfLines={2}>
@@ -205,12 +212,18 @@ function ArticleCard({ article }: { article: Article }) {
         </Text>
 
         <View style={s.articleMeta}>
-          <Text style={s.articleMetaText}>
-            ✍️ {article.author?.full_name ?? 'IT Support'}
-          </Text>
-          <Text style={s.articleMetaText}>
-            📅 {formatDate(article.published_at)}
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <Icon name="edit" size={12} color={colors.textMuted} />
+            <Text style={s.articleMetaText}>
+              {article.author?.full_name ?? 'IT Support'}
+            </Text>
+          </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <Icon name="calendar" size={12} color={colors.textMuted} />
+            <Text style={s.articleMetaText}>
+              {formatDate(article.published_at)}
+            </Text>
+          </View>
         </View>
 
         {!!article.excerpt && (
@@ -220,7 +233,7 @@ function ArticleCard({ article }: { article: Article }) {
         )}
       </View>
 
-      <Text style={s.articleArrow}>→</Text>
+      <Icon name="arrow-right" size={17} color={colors.primary} />
     </TouchableOpacity>
   );
 }
@@ -375,7 +388,7 @@ export default function KnowledgeBaseScreen() {
             Find answers to common lab equipment issues before submitting a ticket
           </Text>
           <View style={s.searchBar}>
-            <Text style={s.searchIcon}>🔍</Text>
+            <Icon name="search" size={15} color={colors.textMuted} />
             <TextInput
               style={s.searchInput}
               value={search}
@@ -387,7 +400,10 @@ export default function KnowledgeBaseScreen() {
             />
             {(search !== '' || activeCategory !== 'all') && (
               <TouchableOpacity onPress={clearFilters} activeOpacity={0.7}>
-                <Text style={s.clearBtn}>✕ Clear</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <Icon name="close" size={12} color={colors.textMuted} />
+                  <Text style={s.clearBtn}>Clear</Text>
+                </View>
               </TouchableOpacity>
             )}
           </View>
@@ -415,7 +431,7 @@ export default function KnowledgeBaseScreen() {
                 onPress={() => handleCategoryToggle(key)}
                 activeOpacity={0.75}
               >
-                <Text style={s.catChipIcon}>{CATEGORY_ICONS[key] ?? '📄'}</Text>
+                <Icon name={CATEGORY_ICONS[key] ?? 'file'} size={18} />
                 <View>
                   <Text style={[s.catChipLabel, active && { color: c.text }]}>
                     {categoryLabel(key)}
@@ -439,7 +455,10 @@ export default function KnowledgeBaseScreen() {
             </Text>
             {(search !== '' || activeCategory !== 'all') && (
               <TouchableOpacity onPress={clearFilters} activeOpacity={0.7}>
-                <Text style={s.clearFiltersLink}>Clear filters ×</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <Text style={s.clearFiltersLink}>Clear filters</Text>
+                  <Icon name="close" size={12} color={colors.textMuted} />
+                </View>
               </TouchableOpacity>
             )}
           </View>
@@ -462,7 +481,7 @@ export default function KnowledgeBaseScreen() {
           </View>
         ) : articles.length === 0 ? (
           <View style={s.emptyState}>
-            <Text style={s.emptyIcon}>🔍</Text>
+            <Icon name="search" size={32} color={colors.textMuted} />
             <Text style={s.emptyTitle}>No articles found</Text>
             <Text style={s.emptySub}>Try a different search term or category</Text>
             {(search || activeCategory !== 'all') && (
@@ -491,7 +510,10 @@ export default function KnowledgeBaseScreen() {
                 onPress={() => handlePage(currentPage - 1)}
                 disabled={!pagination.prev_page_url || pageLoading}
               >
-                <Text style={s.pageBtnText}>← Prev</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <Icon name="arrow-left" size={13} color={colors.textSecondary} />
+                  <Text style={s.pageBtnText}>Prev</Text>
+                </View>
               </TouchableOpacity>
               <View style={s.pageCurrent}>
                 <Text style={s.pageCurrentText}>{currentPage}</Text>
@@ -501,7 +523,10 @@ export default function KnowledgeBaseScreen() {
                 onPress={() => handlePage(currentPage + 1)}
                 disabled={!pagination.next_page_url || pageLoading}
               >
-                <Text style={s.pageBtnText}>Next →</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <Text style={s.pageBtnText}>Next</Text>
+                  <Icon name="arrow-right" size={13} color={colors.textSecondary} />
+                </View>
               </TouchableOpacity>
             </View>
             {pageLoading && (
@@ -517,7 +542,10 @@ export default function KnowledgeBaseScreen() {
         {/* ── Most Popular ── */}
         {popular.length > 0 && (
           <View style={[s.card, { marginHorizontal: spacing.lg, marginTop: spacing.md }]}>
-            <Text style={s.cardTitle}>🔥 Most Popular</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <Icon name="fire" size={16} color={colors.primary} />
+              <Text style={s.cardTitle}>Most Popular</Text>
+            </View>
             {popular.map((article, i) => (
               <TouchableOpacity
                 key={article.id}
@@ -525,13 +553,11 @@ export default function KnowledgeBaseScreen() {
                 onPress={() => router.push(`/(tabs)/knowledge-base/${article.slug}` as any)}
                 activeOpacity={0.75}
               >
-                <Text style={s.popularIcon}>
-                  {CATEGORY_ICONS[article.category] ?? '📄'}
-                </Text>
+                <Icon name={CATEGORY_ICONS[article.category] ?? 'file'} size={16} />
                 <Text style={s.popularTitle} numberOfLines={2}>
                   {article.title}
                 </Text>
-                <Text style={s.popularArrow}>→</Text>
+                <Icon name="arrow-right" size={13} color={colors.primary} />
               </TouchableOpacity>
             ))}
           </View>

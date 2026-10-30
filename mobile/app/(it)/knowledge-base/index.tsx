@@ -31,6 +31,7 @@ import { router } from 'expo-router';
 import { colors, spacing, radius, font } from '@/constants/theme';
 import { loadAuth } from '@/utils/auth';
 import { apiUrl } from '@/constants/api';
+import Icon, { IconName } from '@/components/ui/Icon';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -87,9 +88,9 @@ function formatViews(n: number): string {
   return n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n);
 }
 
-const CATEGORY_ICONS: Record<string, string> = {
-  hardware: '🔧', software: '💾', network: '🌐',
-  display: '🖥️', peripherals: '🖱️', general: '📋',
+const CATEGORY_ICONS: Record<string, IconName> = {
+  hardware: 'wrench', software: 'cpu', network: 'globe',
+  display: 'desktop', peripherals: 'mouse', general: 'clipboard',
 };
 
 // ─── Article Card ─────────────────────────────────────────────────────────────
@@ -127,18 +128,32 @@ function ArticleCard({
 
       {/* Meta row */}
       <View style={card.metaRow}>
-        <Text style={card.meta}>
-          {CATEGORY_ICONS[article.category] ?? '📄'}{' '}
-          {article.category.charAt(0).toUpperCase() + article.category.slice(1)}
-        </Text>
-        <Text style={card.meta}>👁️ {formatViews(article.views)} views</Text>
-        <Text style={card.meta}>👍 {article.helpfulness_percentage}% helpful</Text>
+        <View style={card.metaItem}>
+          <Icon name={CATEGORY_ICONS[article.category] ?? 'file'} size={11} />
+          <Text style={card.meta}>
+            {article.category.charAt(0).toUpperCase() + article.category.slice(1)}
+          </Text>
+        </View>
+        <View style={card.metaItem}>
+          <Icon name="eye" size={11} />
+          <Text style={card.meta}>{formatViews(article.views)} views</Text>
+        </View>
+        <View style={card.metaItem}>
+          <Icon name="check-circle" size={11} color={colors.success} />
+          <Text style={card.meta}>{article.helpfulness_percentage}% helpful</Text>
+        </View>
       </View>
       <View style={card.metaRow}>
-        <Text style={card.meta}>
-          ✏️ {article.author?.full_name ?? 'Unknown'}
-        </Text>
-        <Text style={card.meta}>📅 {diffForHumans(article.updated_at)}</Text>
+        <View style={card.metaItem}>
+          <Icon name="edit" size={11} />
+          <Text style={card.meta}>
+            {article.author?.full_name ?? 'Unknown'}
+          </Text>
+        </View>
+        <View style={card.metaItem}>
+          <Icon name="calendar" size={11} />
+          <Text style={card.meta}>{diffForHumans(article.updated_at)}</Text>
+        </View>
       </View>
 
       {/* Action buttons */}
@@ -213,6 +228,7 @@ const card = StyleSheet.create({
   },
   statusText: { fontSize: font.xs - 1, fontWeight: font.bold },
   metaRow:    { flexDirection: 'row', gap: spacing.md, flexWrap: 'wrap' },
+  metaItem:   { flexDirection: 'row', alignItems: 'center', gap: 4 },
   meta:       { fontSize: font.xs, color: colors.textMuted },
   actions:    { flexDirection: 'row', gap: spacing.xs + 2, marginTop: spacing.xs },
   editBtn: {
@@ -246,8 +262,8 @@ const card = StyleSheet.create({
 
 // ─── Filter Tab ───────────────────────────────────────────────────────────────
 
-function FilterTab({ label, active, onPress }: {
-  label: string; active: boolean; onPress: () => void;
+function FilterTab({ label, icon, active, onPress }: {
+  label: string; icon?: IconName; active: boolean; onPress: () => void;
 }) {
   return (
     <TouchableOpacity
@@ -255,6 +271,7 @@ function FilterTab({ label, active, onPress }: {
       onPress={onPress}
       activeOpacity={0.75}
     >
+      {!!icon && <Icon name={icon} size={11} />}
       <Text style={[ft.text, active && ft.textActive]}>{label}</Text>
     </TouchableOpacity>
   );
@@ -262,6 +279,7 @@ function FilterTab({ label, active, onPress }: {
 
 const ft = StyleSheet.create({
   tab: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
     paddingHorizontal: spacing.md, paddingVertical: spacing.xs + 3,
     borderRadius: radius.full, backgroundColor: colors.bgCard,
     borderWidth: 1, borderColor: colors.border, marginRight: spacing.xs,
@@ -480,7 +498,7 @@ export default function ITKBIndexScreen() {
 
             {/* Search */}
             <View style={s.searchBar}>
-              <Text style={s.searchIcon}>🔍</Text>
+              <Icon name="search" size={15} />
               <TextInput
                 style={s.searchInput}
                 value={search}
@@ -525,7 +543,8 @@ export default function ITKBIndexScreen() {
               {(['hardware', 'software', 'network', 'display', 'peripherals', 'general'] as CategoryFilter[]).map((cat) => (
                 <FilterTab
                   key={cat}
-                  label={`${CATEGORY_ICONS[cat]} ${cat.charAt(0).toUpperCase() + cat.slice(1)}`}
+                  label={cat.charAt(0).toUpperCase() + cat.slice(1)}
+                  icon={CATEGORY_ICONS[cat]}
                   active={category === cat}
                   onPress={() => {
                     setStatus(''); setCategory(cat);
@@ -545,7 +564,7 @@ export default function ITKBIndexScreen() {
         }
         ListEmptyComponent={
           <View style={s.emptyState}>
-            <Text style={s.emptyIcon}>📚</Text>
+            <Icon name="book" size={36} />
             <Text style={s.emptyTitle}>No articles yet</Text>
             <Text style={s.emptySub}>
               {search || status || category !== 'all'
@@ -571,21 +590,23 @@ export default function ITKBIndexScreen() {
                 </Text>
                 <View style={s.pageControls}>
                   <TouchableOpacity
-                    style={[s.pageBtn, !pagination.prev_page_url && s.pageBtnDisabled]}
+                    style={[s.pageBtn, s.pageBtnRow, !pagination.prev_page_url && s.pageBtnDisabled]}
                     onPress={() => handlePage(page - 1)}
                     disabled={!pagination.prev_page_url || pageLoading}
                   >
-                    <Text style={s.pageBtnText}>← Prev</Text>
+                    <Icon name="arrow-left" size={13} />
+                    <Text style={s.pageBtnText}>Prev</Text>
                   </TouchableOpacity>
                   <View style={s.pageCurrent}>
                     <Text style={s.pageCurrentText}>{page}</Text>
                   </View>
                   <TouchableOpacity
-                    style={[s.pageBtn, !pagination.next_page_url && s.pageBtnDisabled]}
+                    style={[s.pageBtn, s.pageBtnRow, !pagination.next_page_url && s.pageBtnDisabled]}
                     onPress={() => handlePage(page + 1)}
                     disabled={!pagination.next_page_url || pageLoading}
                   >
-                    <Text style={s.pageBtnText}>Next →</Text>
+                    <Text style={s.pageBtnText}>Next</Text>
+                    <Icon name="arrow-right" size={13} />
                   </TouchableOpacity>
                 </View>
                 {pageLoading && (
@@ -612,6 +633,7 @@ export default function ITKBIndexScreen() {
 
 const s = StyleSheet.create({
   root:    { flex: 1, backgroundColor: colors.bgPrimary },
+  inlineRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   centered:{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.md },
 
   // Nav
@@ -681,6 +703,7 @@ const s = StyleSheet.create({
   pageInfo:        { fontSize: font.sm, color: colors.textMuted },
   pageControls:    { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   pageBtn:         { paddingHorizontal: spacing.md, paddingVertical: spacing.xs + 2, borderRadius: radius.md, backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border },
+  pageBtnRow:      { flexDirection: 'row', alignItems: 'center', gap: 4 },
   pageBtnDisabled: { opacity: 0.4 },
   pageBtnText:     { fontSize: font.sm, color: colors.textSecondary },
   pageCurrent:     { width: 32, height: 32, borderRadius: radius.full, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },

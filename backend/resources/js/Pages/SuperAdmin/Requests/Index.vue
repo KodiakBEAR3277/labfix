@@ -10,6 +10,7 @@
 import AppLayout from '../../../Layouts/AppLayout.vue'
 import { Link, useForm, router, usePage } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
+import Icon from '../../../Components/Icon.vue'
 
 const props = defineProps({
   requests: Array,
@@ -115,7 +116,7 @@ function formatDate(d) {
       </div>
 
       <div v-else class="empty-state">
-        <div class="empty-icon">✅</div>
+        <div class="empty-icon"><Icon name="check-circle" /></div>
         <h3>No pending requests</h3>
         <p>New institution sign-ups will show up here for review.</p>
       </div>

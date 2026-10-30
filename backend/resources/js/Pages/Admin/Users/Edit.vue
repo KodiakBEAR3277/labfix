@@ -14,6 +14,7 @@ import AppLayout from '../../../Layouts/AppLayout.vue'
 import NavAdmin from '../../../Components/Nav/NavAdmin.vue'
 import { Link, useForm, router, usePage } from '@inertiajs/vue3'
 import { computed } from 'vue'
+import Icon from '../../../Components/Icon.vue'
 
 const props = defineProps({
   user: Object,
@@ -76,7 +77,7 @@ function diffForHumans(d) {
     <template #nav><NavAdmin /></template>
 
     <div class="container">
-      <Link :href="`/admin/users/${user.id}`" class="back-btn">← Back to User Details</Link>
+      <Link :href="`/admin/users/${user.id}`" class="back-btn"><Icon name="arrow-left" /> Back to User Details</Link>
 
       <div class="page-header">
         <h1>Edit User</h1>

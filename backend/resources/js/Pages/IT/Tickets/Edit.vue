@@ -9,6 +9,7 @@ import AppLayout from '../../../Layouts/AppLayout.vue'
 import NavIT from '../../../Components/Nav/NavIT.vue'
 import { Link, useForm, usePage } from '@inertiajs/vue3'
 import { computed } from 'vue'
+import Icon from '../../../Components/Icon.vue'
 
 const props = defineProps({
   ticket:  Object,
@@ -73,7 +74,7 @@ function diffForHumans(d) {
     <template #nav><NavIT /></template>
 
     <div class="container">
-      <Link :href="`/it/tickets/${ticket.id}`" class="back-btn">← Back to Ticket</Link>
+      <Link :href="`/it/tickets/${ticket.id}`" class="back-btn"><Icon name="arrow-left" /> Back to Ticket</Link>
 
       <div class="page-header">
         <h1>Edit Ticket</h1>

@@ -22,21 +22,22 @@ import {
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { router, usePathname } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Icon, { IconName } from '@/components/ui/Icon';
 import { colors, font, spacing } from '@/constants/theme';
 
 type TabDef = {
   key:   string;
   label: string;
-  icon:  string;
+  icon:  IconName;
   route: string;
 };
 
 const TABS: TabDef[] = [
-  { key: 'index',          label: 'Dashboard', icon: '🏠', route: '/(tabs)/'              },
-  { key: 'report',         label: 'Report',    icon: '🎫', route: '/(tabs)/report'        },
-  { key: 'my-reports',     label: 'My Reports',icon: '📋', route: '/(tabs)/my-reports'   },
-  { key: 'knowledge-base', label: 'KB',        icon: '📚', route: '/(tabs)/knowledge-base'},
-  { key: 'lab-status',     label: 'Labs',      icon: '🖥️', route: '/(tabs)/lab-status'   },
+  { key: 'index',          label: 'Dashboard', icon: 'home', route: '/(tabs)/'              },
+  { key: 'report',         label: 'Report',    icon: 'ticket', route: '/(tabs)/report'        },
+  { key: 'my-reports',     label: 'My Reports',icon: 'clipboard', route: '/(tabs)/my-reports'   },
+  { key: 'knowledge-base', label: 'KB',        icon: 'book', route: '/(tabs)/knowledge-base'},
+  { key: 'lab-status',     label: 'Labs',      icon: 'desktop', route: '/(tabs)/lab-status'   },
 ];
 
 export function UserTabBar(_props: BottomTabBarProps) {
@@ -68,7 +69,7 @@ export function UserTabBar(_props: BottomTabBarProps) {
             onPress={() => router.replace(tab.route as any)}
             activeOpacity={0.7}
           >
-            <Text style={s.icon}>{tab.icon}</Text>
+            <Icon name={tab.icon} size={18} color="#ffffff" />
             <Text style={[s.label, active && s.labelActive]}>{tab.label}</Text>
             {active && <View style={s.activeDot} />}
           </TouchableOpacity>

@@ -15,6 +15,7 @@
 import AppLayout from '../../Layouts/AppLayout.vue'
 import NavAdmin from '../../Components/Nav/NavAdmin.vue'
 import { Link } from '@inertiajs/vue3'
+import Icon from '../../Components/Icon.vue'
 
 const props = defineProps({
   currentPlan: String,
@@ -109,7 +110,7 @@ function cardStyle(tier) {
               :key="feature"
               style="display:flex;align-items:flex-start;gap:0.5rem;font-size:0.9rem;color:var(--color-text-secondary);margin-bottom:0.65rem;"
             >
-              <span style="color:var(--color-primary);font-weight:700;">✓</span> {{ feature }}
+              <span style="color:var(--color-primary);font-weight:700;"><Icon name="check" /></span> {{ feature }}
             </li>
           </ul>
 

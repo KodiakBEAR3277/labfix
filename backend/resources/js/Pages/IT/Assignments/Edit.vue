@@ -10,6 +10,7 @@ import AppLayout from '../../../Layouts/AppLayout.vue'
 import NavIT from '../../../Components/Nav/NavIT.vue'
 import { Link, useForm } from '@inertiajs/vue3'
 import { computed } from 'vue'
+import Icon from '../../../Components/Icon.vue'
 
 const props = defineProps({
   ticket: Object,
@@ -81,7 +82,7 @@ function diffForHumans(d) {
     <template #nav><NavIT /></template>
 
     <div class="container">
-      <Link :href="`/it/assignments/${ticket.id}`" class="back-btn">← Back to Assignment</Link>
+      <Link :href="`/it/assignments/${ticket.id}`" class="back-btn"><Icon name="arrow-left" /> Back to Assignment</Link>
 
       <div class="page-header">
         <h1>Update Assignment</h1>
@@ -135,7 +136,7 @@ function diffForHumans(d) {
 
                 <div style="background:rgba(45,212,191,0.1);border:1px solid rgba(45,212,191,0.3);padding:1rem;border-radius:8px;margin-top:1rem;">
                   <p style="color:#2dd4bf;margin:0;font-size:0.9rem;">
-                    💡 <strong>Note:</strong> The reporter will be automatically notified when you update this ticket.
+                    <Icon name="lightbulb" /> <strong>Note:</strong> The reporter will be automatically notified when you update this ticket.
                   </p>
                 </div>
 
@@ -162,7 +163,7 @@ function diffForHumans(d) {
                 style="width:100%;"
                 @click="quickUpdate('in-progress')"
               >
-                🚀 Start Working
+                <Icon name="rocket" /> Start Working
               </button>
               <button
                 v-if="ticket.status !== 'resolved'"
@@ -171,7 +172,7 @@ function diffForHumans(d) {
                 style="width:100%;"
                 @click="quickUpdate('resolved')"
               >
-                ✅ Mark Resolved
+                <Icon name="check-circle" /> Mark Resolved
               </button>
               <button
                 v-if="ticket.priority !== 'high' && ticket.status !== 'resolved'"
@@ -180,14 +181,14 @@ function diffForHumans(d) {
                 style="width:100%;"
                 @click="escalatePriority"
               >
-                🔴 Escalate Priority
+                <Icon name="circle" :style="{ color: 'var(--color-danger)' }" /> Escalate Priority
               </button>
             </div>
           </div>
 
           <!-- Status guidelines -->
           <div class="card" style="margin-top:1.5rem;background:rgba(59,130,246,0.1);border-color:rgba(59,130,246,0.3);">
-            <h2 class="card-title" style="color:#3b82f6;">📋 Status Guidelines</h2>
+            <h2 class="card-title" style="color:#3b82f6;"><Icon name="clipboard" /> Status Guidelines</h2>
             <div style="color:#d1d5db;font-size:0.9rem;line-height:1.6;">
               <div style="margin-bottom:1rem;">
                 <strong style="color:#60a5fa;">Assigned:</strong> Ticket is assigned but work hasn't started yet
@@ -279,12 +280,12 @@ function diffForHumans(d) {
               <div class="reporter-role">{{ statusLabel(ticket.reporter?.role ?? '') }}</div>
               <p v-if="ticket.reporter?.email" style="color:#9ca3af;margin-top:0.5rem;font-size:0.9rem;">
                 <a :href="`mailto:${ticket.reporter.email}`" style="color:#2dd4bf;text-decoration:none;">
-                  📧 {{ ticket.reporter.email }}
+                  <Icon name="mail" /> {{ ticket.reporter.email }}
                 </a>
               </p>
               <p v-if="ticket.reporter?.phone" style="color:#9ca3af;font-size:0.9rem;">
                 <a :href="`tel:${ticket.reporter.phone}`" style="color:#2dd4bf;text-decoration:none;">
-                  📞 {{ ticket.reporter.phone }}
+                  <Icon name="phone" /> {{ ticket.reporter.phone }}
                 </a>
               </p>
             </div>

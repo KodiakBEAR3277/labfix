@@ -11,6 +11,7 @@ import AppLayout from '../../../Layouts/AppLayout.vue'
 import NavAdmin from '../../../Components/Nav/NavAdmin.vue'
 import { Link, router, useForm } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
+import Icon from '../../../Components/Icon.vue'
 
 const props = defineProps({
   tickets: Object,
@@ -124,40 +125,40 @@ function staffFullName(staff) {
           <p style="color:#9ca3af;">Oversee all support tickets and manage assignments</p>
         </div>
         <div class="header-actions">
-          <Link href="/admin/transactions" class="btn btn-secondary">📜 Ticket History</Link>
-          <button type="button" class="btn btn-primary" @click="goToBulkActions">⚡ Bulk Actions</button>
+          <Link href="/admin/transactions" class="btn btn-secondary"><Icon name="restore" /> Ticket History</Link>
+          <button type="button" class="btn btn-primary" @click="goToBulkActions"><Icon name="bolt" /> Bulk Actions</button>
         </div>
       </div>
 
       <!-- Stats -->
       <div class="system-stats">
         <div class="stat-card">
-          <div class="stat-header"><span class="stat-label">Total Tickets</span><span class="stat-icon">📋</span></div>
+          <div class="stat-header"><span class="stat-label">Total Tickets</span><span class="stat-icon"><Icon name="clipboard" /></span></div>
           <div class="stat-value">{{ stats.total }}</div>
           <div class="stat-detail">All time</div>
         </div>
         <div class="stat-card">
-          <div class="stat-header"><span class="stat-label">Open Tickets</span><span class="stat-icon">🔔</span></div>
+          <div class="stat-header"><span class="stat-label">Open Tickets</span><span class="stat-icon"><Icon name="bell" /></span></div>
           <div class="stat-value">{{ stats.open }}</div>
           <div class="stat-detail">Needs attention</div>
         </div>
         <div class="stat-card">
-          <div class="stat-header"><span class="stat-label">Unassigned</span><span class="stat-icon">⏳</span></div>
+          <div class="stat-header"><span class="stat-label">Unassigned</span><span class="stat-icon"><Icon name="hourglass" /></span></div>
           <div class="stat-value">{{ stats.unassigned }}</div>
           <div class="stat-detail">Waiting for assignment</div>
         </div>
         <div class="stat-card">
-          <div class="stat-header"><span class="stat-label">In Progress</span><span class="stat-icon">⚙️</span></div>
+          <div class="stat-header"><span class="stat-label">In Progress</span><span class="stat-icon"><Icon name="settings" /></span></div>
           <div class="stat-value">{{ stats.in_progress }}</div>
           <div class="stat-detail">Being worked on</div>
         </div>
         <div class="stat-card">
-          <div class="stat-header"><span class="stat-label">High Priority</span><span class="stat-icon">🔴</span></div>
+          <div class="stat-header"><span class="stat-label">High Priority</span><span class="stat-icon"><Icon name="circle" style="color:var(--color-danger);" /></span></div>
           <div class="stat-value">{{ stats.high_priority }}</div>
           <div class="stat-detail">Urgent attention needed</div>
         </div>
         <div class="stat-card">
-          <div class="stat-header"><span class="stat-label">Resolved</span><span class="stat-icon">✅</span></div>
+          <div class="stat-header"><span class="stat-label">Resolved</span><span class="stat-icon"><Icon name="check-circle" /></span></div>
           <div class="stat-value">{{ stats.resolved }}</div>
           <div class="stat-detail">Completed tickets</div>
         </div>
@@ -167,7 +168,7 @@ function staffFullName(staff) {
       <div class="filter-bar">
         <div class="filter-row">
           <div class="search-box">
-            <span class="search-icon">🔍</span>
+            <span class="search-icon"><Icon name="search" /></span>
             <input v-model="search" type="text" placeholder="Search by ticket ID, title, reporter, or location...">
           </div>
           <div class="filter-group">
@@ -268,7 +269,7 @@ function staffFullName(staff) {
                 </td>
                 <td>
                   <span class="priority-badge" :class="`priority-${ticket.priority}`">
-                    {{ ticket.priority === 'high' ? '🔴' : ticket.priority === 'medium' ? '🟡' : '🟢' }}
+                    <Icon name="circle" :style="{ color: ticket.priority === 'high' ? 'var(--color-danger)' : ticket.priority === 'medium' ? 'var(--color-warning)' : 'var(--color-success)' }" />
                     {{ ticket.priority.charAt(0).toUpperCase() + ticket.priority.slice(1) }}
                   </span>
                 </td>
@@ -290,13 +291,13 @@ function staffFullName(staff) {
             <tr v-else>
               <td colspan="10" style="text-align:center;padding:3rem;color:#9ca3af;">
                 <template v-if="filters.search || filters.status || filters.priority || filters.lab || filters.assigned">
-                  <div style="font-size:2rem;margin-bottom:1rem;">🔍</div>
+                  <div style="font-size:2rem;margin-bottom:1rem;"><Icon name="search" /></div>
                   <h3 style="color:#d1d5db;">No tickets found</h3>
                   <p>Try adjusting your filters or search terms</p>
                   <Link href="/admin/tickets" class="btn btn-primary" style="margin-top:1rem;">Clear Filters</Link>
                 </template>
                 <template v-else>
-                  <div style="font-size:2rem;margin-bottom:1rem;">📋</div>
+                  <div style="font-size:2rem;margin-bottom:1rem;"><Icon name="clipboard" /></div>
                   <h3 style="color:#d1d5db;">No tickets yet</h3>
                   <p>All clear! No tickets in the system.</p>
                 </template>
@@ -311,13 +312,13 @@ function staffFullName(staff) {
             Showing {{ tickets.from ?? 0 }}–{{ tickets.to ?? 0 }} of {{ tickets.total }} tickets
           </div>
           <div class="page-controls">
-            <button class="page-btn" :disabled="!tickets.prev_page_url" @click="router.get(tickets.prev_page_url)">← Previous</button>
+            <button class="page-btn" :disabled="!tickets.prev_page_url" @click="router.get(tickets.prev_page_url)"><Icon name="arrow-left" /> Previous</button>
             <button
               v-for="p in tickets.last_page" :key="p"
               class="page-btn" :class="{ active: p === tickets.current_page }"
               @click="router.get(tickets.path + '?page=' + p)"
             >{{ p }}</button>
-            <button class="page-btn" :disabled="!tickets.next_page_url" @click="router.get(tickets.next_page_url)">Next →</button>
+            <button class="page-btn" :disabled="!tickets.next_page_url" @click="router.get(tickets.next_page_url)">Next <Icon name="arrow-right" /></button>
           </div>
         </div>
       </div>

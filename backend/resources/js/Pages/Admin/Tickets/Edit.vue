@@ -10,6 +10,7 @@ import AppLayout from '../../../Layouts/AppLayout.vue'
 import NavAdmin from '../../../Components/Nav/NavAdmin.vue'
 import { Link, useForm, router } from '@inertiajs/vue3'
 import { computed } from 'vue'
+import Icon from '../../../Components/Icon.vue'
 
 const props = defineProps({
   ticket:  Object,
@@ -80,7 +81,7 @@ const equipmentStatusClass = (s) =>
     <template #nav><NavAdmin /></template>
 
     <div class="container">
-      <Link :href="`/admin/tickets/${ticket.id}`" class="back-btn">← Back to Ticket</Link>
+      <Link :href="`/admin/tickets/${ticket.id}`" class="back-btn"><Icon name="arrow-left" /> Back to Ticket</Link>
 
       <div class="page-header">
         <h1>Edit Ticket</h1>

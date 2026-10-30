@@ -29,6 +29,7 @@ import { router } from 'expo-router';
 import { colors, spacing, radius, font } from '@/constants/theme';
 import { loadAuth } from '@/utils/auth';
 import { apiUrl } from '@/constants/api';
+import Icon from '@/components/ui/Icon';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -93,10 +94,6 @@ function priorityColor(p: string): string {
   return p === 'high' ? colors.danger : p === 'medium' ? colors.warning : colors.success;
 }
 
-function priorityEmoji(p: string): string {
-  return p === 'high' ? '🔴' : p === 'medium' ? '🟡' : '🟢';
-}
-
 function diffForHumans(iso: string): string {
   const sec = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
   if (sec < 60)    return `${sec}s ago`;
@@ -121,10 +118,12 @@ function AssignmentCard({ ticket }: { ticket: Ticket }) {
       <View style={card.top}>
         <Text style={card.ticketNum}>{ticket.ticket_number}</Text>
         <View style={[card.priorityBadge, { borderColor: pc + '66' }]}>
-          <Text style={[card.priorityText, { color: pc }]}>
-            {priorityEmoji(ticket.priority)}{' '}
-            {ticket.priority.charAt(0).toUpperCase() + ticket.priority.slice(1)}
-          </Text>
+          <View style={card.priorityInner}>
+            <Icon name="circle" size={10} color={pc} />
+            <Text style={[card.priorityText, { color: pc }]}>
+              {ticket.priority.charAt(0).toUpperCase() + ticket.priority.slice(1)}
+            </Text>
+          </View>
         </View>
       </View>
 
@@ -134,22 +133,34 @@ function AssignmentCard({ ticket }: { ticket: Ticket }) {
       {/* Meta row */}
       <View style={card.metaRow}>
         {ticket.reporter && (
-          <Text style={card.meta}>
-            👤 {ticket.reporter.first_name} {ticket.reporter.last_name}
-          </Text>
+          <View style={card.metaItem}>
+            <Icon name="user" size={11} />
+            <Text style={card.meta}>
+              {ticket.reporter.first_name} {ticket.reporter.last_name}
+            </Text>
+          </View>
         )}
         {ticket.equipment?.lab?.name && (
-          <Text style={card.meta}>📍 {ticket.equipment.lab.name}</Text>
+          <View style={card.metaItem}>
+            <Icon name="map-pin" size={11} />
+            <Text style={card.meta}>{ticket.equipment.lab.name}</Text>
+          </View>
         )}
         {ticket.equipment?.equipment_code && (
           <Text style={card.meta}>{ticket.equipment.equipment_code}</Text>
         )}
       </View>
       <View style={card.metaRow}>
-        <Text style={card.meta}>🕒 {diffForHumans(ticket.created_at)}</Text>
-        <Text style={card.meta}>
-          🏷️ {ticket.category.charAt(0).toUpperCase() + ticket.category.slice(1)}
-        </Text>
+        <View style={card.metaItem}>
+          <Icon name="clock" size={11} />
+          <Text style={card.meta}>{diffForHumans(ticket.created_at)}</Text>
+        </View>
+        <View style={card.metaItem}>
+          <Icon name="tag" size={11} />
+          <Text style={card.meta}>
+            {ticket.category.charAt(0).toUpperCase() + ticket.category.slice(1)}
+          </Text>
+        </View>
       </View>
 
       {/* Description excerpt */}
@@ -206,12 +217,14 @@ const card = StyleSheet.create({
     borderWidth: 1, borderRadius: radius.full,
     paddingHorizontal: 8, paddingVertical: 2,
   },
+  priorityInner: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   priorityText: { fontSize: font.xs - 1, fontWeight: font.semibold },
   title: {
     fontSize: font.base, fontWeight: font.medium,
     color: colors.textPrimary, lineHeight: 21,
   },
   metaRow:  { flexDirection: 'row', gap: spacing.md, flexWrap: 'wrap' },
+  metaItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   meta:     { fontSize: font.xs, color: colors.textMuted },
   excerpt: {
     fontSize: font.sm, color: colors.textMuted,
@@ -452,7 +465,7 @@ export default function ITAssignmentsScreen() {
         }
         ListEmptyComponent={
           <View style={s.emptyState}>
-            <Text style={s.emptyIcon}>📋</Text>
+            <Icon name="clipboard" size={36} />
             <Text style={s.emptyTitle}>No assignments yet</Text>
             <Text style={s.emptySub}>
               You don't have any tickets assigned to you at the moment
@@ -476,21 +489,23 @@ export default function ITAssignmentsScreen() {
                 </Text>
                 <View style={s.pageControls}>
                   <TouchableOpacity
-                    style={[s.pageBtn, !pagination.prev_page_url && s.pageBtnDisabled]}
+                    style={[s.pageBtn, s.pageBtnRow, !pagination.prev_page_url && s.pageBtnDisabled]}
                     onPress={() => handlePage(page - 1)}
                     disabled={!pagination.prev_page_url || pageLoading}
                   >
-                    <Text style={s.pageBtnText}>← Prev</Text>
+                    <Icon name="arrow-left" size={13} />
+                    <Text style={s.pageBtnText}>Prev</Text>
                   </TouchableOpacity>
                   <View style={s.pageCurrent}>
                     <Text style={s.pageCurrentText}>{page}</Text>
                   </View>
                   <TouchableOpacity
-                    style={[s.pageBtn, !pagination.next_page_url && s.pageBtnDisabled]}
+                    style={[s.pageBtn, s.pageBtnRow, !pagination.next_page_url && s.pageBtnDisabled]}
                     onPress={() => handlePage(page + 1)}
                     disabled={!pagination.next_page_url || pageLoading}
                   >
-                    <Text style={s.pageBtnText}>Next →</Text>
+                    <Text style={s.pageBtnText}>Next</Text>
+                    <Icon name="arrow-right" size={13} />
                   </TouchableOpacity>
                 </View>
                 {pageLoading && (
@@ -506,7 +521,10 @@ export default function ITAssignmentsScreen() {
                 onPress={() => router.push('/(it)/queue' as any)}
                 activeOpacity={0.75}
               >
-                <Text style={s.queueLinkText}>View Full Ticket Queue →</Text>
+                <View style={s.inlineRow}>
+                  <Text style={s.queueLinkText}>View Full Ticket Queue</Text>
+                  <Icon name="arrow-right" size={13} color={colors.primary} />
+                </View>
               </TouchableOpacity>
             )}
 
@@ -523,6 +541,7 @@ export default function ITAssignmentsScreen() {
 
 const s = StyleSheet.create({
   root:    { flex: 1, backgroundColor: colors.bgPrimary },
+  inlineRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   centered:{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.md },
 
   // Nav
@@ -590,6 +609,7 @@ const s = StyleSheet.create({
   pageInfo:        { fontSize: font.sm, color: colors.textMuted },
   pageControls:    { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   pageBtn:         { paddingHorizontal: spacing.md, paddingVertical: spacing.xs + 2, borderRadius: radius.md, backgroundColor: colors.bgCard, borderWidth: 1, borderColor: colors.border },
+  pageBtnRow:      { flexDirection: 'row', alignItems: 'center', gap: 4 },
   pageBtnDisabled: { opacity: 0.4 },
   pageBtnText:     { fontSize: font.sm, color: colors.textSecondary },
   pageCurrent:     { width: 32, height: 32, borderRadius: radius.full, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },

@@ -6,6 +6,7 @@
 import AppLayout from '../../Layouts/AppLayout.vue'
 import NavUser from '../../Components/Nav/NavUser.vue'
 import { Link, router } from '@inertiajs/vue3'
+import Icon from '../../Components/Icon.vue'
 
 const props = defineProps({
   article:         Object,
@@ -25,8 +26,8 @@ function formatDate(dateStr) {
 }
 
 const categoryIcons = {
-  hardware: '🔧', software: '💾', network: '🌐',
-  display: '🖥️', peripherals: '🖱️', general: '📋',
+  hardware: 'wrench', software: 'cpu', network: 'globe',
+  display: 'desktop', peripherals: 'mouse', general: 'clipboard',
 }
 </script>
 
@@ -35,7 +36,7 @@ const categoryIcons = {
     <template #nav><NavUser /></template>
 
     <div class="container">
-      <Link href="/user/knowledge-base" class="back-btn">← Back to Knowledge Base</Link>
+      <Link href="/user/knowledge-base" class="back-btn"><Icon name="arrow-left" /> Back to Knowledge Base</Link>
 
       <div class="content-grid">
 
@@ -45,15 +46,15 @@ const categoryIcons = {
             <div style="margin-bottom:2rem;">
               <div style="display:flex;gap:0.75rem;align-items:center;margin-bottom:1rem;">
                 <span class="category-badge">
-                  {{ categoryIcons[article.category] ?? '📄' }}
+                  <Icon :name="categoryIcons[article.category] ?? 'file'" />
                   {{ article.category.charAt(0).toUpperCase() + article.category.slice(1) }}
                 </span>
                 <span style="color:#9ca3af;font-size:0.9rem;">{{ article.views }} views</span>
               </div>
               <h1 style="font-size:2rem;color:#ffffff;margin-bottom:1rem;">{{ article.title }}</h1>
               <div style="display:flex;gap:1.5rem;color:#9ca3af;font-size:0.9rem;">
-                <span>✍️ {{ article.author?.full_name }}</span>
-                <span>📅 {{ formatDate(article.published_at) }}</span>
+                <span><Icon name="user" /> {{ article.author?.full_name }}</span>
+                <span><Icon name="calendar" /> {{ formatDate(article.published_at) }}</span>
               </div>
             </div>
 
@@ -65,10 +66,10 @@ const categoryIcons = {
               <p style="color:#9ca3af;margin-bottom:1rem;">Was this article helpful?</p>
               <div style="display:flex;gap:1rem;">
                 <button type="button" class="btn btn-secondary" @click="vote('helpful')">
-                  👍 Yes ({{ article.helpful_count }})
+                  <Icon name="check-circle" /> Yes ({{ article.helpful_count }})
                 </button>
                 <button type="button" class="btn btn-secondary" @click="vote('not-helpful')">
-                  👎 No ({{ article.not_helpful_count }})
+                  <Icon name="close-circle" /> No ({{ article.not_helpful_count }})
                 </button>
               </div>
               <div v-if="article.helpful_count + article.not_helpful_count > 0" style="margin-top:1rem;color:#9ca3af;font-size:0.9rem;">
@@ -93,7 +94,7 @@ const categoryIcons = {
                 :href="`/user/knowledge-base/${related.slug}`"
                 class="link-item"
               >
-                <span>{{ categoryIcons[related.category] ?? '📄' }}</span>
+                <span><Icon :name="categoryIcons[related.category] ?? 'file'" /></span>
                 {{ related.title }}
               </Link>
             </div>

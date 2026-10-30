@@ -19,6 +19,7 @@ import {
 } from 'react-native';
 import { colors, spacing, radius, font } from '@/constants/theme';
 import { storageUrl } from '@/constants/api';
+import Icon from '@/components/ui/Icon';
 
 type Props = {
   attachments?: string[] | null;
@@ -40,7 +41,7 @@ export default function AttachmentList({ attachments }: Props) {
             onPress={() => Linking.openURL(storageUrl(att))}
             activeOpacity={0.75}
           >
-            <Text style={s.icon}>{isPdf ? '📄' : '🖼️'}</Text>
+            <Icon name={isPdf ? 'file' : 'image'} size={22} />
             <Text style={s.name} numberOfLines={2}>{name}</Text>
           </TouchableOpacity>
         );

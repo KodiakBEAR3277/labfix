@@ -47,6 +47,7 @@ import { Link, router } from 'expo-router';
 import { colors, spacing, radius, font } from '@/constants/theme';
 import { apiUrl } from '@/constants/api';
 import { saveAuth, dashboardRouteForRole, AuthUser } from '@/utils/auth';
+import Icon from '@/components/ui/Icon';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -152,7 +153,7 @@ export default function LoginScreen() {
           {/* ── Brand area ── */}
           <View style={s.brand}>
             <View style={s.brandIconBox}>
-              <Text style={s.brandIconText}>🔧</Text>
+              <Icon name="wrench" size={26} color={colors.primary} />
             </View>
             <Text style={s.brandSub}>
               Sign <Text style={s.brandSubAccent}>in</Text> to continue
@@ -234,10 +235,12 @@ export default function LoginScreen() {
             {/* Social buttons — placeholder, no OAuth implemented yet */}
             <View style={s.socialRow}>
               <TouchableOpacity style={s.socialBtn} activeOpacity={0.7}>
-                <Text style={s.socialBtnText}>G  Google</Text>
+                <Icon name="google" size={18} color="#ffffff" />
+                <Text style={s.socialBtnText}>Google</Text>
               </TouchableOpacity>
               <TouchableOpacity style={s.socialBtn} activeOpacity={0.7}>
-                <Text style={s.socialBtnText}>f  Facebook</Text>
+                <Icon name="facebook" size={18} color="#ffffff" />
+                <Text style={s.socialBtnText}>Facebook</Text>
               </TouchableOpacity>
             </View>
 
@@ -316,9 +319,6 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.sm,
-  },
-  brandIconText: {
-    fontSize: 26,
   },
   brandSub: {
     fontSize: font.sm,
@@ -442,6 +442,9 @@ const s = StyleSheet.create({
   },
   socialBtn: {
     flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: spacing.sm,
     backgroundColor: 'rgba(255,255,255,0.05)', // frozen dark-card surface
     borderWidth: 1,
     borderColor: colors.border,

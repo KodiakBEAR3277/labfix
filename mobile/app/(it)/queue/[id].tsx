@@ -30,6 +30,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { colors, spacing, radius, font } from '@/constants/theme';
 import { loadAuth, AuthUser } from '@/utils/auth';
 import { apiUrl } from '@/constants/api';
+import Icon, { IconName } from '@/components/ui/Icon';
 import VoiceMessage from '@/components/ui/VoiceMessage';
 import AttachmentList from '@/components/ui/AttachmentList';
 
@@ -104,12 +105,12 @@ function equipmentStatusStyle(s: string): { bg: string; text: string; border: st
   }
 }
 
-function txIcon(action: string): string {
-  const map: Record<string, string> = {
-    created: '🎫', status_changed: '🔄', assigned: '👤',
-    priority_changed: '⚠️', updated: '✏️', deleted: '🗑️', restored: '♻️',
+function txIcon(action: string): IconName {
+  const map: Record<string, IconName> = {
+    created: 'ticket', status_changed: 'refresh', assigned: 'user',
+    priority_changed: 'alert', updated: 'edit', deleted: 'trash', restored: 'restore',
   };
-  return map[action] ?? '📌';
+  return map[action] ?? 'pin';
 }
 
 function txTitle(action: string): string {
@@ -295,10 +296,14 @@ export default function ITQueueShowScreen() {
       <SafeAreaView style={s.root}>
         <StatusBar barStyle="light-content" backgroundColor={colors.bgPrimary} />
         <View style={s.centered}>
-          <Text style={s.errorIcon}>⚠️</Text>
+          <Icon name="alert" size={36} color={colors.warning} />
           <Text style={s.errorText}>{error ?? 'Ticket not found.'}</Text>
-          <TouchableOpacity style={s.retryBtn} onPress={() => router.replace('/(it)/queue' as any)}>
-            <Text style={s.retryText}>← Go Back</Text>
+          <TouchableOpacity
+            style={[s.retryBtn, s.inlineRow]}
+            onPress={() => router.replace('/(it)/queue' as any)}
+          >
+            <Icon name="arrow-left" size={14} color="#ffffff" />
+            <Text style={s.retryText}>Go Back</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -318,8 +323,13 @@ export default function ITQueueShowScreen() {
 
       {/* ── Top Nav ── */}
       <View style={s.nav}>
-        <TouchableOpacity onPress={() => router.replace('/(it)/queue' as any)} activeOpacity={0.7}>
-          <Text style={s.navBack}>← Queue</Text>
+        <TouchableOpacity
+          style={s.inlineRow}
+          onPress={() => router.replace('/(it)/queue' as any)}
+          activeOpacity={0.7}
+        >
+          <Icon name="arrow-left" size={13} color={colors.primary} />
+          <Text style={s.navBack}>Queue</Text>
         </TouchableOpacity>
         <Text style={s.navTicketNum}>{ticket.ticket_number}</Text>
         <TouchableOpacity
@@ -483,10 +493,16 @@ export default function ITQueueShowScreen() {
                 {statusLabel(ticket.reporter?.role ?? '')}
               </Text>
               {ticket.reporter?.email && (
-                <Text style={s.personContact}>📧 {ticket.reporter.email}</Text>
+                <View style={s.inlineRow}>
+                  <Icon name="mail" size={11} color={colors.primary} />
+                  <Text style={s.personContact}>{ticket.reporter.email}</Text>
+                </View>
               )}
               {ticket.reporter?.phone && (
-                <Text style={s.personContact}>📞 {ticket.reporter.phone}</Text>
+                <View style={s.inlineRow}>
+                  <Icon name="phone" size={11} color={colors.primary} />
+                  <Text style={s.personContact}>{ticket.reporter.phone}</Text>
+                </View>
               )}
             </View>
           </View>
@@ -512,7 +528,10 @@ export default function ITQueueShowScreen() {
                   {statusLabel(ticket.assigned_to_user.role ?? '')}
                 </Text>
                 {ticket.assigned_to_user.email && (
-                  <Text style={s.personContact}>📧 {ticket.assigned_to_user.email}</Text>
+                  <View style={s.inlineRow}>
+                    <Icon name="mail" size={11} color={colors.primary} />
+                    <Text style={s.personContact}>{ticket.assigned_to_user.email}</Text>
+                  </View>
                 )}
               </View>
             </View>
@@ -520,7 +539,7 @@ export default function ITQueueShowScreen() {
         ) : (
           <SectionCard title="Assignment Status">
             <View style={s.unassignedWrap}>
-              <Text style={s.unassignedIcon}>⏳</Text>
+              <Icon name="hourglass" size={30} />
               <Text style={s.unassignedText}>Not yet assigned</Text>
               <TouchableOpacity
                 style={[s.primaryBtn, { marginTop: spacing.md }, assigning && { opacity: 0.6 }]}
@@ -566,8 +585,9 @@ export default function ITQueueShowScreen() {
                   </View>
                   <View style={s.tlContent}>
                     <View style={s.tlHeader}>
+                      <Icon name={txIcon(tx.action)} size={13} />
                       <Text style={s.tlTitle}>
-                        {txIcon(tx.action)} {txTitle(tx.action)}
+                        {txTitle(tx.action)}
                       </Text>
                       <Text style={s.tlTime}>{formatDate(tx.created_at)}</Text>
                     </View>
@@ -576,7 +596,7 @@ export default function ITQueueShowScreen() {
                       <View style={s.tlChange}>
                         {tx.old_value && <Text style={s.tlOld}>{tx.old_value}</Text>}
                         {tx.old_value && tx.new_value && (
-                          <Text style={s.tlArrow}> → </Text>
+                          <Icon name="arrow-right" size={11} color={colors.textMuted} />
                         )}
                         {tx.new_value && <Text style={s.tlNew}>{tx.new_value}</Text>}
                       </View>
@@ -596,7 +616,8 @@ export default function ITQueueShowScreen() {
                 </View>
                 <View style={s.tlContent}>
                   <View style={s.tlHeader}>
-                    <Text style={s.tlTitle}>🎫 Ticket Created</Text>
+                    <Icon name="ticket" size={13} />
+                    <Text style={s.tlTitle}>Ticket Created</Text>
                     <Text style={s.tlTime}>{formatDate(ticket.created_at)}</Text>
                   </View>
                   <Text style={s.tlText}>
@@ -619,6 +640,7 @@ export default function ITQueueShowScreen() {
 const s = StyleSheet.create({
   root:    { flex: 1, backgroundColor: colors.bgPrimary },
   scroll:  { paddingBottom: spacing.lg },
+  inlineRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   centered:{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.md, padding: spacing.lg },
 
   // Nav

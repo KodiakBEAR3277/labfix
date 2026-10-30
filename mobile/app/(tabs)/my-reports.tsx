@@ -36,6 +36,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
+import Icon from '@/components/ui/Icon';
 import { colors, spacing, radius, font } from '@/constants/theme';
 import { loadAuth } from '@/utils/auth';
 import { apiUrl } from '@/constants/api';
@@ -99,10 +100,6 @@ function priorityColor(priority: string): string {
     case 'medium': return colors.warning;
     default:       return colors.success;
   }
-}
-
-function priorityEmoji(priority: string): string {
-  return priority === 'high' ? '🔴' : priority === 'medium' ? '🟡' : '🟢';
 }
 
 function formatDate(iso: string): string {
@@ -270,7 +267,7 @@ export default function MyReportsScreen() {
 
       {/* ── Search ── */}
       <View style={s.searchBar}>
-        <Text style={s.searchIcon}>🔍</Text>
+        <Icon name="search" size={16} color={colors.textMuted} />
         <TextInput
           style={s.searchInput}
           value={search}
@@ -329,7 +326,7 @@ export default function MyReportsScreen() {
           }
           ListEmptyComponent={
             <View style={s.emptyState}>
-              <Text style={s.emptyIcon}>📋</Text>
+              <Icon name="clipboard" size={36} color={colors.textMuted} />
               <Text style={s.emptyTitle}>No reports found</Text>
               <Text style={s.emptySub}>
                 {search || statusFilter !== 'all'
@@ -367,7 +364,10 @@ export default function MyReportsScreen() {
                       onPress={() => handlePage(currentPage - 1)}
                       disabled={!pagination.prev_page_url || pageLoading}
                     >
-                      <Text style={s.pageBtnText}>← Prev</Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                        <Icon name="arrow-left" size={13} color={colors.textSecondary} />
+                        <Text style={s.pageBtnText}>Prev</Text>
+                      </View>
                     </TouchableOpacity>
                     <View style={s.pageCurrent}>
                       <Text style={s.pageCurrentText}>{currentPage}</Text>
@@ -377,7 +377,10 @@ export default function MyReportsScreen() {
                       onPress={() => handlePage(currentPage + 1)}
                       disabled={!pagination.next_page_url || pageLoading}
                     >
-                      <Text style={s.pageBtnText}>Next →</Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                        <Text style={s.pageBtnText}>Next</Text>
+                        <Icon name="arrow-right" size={13} color={colors.textSecondary} />
+                      </View>
                     </TouchableOpacity>
                   </View>
                   {pageLoading && (
@@ -392,7 +395,7 @@ export default function MyReportsScreen() {
 
               {/* Info note */}
               <View style={s.infoNote}>
-                <Text style={s.infoIcon}>ℹ️</Text>
+                <Icon name="info" size={16} color={colors.info} />
                 <Text style={s.infoText}>
                   You can edit or cancel tickets before they're assigned to a technician.
                   Once assigned, contact the technician to make changes.
@@ -444,10 +447,12 @@ function TicketCard({ ticket }: { ticket: Ticket }) {
           <Text style={s.metaText}>· {ticket.equipment.equipment_code}</Text>
         )}
         <View style={[s.priorityPill, { borderColor: priorityColor(ticket.priority) + '66' }]}>
-          <Text style={[s.priorityText, { color: priorityColor(ticket.priority) }]}>
-            {priorityEmoji(ticket.priority)}{' '}
-            {ticket.priority.charAt(0).toUpperCase() + ticket.priority.slice(1)}
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+            <Icon name="circle" size={10} color={priorityColor(ticket.priority)} />
+            <Text style={[s.priorityText, { color: priorityColor(ticket.priority) }]}>
+              {ticket.priority.charAt(0).toUpperCase() + ticket.priority.slice(1)}
+            </Text>
+          </View>
         </View>
         <Text style={[s.metaText, { marginLeft: 'auto' }]}>
           {formatDate(ticket.created_at)}
@@ -466,7 +471,10 @@ function TicketCard({ ticket }: { ticket: Ticket }) {
 
         {locked ? (
           <View style={[s.actionBtn, s.actionBtnLocked]}>
-            <Text style={s.actionBtnLockedText}>🔒 Locked</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <Icon name="lock" size={12} color={colors.textMuted} />
+              <Text style={s.actionBtnLockedText}>Locked</Text>
+            </View>
           </View>
         ) : (
           <>

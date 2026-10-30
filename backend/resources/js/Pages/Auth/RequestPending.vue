@@ -8,6 +8,7 @@
 
 import { Link } from '@inertiajs/vue3'
 import AuthLayout from '../../Layouts/AuthLayout.vue'
+import Icon from '../../Components/Icon.vue'
 </script>
 
 <template>
@@ -32,7 +33,7 @@ import AuthLayout from '../../Layouts/AuthLayout.vue'
 
     <div class="auth-right-section">
       <div class="auth-registration-container" style="text-align:center;">
-        <div style="font-size:3rem;margin-bottom:1rem;">📝</div>
+        <div style="font-size:3rem;margin-bottom:1rem;"><Icon name="edit" /></div>
         <h2 class="auth-form-title">Request submitted</h2>
         <p style="color:#9ca3af;line-height:1.6;margin-top:1rem;">
           Thanks for signing up your school. A LabFix administrator will review your

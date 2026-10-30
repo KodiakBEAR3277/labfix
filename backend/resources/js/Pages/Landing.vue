@@ -11,37 +11,38 @@
 import { computed } from 'vue'
 import { Link, usePage } from '@inertiajs/vue3'
 import LandingLayout from '../Layouts/LandingLayout.vue'
+import Icon from '../Components/Icon.vue'
 
 const user = computed(() => usePage().props.auth.user)
 
 const features = [
   {
-    icon: '🎫',
+    icon: 'ticket',
     title: 'Easy Ticket Submission',
     description: 'Submit lab equipment issues in minutes with our guided multi-step form. Attach photos and specify the exact equipment and location.'
   },
   {
-    icon: '⚡',
+    icon: 'bolt',
     title: 'Real-Time Tracking',
     description: 'Track your ticket status in real time from submission to resolution. Get notified at every step of the repair process.'
   },
   {
-    icon: '🔧',
+    icon: 'wrench',
     title: 'IT Support Queue',
     description: 'IT staff get a prioritized queue with smart assignment. No more lost emails — every issue is tracked and accountable.'
   },
   {
-    icon: '📚',
+    icon: 'book',
     title: 'Knowledge Base',
     description: 'Browse self-help articles before submitting a ticket. Common fixes are documented so you can resolve minor issues yourself.'
   },
   {
-    icon: '🖥️',
+    icon: 'desktop',
     title: 'Lab Status Monitor',
     description: "Check which labs are operational before heading in. See equipment availability and any known ongoing issues at a glance."
   },
   {
-    icon: '📊',
+    icon: 'chart',
     title: 'Admin Oversight',
     description: 'Admins get full visibility into ticket volume, IT performance, and equipment health across all labs with detailed reports.'
   }
@@ -110,7 +111,7 @@ const mockTickets = [
             :key="feature.title"
             class="feature-card"
           >
-            <div class="feature-icon">{{ feature.icon }}</div>
+            <div class="feature-icon"><Icon :name="feature.icon" /></div>
             <h3>{{ feature.title }}</h3>
             <p>{{ feature.description }}</p>
           </div>

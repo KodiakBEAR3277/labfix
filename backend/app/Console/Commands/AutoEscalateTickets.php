@@ -28,6 +28,10 @@ class AutoEscalateTickets extends Command
         $totalEscalated = 0;
 
         foreach (Institution::where('is_active', true)->get() as $institution) {
+            if (! $institution->hasAutoRules()) {
+                continue;
+            }
+
             app()->instance('currentInstitutionId', $institution->id);
 
             $hours = Setting::get('auto_escalate_after_hours', 24);
