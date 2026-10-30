@@ -168,6 +168,7 @@
     display: flex;
     align-items: center;
     gap: var(--spacing-md);
+    min-height: 88px;
 }
 
 .category-option:hover {
@@ -180,18 +181,37 @@
     border-color: var(--color-primary);
 }
 
-.category-icon {
+/* Fixed, centred icon box so the icon sits consistently no matter which
+   label/description it pairs with. */
+.category-option .category-icon {
+    flex: 0 0 auto;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-size: var(--font-size-3xl);
+    color: var(--color-primary);
 }
 
-.category-info h3 {
+.category-option .category-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.category-option .category-info h3 {
     color: var(--color-text-primary);
     margin-bottom: var(--spacing-xs);
 }
 
-.category-info p {
+/* Reserve two lines so every card's text block is the same height — otherwise
+   the shorter descriptions leave the centred content sitting at a different
+   offset than their neighbours. */
+.category-option .category-info p {
     color: var(--color-text-muted);
     font-size: var(--font-size-sm);
+    line-height: 1.4;
+    min-height: 2.8em;
 }
 
 /* ============================================

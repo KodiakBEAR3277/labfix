@@ -7,7 +7,7 @@ use App\Models\Setting;
 use App\Support\ProfileRules;
 
 // Public API routes
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:auth');
 
 Route::get('/contact-info', function () {
     return response()->json([
@@ -220,7 +220,7 @@ Route::middleware(['auth:sanctum', 'institution.active'])->group(function () {
             'message' => 'Ticket created successfully',
             'ticket'  => $ticket->load(['equipment.lab', 'voiceNotes']),
         ], 201);
-    })->middleware('maintenance.check');
+    })->middleware(['maintenance.check', 'throttle:tickets']);
 
     Route::put('/tickets/{id}', function (Request $request, $id) {
         $report = \App\Models\Report::where('user_id', auth()->id())->findOrFail($id);

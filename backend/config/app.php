@@ -123,4 +123,17 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Cron Endpoint Secret
+    |--------------------------------------------------------------------------
+    |
+    | Shared token required in the X-Cron-Token header by the /cron/* endpoints
+    | (see routes/system.php). The external scheduler (cron-job.org) sends it so
+    | only we can trigger the auto-escalate / auto-close commands over HTTP.
+    |
+    */
+
+    'cron_secret' => env('CRON_SECRET'),
+
 ];

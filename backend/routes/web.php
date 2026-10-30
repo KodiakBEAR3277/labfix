@@ -34,9 +34,9 @@ Route::get('/pricing', fn() => Inertia::render('Pricing'))->name('pricing');
 // Auth routes
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+    Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:auth')->name('login.post');
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-    Route::post('/register', [AuthController::class, 'register'])->name('register.post');
+    Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:auth')->name('register.post');
     Route::get('/register/pending', [AuthController::class, 'showRequestPending'])->name('register.pending');
 });
 
@@ -74,7 +74,7 @@ Route::middleware('auth')->group(function () {
     // User routes
     Route::prefix('user')->name('user.')->group(function () {
         Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
-        Route::post('/reports', [ReportController::class, 'store'])->middleware('maintenance.check')->name('reports.store');
+        Route::post('/reports', [ReportController::class, 'store'])->middleware(['maintenance.check', 'throttle:tickets'])->name('reports.store');
         Route::resource('reports', ReportController::class)->except(['store']);
         Route::get('/lab-status', [LabStatusController::class, 'index'])->name('lab-status');
         Route::get('/knowledge-base', [KnowledgeBaseController::class, 'index'])->name('knowledge-base');

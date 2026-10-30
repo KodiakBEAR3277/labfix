@@ -14,13 +14,20 @@ return Application::configure(basePath: dirname(__DIR__))
         api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
+        then: function () {
+            require __DIR__.'/../routes/system.php';
+        },
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Render terminates TLS at its proxy; trust it so generated URLs are https.
+        $middleware->trustProxies(at: '*');
+
         $middleware->alias([
             'role' => CheckRole::class,
             'maintenance.check' => CheckMaintenanceMode::class,
             'superadmin' => EnsureIsSuperAdmin::class,
             'institution.active' => EnsureInstitutionIsActive::class,
+            'cron.token' => \App\Http\Middleware\VerifyCronToken::class,
         ]);
         $middleware->web(append: [
             EnsureInstitutionIsActive::class,

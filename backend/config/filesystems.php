@@ -33,12 +33,30 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
-            'serve' => true,
+            // Laravel would auto-register a signed-URL /storage/{path} route for
+            // this (private) disk. We serve uploads from the `public` disk via our
+            // own route instead (routes/system.php), so disable it to avoid a clash.
+            'serve' => false,
             'throw' => false,
             'report' => false,
         ],
 
-        'public' => [
+        // Uploads (voice notes, attachments) land here. Local in development;
+        // set FILESYSTEM_PUBLIC_DRIVER=s3 to point it at an S3-compatible store
+        // (e.g. Cloudflare R2) in production. The `/storage/{path}` route streams
+        // from this disk, so no object ACL is needed — hence the s3 branch has no
+        // `visibility` (R2 rejects public-read ACLs).
+        'public' => env('FILESYSTEM_PUBLIC_DRIVER', 'local') === 's3' ? [
+            'driver' => 's3',
+            'key' => env('AWS_ACCESS_KEY_ID'),
+            'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            'region' => env('AWS_DEFAULT_REGION', 'auto'),
+            'bucket' => env('AWS_BUCKET'),
+            'endpoint' => env('AWS_ENDPOINT'),
+            'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', true),
+            'throw' => false,
+            'report' => false,
+        ] : [
             'driver' => 'local',
             'root' => storage_path('app/public'),
             'url' => env('APP_URL').'/storage',
