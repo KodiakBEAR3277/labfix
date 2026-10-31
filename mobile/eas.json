@@ -10,7 +10,10 @@
       "distribution": "internal"
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://labfix.onrender.com"
+      }
     },
     "production": {
       "autoIncrement": true

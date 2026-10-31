@@ -6,4 +6,5 @@
 - Prefers plain characters (e.g. a literal `'` or `"`) over HTML character entities (`&apos;`, `&quot;`); rejects entity-escaping edits as unnecessary churn. Confidence: 0.55
 - Wants a feature's design/UI carried with parity across every client — mobile user pages, mobile + web IT, and admin — rather than implemented on a single platform. Confidence: 0.5
 - Prefers real vector/SVG icons over basic symbols and emojis for UI icons — inline SVG (or an existing icon set like `@expo/vector-icons`) rather than unicode glyphs (e.g. `▶`, `❚❚`). Confidence: 0.55
+- Handles git operations (commit/push to GitHub) himself rather than having the agent do them; the agent should prepare the change and let him push. Confidence: 0.5
 - Wants demo/seeded accounts to use predictable, human-guessable credentials: email composed from the institution identifier plus the role (e.g. `standarduser@gmail.com`, `snsuadmin@gmail.com`) and the same trivial password (`password`) for every seeded account. Confidence: 0.55
