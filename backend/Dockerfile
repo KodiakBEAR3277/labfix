@@ -10,7 +10,7 @@ RUN npm ci && npm run build
 FROM php:8.4-fpm AS app
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        nginx supervisor unzip git ca-certificates \
+        nginx supervisor unzip git ca-certificates gettext-base \
         libzip-dev libpng-dev libonig-dev libxml2-dev \
     && docker-php-ext-install pdo_mysql mbstring bcmath gd zip exif \
     && apt-get clean && rm -rf /var/lib/apt/lists/*

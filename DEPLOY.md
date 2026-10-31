@@ -30,10 +30,14 @@ Rationale for the odd bits:
 
 ---
 
-## 1. Database — TiDB Cloud Serverless
-1. Sign up at TiDB Cloud (email or GitHub — no card for the Serverless tier).
-2. **Create Cluster → Serverless**, pick the region nearest you.
-3. Open the cluster → **Connect** and note:
+## 1. Database — TiDB Cloud Starter (formerly "Serverless")
+> TiDB renamed its tiers. What older docs call **Serverless** is today's **Starter**
+> ("POWERED BY TiDB X"). Essential / Premium / Dedicated are the paid tiers — ignore them.
+1. Sign up at TiDB Cloud (email or GitHub — no card for the free tier).
+2. **Create Resource → Starter**, set **Compatibility Mode = MySQL Compatible**, give it a
+   name (e.g. `labfix`), pick the region nearest you. Confirm the summary shows
+   `$0 / month`, then create.
+3. Open the instance → **Connect** and note:
    - **Host** (e.g. `gateway01.<region>.prod.aws.tidbcloud.com`)
    - **Port**: `4000`
    - **User** + password (create a SQL user if needed)
