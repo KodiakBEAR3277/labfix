@@ -11,7 +11,10 @@ class TicketTransaction extends Model
 {
     use HasFactory, BelongsToInstitution;
 
-    public $timestamps = false; // Only created_at, no updated_at
+    // Timestamps ON, but only created_at: with UPDATED_AT = null Eloquent
+    // writes created_at and skips updated_at. (Setting $timestamps = false
+    // instead would disable both and ignore the constants below.)
+    public $timestamps = true;
 
     const CREATED_AT = 'created_at';
     const UPDATED_AT = null;
