@@ -23,7 +23,7 @@ const form = useForm({
   _method:     'PUT',
   status:      props.ticket.status,
   priority:    props.ticket.priority,
-  assigned_to: props.ticket.assigned_to ?? '',
+  assigned_to: props.ticket.assigned_to?.id ?? '',
 })
 
 function submit() {
@@ -35,7 +35,7 @@ function quickUpdate(status) {
     _method:     'PUT',
     status:      status,
     priority:    props.ticket.priority,
-    assigned_to: props.ticket.assigned_to ?? '',
+    assigned_to: props.ticket.assigned_to?.id ?? '',
   }).post(`/it/tickets/${props.ticket.id}`)
 }
 
@@ -173,7 +173,7 @@ function diffForHumans(d) {
                 Mark Resolved
               </button>
               <button
-                v-if="!ticket.assigned_to || ticket.assigned_to !== authUser.id"
+                v-if="ticket.assigned_to?.id !== authUser.id"
                 type="button"
                 class="btn btn-secondary"
                 style="width:100%;"

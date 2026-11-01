@@ -126,6 +126,7 @@ function staffFullName(staff) {
         </div>
         <div class="header-actions">
           <Link href="/admin/transactions" class="btn btn-secondary"><Icon name="restore" /> Ticket History</Link>
+          <Link href="/admin/tickets/trashed" class="btn btn-secondary"><Icon name="trash" /> Trashed</Link>
           <button type="button" class="btn btn-primary" @click="goToBulkActions"><Icon name="bolt" /> Bulk Actions</button>
         </div>
       </div>

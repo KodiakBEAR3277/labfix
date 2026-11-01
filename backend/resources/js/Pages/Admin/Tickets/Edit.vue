@@ -8,7 +8,7 @@
 
 import AppLayout from '../../../Layouts/AppLayout.vue'
 import NavAdmin from '../../../Components/Nav/NavAdmin.vue'
-import { Link, useForm, router } from '@inertiajs/vue3'
+import { Link, useForm, router, usePage } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import Icon from '../../../Components/Icon.vue'
 
@@ -17,12 +17,14 @@ const props = defineProps({
   itStaff: Array,
 })
 
+const authUser = computed(() => usePage().props.auth.user)
+
 // ── Main edit form ─────────────────────────────────────────────────────────────
 const form = useForm({
   _method:     'PUT',
   status:      props.ticket.status,
   priority:    props.ticket.priority,
-  assigned_to: props.ticket.assigned_to ?? '',
+  assigned_to: props.ticket.assigned_to?.id ?? '',
 })
 
 function submit() {
@@ -36,12 +38,21 @@ function quickUpdate(status) {
     _method:     'PUT',
     status:      status,
     priority:    props.ticket.priority,
-    assigned_to: props.ticket.assigned_to ?? '',
+    assigned_to: props.ticket.assigned_to?.id ?? '',
+  }).post(`/admin/tickets/${props.ticket.id}`)
+}
+
+function assignToMe() {
+  useForm({
+    _method:     'PUT',
+    status:      'assigned',
+    priority:    props.ticket.priority,
+    assigned_to: authUser.value?.id ?? '',
   }).post(`/admin/tickets/${props.ticket.id}`)
 }
 
 function deleteTicket() {
-  if (confirm('Are you sure you want to delete this ticket? This action cannot be undone!')) {
+  if (confirm('Move this ticket to Trash? You can restore it later from Trashed Tickets.')) {
     router.delete(`/admin/tickets/${props.ticket.id}`)
   }
 }
@@ -163,7 +174,7 @@ const equipmentStatusClass = (s) =>
             <h2 class="card-title">Quick Actions</h2>
             <p style="color:#9ca3af;margin-bottom:1rem;">Apply common status changes with one click</p>
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;">
-              <button v-if="ticket.status !== 'assigned' && !ticket.assigned_to" type="button" class="btn btn-secondary" style="width:100%;" @click="quickUpdate('assigned')">
+              <button v-if="ticket.status !== 'assigned' && !ticket.assigned_to" type="button" class="btn btn-secondary" style="width:100%;" @click="assignToMe">
                 Assign to Me
               </button>
               <button v-if="ticket.status !== 'in-progress'" type="button" class="btn btn-secondary" style="width:100%;" @click="quickUpdate('in-progress')">
@@ -181,9 +192,9 @@ const equipmentStatusClass = (s) =>
           <!-- Danger zone -->
           <div class="card" style="margin-top:1.5rem;border-color:rgba(239,68,68,0.3);">
             <h2 class="card-title" style="color:#ef4444;">Danger Zone</h2>
-            <p style="color:#9ca3af;margin-bottom:1rem;">Irreversible actions — proceed with caution</p>
+            <p style="color:#9ca3af;margin-bottom:1rem;">Moves the ticket to Trash — admins can restore it later</p>
             <button type="button" class="btn btn-danger" @click="deleteTicket">
-              Delete This Ticket Permanently
+              Move Ticket to Trash
             </button>
           </div>
 

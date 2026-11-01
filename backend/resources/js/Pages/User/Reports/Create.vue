@@ -58,7 +58,7 @@ function selectLab(lab) {
   equipment.value         = []
 
   equipmentLoading.value = true
-  fetch(`/api/labs/${lab.id}/equipment`)
+  fetch(`/user/labs/${lab.id}/equipment`)
     .then(r => r.json())
     .then(data => { equipment.value = data })
     .catch(() => { equipment.value = [] })

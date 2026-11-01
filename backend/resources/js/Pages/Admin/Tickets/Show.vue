@@ -20,7 +20,7 @@ const resolveForm = useForm({
   _method:     'PUT',
   status:      'resolved',
   priority:    props.ticket.priority,
-  assigned_to: props.ticket.assigned_to ?? '',
+  assigned_to: props.ticket.assigned_to?.id ?? '',
 })
 
 function markResolved() {
@@ -29,7 +29,7 @@ function markResolved() {
 
 // ── Delete ────────────────────────────────────────────────────────────────────
 function deleteTicket() {
-  if (confirm('Are you sure you want to delete this ticket? This action cannot be undone!')) {
+  if (confirm('Move this ticket to Trash? You can restore it later from Trashed Tickets.')) {
     router.delete(`/admin/tickets/${props.ticket.id}`)
   }
 }
@@ -276,7 +276,7 @@ function diffForHumans(d) {
                 {{ resolveForm.processing ? 'Updating…' : 'Mark as Resolved' }}
               </button>
               <button type="button" class="btn btn-danger" @click="deleteTicket">
-                Delete Ticket
+                Move to Trash
               </button>
             </div>
           </div>

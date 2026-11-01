@@ -95,12 +95,12 @@ Route::middleware('auth')->group(function () {
         
         // Tickets - IT can view and self-assign
         Route::get('/tickets', [TicketController::class, 'index'])->name('tickets.index');
+        Route::get('/tickets/bulk', [TicketController::class, 'bulk'])->name('tickets.bulk')->middleware('role:admin');
         Route::get('/tickets/{id}', [TicketController::class, 'show'])->name('tickets.show');
         Route::get('/tickets/{id}/edit', [TicketController::class, 'edit'])->name('tickets.edit');
         Route::put('/tickets/{id}', [TicketController::class, 'update'])->name('tickets.update');
         Route::post('/tickets/{id}/assign-self', [TicketController::class, 'assignToSelf'])->name('tickets.assign-self');
         // Bulk operations - ADMIN ONLY
-        Route::get('/tickets/bulk', [TicketController::class, 'bulk'])->name('tickets.bulk')->middleware('role:admin');
         Route::post('/tickets/bulk-update', [TicketController::class, 'bulkUpdate'])->name('tickets.bulk-update')->middleware('role:admin');
     });
 
@@ -146,13 +146,13 @@ Route::prefix('profile')->name('profile.')->middleware('auth')->group(function (
 });
 
 // API route for loading equipment by lab
-Route::get('/api/labs/{lab}/equipment', function ($labId) {
+Route::get('/user/labs/{lab}/equipment', function ($labId) {
     $equipment = Equipment::where('lab_id', $labId)
         ->orderBy('equipment_code')
-        ->get(['id', 'equipment_code', 'status']);
-    
+        ->get(['id', 'equipment_code', 'status', 'type']);
+
     return response()->json($equipment);
-});
+})->middleware('auth');
 
 // API route for institution search during registration
 Route::get('/api/institutions/search', function () {

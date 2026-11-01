@@ -129,8 +129,6 @@ class TicketController extends Controller
             'status'      => $validated['status'],
             'priority'    => $validated['priority'],
             'assigned_to' => $validated['assigned_to'],
-            'assigned_at' => $validated['assigned_to'] && !$ticket->assigned_at ? now() : $ticket->assigned_at,
-            'resolved_at' => ($statusChanged && $validated['status'] === 'resolved') ? now() : $ticket->resolved_at,
         ]);
 
         if ($statusChanged)   $this->logStatusChange($ticket, $oldStatus, $validated['status']);
@@ -176,17 +174,12 @@ class TicketController extends Controller
                 $tickets->update([
                     'assigned_to' => $validated['assigned_to'],
                     'status'      => 'assigned',
-                    'assigned_at' => now(),
                 ]);
                 $message = 'Tickets assigned successfully!';
                 break;
 
             case 'status':
-                $updateData = ['status' => $validated['status']];
-                if ($validated['status'] === 'resolved') {
-                    $updateData['resolved_at'] = now();
-                }
-                $tickets->update($updateData);
+                $tickets->update(['status' => $validated['status']]);
                 $message = 'Ticket status updated successfully!';
                 break;
 
@@ -196,10 +189,7 @@ class TicketController extends Controller
                 break;
 
             case 'close':
-                $tickets->update([
-                    'status'    => 'closed',
-                    'closed_at' => now(),
-                ]);
+                $tickets->update(['status' => 'closed']);
                 $message = 'Tickets closed successfully!';
                 break;
 

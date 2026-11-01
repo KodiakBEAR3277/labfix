@@ -217,6 +217,28 @@ export default function MyReportsScreen() {
     setRefreshing(false);
   }, [token, search, statusFilter, fetchTickets]);
 
+  // Cancel a ticket straight from the list, then refresh in place.
+  const cancelTicket = useCallback(async (ticket: Ticket) => {
+    if (!token) return;
+    try {
+      const res = await fetch(apiUrl(`tickets/${ticket.id}`), {
+        method: 'DELETE',
+        headers: {
+          'Accept':        'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (res.ok) {
+        await fetchTickets(token, { search, status: statusFilter, page: currentPage });
+      } else {
+        const data = await res.json().catch(() => null);
+        Alert.alert('Error', data?.message ?? 'Could not cancel ticket.');
+      }
+    } catch {
+      Alert.alert('Error', 'Could not reach the server.');
+    }
+  }, [token, search, statusFilter, currentPage, fetchTickets]);
+
   // ── Derived stats (from current full set) ─────────────────────────────────
   // We show them from pagination totals when available
   const total    = pagination?.total ?? tickets.length;
@@ -405,7 +427,7 @@ export default function MyReportsScreen() {
               <View style={{ height: spacing.xl }} />
             </>
           }
-          renderItem={({ item }) => <TicketCard ticket={item} />}
+          renderItem={({ item }) => <TicketCard ticket={item} onCancel={cancelTicket} />}
         />
       )}
     </SafeAreaView>
@@ -414,7 +436,7 @@ export default function MyReportsScreen() {
 
 // ─── Ticket Card ──────────────────────────────────────────────────────────────
 
-function TicketCard({ ticket }: { ticket: Ticket }) {
+function TicketCard({ ticket, onCancel }: { ticket: Ticket; onCancel: (t: Ticket) => void }) {
   const sc      = statusStyle(ticket.status);
   const locked  = !!ticket.assigned_to;
   const isOpen  = ['new', 'assigned', 'in-progress'].includes(ticket.status);
@@ -499,10 +521,7 @@ function TicketCard({ ticket }: { ticket: Ticket }) {
                       {
                         text: 'Cancel Ticket',
                         style: 'destructive',
-                        onPress: () => {
-                          // Navigate to detail which handles the delete
-                          router.push(`/(tabs)/my-reports/${ticket.id}` as any);
-                        },
+                        onPress: () => onCancel(ticket),
                       },
                     ]
                   )

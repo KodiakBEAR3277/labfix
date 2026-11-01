@@ -51,6 +51,7 @@ type Stats = {
   in_progress:   number;
   high_priority: number;
   unassigned:    number;
+  my_active:     number;
 };
 
 type QueueResponse = {
@@ -616,7 +617,7 @@ export default function ITQueueScreen() {
                 activeOpacity={0.8}
               >
                 <Text style={s.summaryLabel}>My Active Tickets</Text>
-                <Text style={s.summaryValue}>{stats?.assigned ?? 0}</Text>
+                <Text style={s.summaryValue}>{stats?.my_active ?? 0}</Text>
                 <View style={s.summaryLinkRow}>
                   <Text style={s.summaryLink}>View My Assignments</Text>
                   <Icon name="arrow-right" size={11} color={colors.primary} />

@@ -463,6 +463,8 @@ Route::middleware(['auth:sanctum', 'institution.active'])->group(function () {
                 'assigned'      => \App\Models\Report::where('status', 'assigned')->count(),
                 'in_progress'   => \App\Models\Report::where('status', 'in-progress')->count(),
                 'high_priority' => \App\Models\Report::where('priority', 'high')->open()->count(),
+                'unassigned'    => \App\Models\Report::whereNull('assigned_to')->open()->count(),
+                'my_active'     => \App\Models\Report::where('assigned_to', auth()->id())->open()->count(),
             ];
 
             $itStaff = \App\Models\User::whereIn('role', ['it-support', 'admin'])->get(['id', 'first_name', 'last_name', 'role']);

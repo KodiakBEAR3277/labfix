@@ -15,8 +15,8 @@
  *   6. Quick Information   — status, priority, age
  *   7. Activity Timeline   — transactions list
  *
- * Cancel calls DELETE /api/tickets/{id} (not yet in api.php — shown as
- * a placeholder Alert that navigates back; add the endpoint later).
+ * Cancel calls DELETE /api/tickets/{id} (defined in routes/api.php) and
+ * returns to the list on success.
  */
 
 import React, { useEffect, useState, useCallback } from 'react';

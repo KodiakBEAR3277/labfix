@@ -21,7 +21,7 @@ const resolveForm = useForm({
   _method:     'PUT',
   status:      'resolved',
   priority:    props.ticket.priority,
-  assigned_to: props.ticket.assigned_to ?? '',
+  assigned_to: props.ticket.assigned_to?.id ?? '',
 })
 
 function markResolved() {
