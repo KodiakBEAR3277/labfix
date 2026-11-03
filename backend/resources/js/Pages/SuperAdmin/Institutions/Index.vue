@@ -9,14 +9,12 @@
 // not built yet.
 
 import AppLayout from '../../../Layouts/AppLayout.vue'
-import { Link, router, usePage } from '@inertiajs/vue3'
-import { computed } from 'vue'
+import NavSuperAdmin from '../../../Components/Nav/NavSuperAdmin.vue'
+import { router } from '@inertiajs/vue3'
 
 defineProps({
   institutions: Array,
 })
-
-const user = computed(() => usePage().props.auth.user)
 
 function toggleStatus(institution) {
   router.post(`/superadmin/institutions/${institution.id}/toggle-status`)
@@ -26,28 +24,11 @@ function changePlan(institution, plan) {
   if (plan === institution.plan) return
   router.post(`/superadmin/institutions/${institution.id}/plan`, { plan }, { preserveScroll: true })
 }
-
-function logout() {
-  router.post('/logout')
-}
 </script>
 
 <template>
   <AppLayout>
-    <template #nav>
-      <nav style="display:flex;justify-content:space-between;align-items:center;padding:1rem 2rem;">
-        <span class="logo">
-          LabFix<span style="font-size:0.7rem;color:#9ca3af;font-weight:400;margin-left:0.5rem;">· Platform Oversight</span>
-        </span>
-        <div style="display:flex;align-items:center;gap:1.5rem;">
-          <Link href="/superadmin/institutions" style="color:#2dd4bf;text-decoration:none;font-size:0.9rem;font-weight:600;">Institutions</Link>
-          <Link href="/superadmin/requests" style="color:#9ca3af;text-decoration:none;font-size:0.9rem;">Requests</Link>
-          <Link href="/superadmin/settings" style="color:#9ca3af;text-decoration:none;font-size:0.9rem;">Settings</Link>
-          <span style="color:#9ca3af;font-size:0.9rem;">{{ user?.first_name }} {{ user?.last_name }}</span>
-          <button type="button" class="btn btn-secondary" @click="logout">Sign Out</button>
-        </div>
-      </nav>
-    </template>
+    <template #nav><NavSuperAdmin /></template>
 
     <div class="container">
       <div class="page-header">

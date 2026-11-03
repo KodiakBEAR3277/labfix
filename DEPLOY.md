@@ -73,6 +73,7 @@ Values to keep: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_BUCKET`, `AWS
    | `APP_DEBUG` | `false` |
    | `APP_KEY` | output of `php artisan key:generate --show` (run locally) |
    | `APP_URL` | `https://<your-service>.onrender.com` |
+   | `SUPERADMIN_PASSWORD` | (optional) password given to the seeded superadmin. If unset, seeding prints a random one — grab it from the seed output. |
    | `LOG_CHANNEL` | `stderr` |
    | `QUEUE_CONNECTION` | `sync` |
    | `SESSION_DRIVER` | `database` |
@@ -117,6 +118,12 @@ php artisan db:seed --force
 ```
 This seeds the demo institutions/users/equipment (see `database/seeders`). Run it once;
 it is **not** run automatically (so redeploys don't re-seed).
+
+> **Superadmin password:** the seeded `superadmin@gmail.com` account does **not** use a
+> fixed default. If `SUPERADMIN_PASSWORD` is set it uses that; otherwise the seeder
+> prints a random password once — copy it from the seed output. Log in and change it
+> any time from **Account** (top-right) in the superadmin pages. The demo *institution*
+> accounts (`*admin@`, `*it@`, `*staff@`, `*user@`) still use `password`.
 
 ## 6. Mobile app
 Point it at the deployed URL and rebuild — no code change needed:

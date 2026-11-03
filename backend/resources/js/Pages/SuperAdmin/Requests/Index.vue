@@ -8,15 +8,14 @@
 // AuthController::register() never creates one directly anymore.
 
 import AppLayout from '../../../Layouts/AppLayout.vue'
-import { Link, useForm, router, usePage } from '@inertiajs/vue3'
-import { computed, ref } from 'vue'
+import NavSuperAdmin from '../../../Components/Nav/NavSuperAdmin.vue'
+import { useForm, router } from '@inertiajs/vue3'
+import { ref } from 'vue'
 import Icon from '../../../Components/Icon.vue'
 
 const props = defineProps({
   requests: Array,
 })
-
-const user = computed(() => usePage().props.auth.user)
 
 function approve(id) {
   if (confirm('Approve this institution? This creates their admin account immediately.')) {
@@ -44,10 +43,6 @@ function submitReject() {
   })
 }
 
-function logout() {
-  router.post('/logout')
-}
-
 function planLabel(plan) {
   if (!plan) return '—'
   return plan.charAt(0).toUpperCase() + plan.slice(1)
@@ -60,20 +55,7 @@ function formatDate(d) {
 
 <template>
   <AppLayout>
-    <template #nav>
-      <nav style="display:flex;justify-content:space-between;align-items:center;padding:1rem 2rem;">
-        <span class="logo">
-          LabFix<span style="font-size:0.7rem;color:#9ca3af;font-weight:400;margin-left:0.5rem;">· Platform Oversight</span>
-        </span>
-        <div style="display:flex;align-items:center;gap:1.5rem;">
-          <Link href="/superadmin/institutions" style="color:#9ca3af;text-decoration:none;font-size:0.9rem;">Institutions</Link>
-          <Link href="/superadmin/requests" style="color:#2dd4bf;text-decoration:none;font-size:0.9rem;font-weight:600;">Requests</Link>
-          <Link href="/superadmin/settings" style="color:#9ca3af;text-decoration:none;font-size:0.9rem;">Settings</Link>
-          <span style="color:#9ca3af;font-size:0.9rem;">{{ user?.first_name }} {{ user?.last_name }}</span>
-          <button type="button" class="btn btn-secondary" @click="logout">Sign Out</button>
-        </div>
-      </nav>
-    </template>
+    <template #nav><NavSuperAdmin /></template>
 
     <div class="container">
       <div class="page-header">

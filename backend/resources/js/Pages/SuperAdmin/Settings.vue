@@ -8,14 +8,12 @@
 // and has nothing to do with the platform itself.
 
 import AppLayout from '../../Layouts/AppLayout.vue'
-import { Link, useForm, router, usePage } from '@inertiajs/vue3'
-import { computed } from 'vue'
+import NavSuperAdmin from '../../Components/Nav/NavSuperAdmin.vue'
+import { useForm } from '@inertiajs/vue3'
 
 const props = defineProps({
   settings: Object,
 })
-
-const user = computed(() => usePage().props.auth.user)
 
 const form = useForm({
   platform_name:          props.settings.platform_name          ?? '',
@@ -26,28 +24,11 @@ const form = useForm({
 function submit() {
   form.post('/superadmin/settings/update')
 }
-
-function logout() {
-  router.post('/logout')
-}
 </script>
 
 <template>
   <AppLayout>
-    <template #nav>
-      <nav style="display:flex;justify-content:space-between;align-items:center;padding:1rem 2rem;">
-        <span class="logo">
-          LabFix<span style="font-size:0.7rem;color:#9ca3af;font-weight:400;margin-left:0.5rem;">· Platform Oversight</span>
-        </span>
-        <div style="display:flex;align-items:center;gap:1.5rem;">
-          <Link href="/superadmin/institutions" style="color:#9ca3af;text-decoration:none;font-size:0.9rem;">Institutions</Link>
-          <Link href="/superadmin/requests" style="color:#9ca3af;text-decoration:none;font-size:0.9rem;">Requests</Link>
-          <Link href="/superadmin/settings" style="color:#2dd4bf;text-decoration:none;font-size:0.9rem;font-weight:600;">Settings</Link>
-          <span style="color:#9ca3af;font-size:0.9rem;">{{ user?.first_name }} {{ user?.last_name }}</span>
-          <button type="button" class="btn btn-secondary" @click="logout">Sign Out</button>
-        </div>
-      </nav>
-    </template>
+    <template #nav><NavSuperAdmin /></template>
 
     <div class="container">
       <div class="page-header">

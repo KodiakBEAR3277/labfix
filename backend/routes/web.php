@@ -24,6 +24,7 @@ use App\Http\Controllers\User\KnowledgeBaseController;
 use App\Http\Controllers\User\LabStatusController;
 use App\Models\Institution;
 use App\Http\Controllers\SuperAdmin\InstitutionController as SuperAdminInstitutionController;
+use App\Http\Controllers\SuperAdmin\UserController as SuperAdminUserController;
 
 
 // Public routes
@@ -69,6 +70,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/requests', [\App\Http\Controllers\SuperAdmin\RequestController::class, 'index'])->name('requests.index');
         Route::post('/requests/{id}/approve', [\App\Http\Controllers\SuperAdmin\RequestController::class, 'approve'])->name('requests.approve');
         Route::post('/requests/{id}/reject', [\App\Http\Controllers\SuperAdmin\RequestController::class, 'reject'])->name('requests.reject');
+
+        // Platform-wide user oversight (list + edit, including the superadmin's
+        // own account).
+        Route::get('/users', [SuperAdminUserController::class, 'index'])->name('users.index');
+        Route::get('/users/{user}/edit', [SuperAdminUserController::class, 'edit'])->name('users.edit');
+        Route::put('/users/{user}', [SuperAdminUserController::class, 'update'])->name('users.update');
     });
 
     // User routes

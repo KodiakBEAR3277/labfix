@@ -6,6 +6,7 @@ use App\Models\Institution;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class InstitutionSeeder extends Seeder
 {
@@ -56,14 +57,25 @@ class InstitutionSeeder extends Seeder
 
         // Platform-level superadmin — not tied to any institution. The
         // tickets:auto-close command and the superadmin pages both expect one.
+        //
+        // This account is platform-wide, so it must not ship with a known
+        // default: use SUPERADMIN_PASSWORD when set, otherwise generate a
+        // random password and print it once so the operator can capture it.
+        $superadminPassword = config('labfix.superadmin_password') ?: Str::password(20);
+
         User::create([
             'institution_id' => null,
             'first_name'     => 'Platform',
             'last_name'      => 'Superadmin',
             'email'          => 'superadmin@gmail.com',
             'role'           => 'superadmin',
-            'password'       => Hash::make('password'),
+            'password'       => Hash::make($superadminPassword),
         ]);
+
+        if (! config('labfix.superadmin_password')) {
+            $this->command->warn("Generated superadmin password: {$superadminPassword}");
+            $this->command->warn('Save it now — it is not shown again. Set SUPERADMIN_PASSWORD to control it.');
+        }
 
         $this->command->info('Institutions and platform superadmin created.');
     }

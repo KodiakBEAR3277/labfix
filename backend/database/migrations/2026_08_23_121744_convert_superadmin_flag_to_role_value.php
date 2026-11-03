@@ -11,7 +11,7 @@ return new class extends Migration
     {
         // Widen the enum first, so 'superadmin' is a valid value to move
         // existing flagged accounts into.
-        DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('student', 'staff', 'it-support', 'admin', 'superadmin') NOT NULL DEFAULT 'student'");
+        $this->widenRoleColumn(['student', 'staff', 'it-support', 'admin', 'superadmin']);
 
         // Any account already flagged is_superadmin carries the role itself
         // now, rather than living as a special case layered on top of 'admin'.
@@ -33,6 +33,26 @@ return new class extends Migration
             'is_superadmin' => true,
         ]);
 
-        DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('student', 'staff', 'it-support', 'admin') NOT NULL DEFAULT 'student'");
+        $this->widenRoleColumn(['student', 'staff', 'it-support', 'admin']);
+    }
+
+    /**
+     * Widen the role enum. MySQL/TiDB (production) needs the explicit
+     * MODIFY COLUMN; other drivers rebuild the column. SQLite backs an enum
+     * with a CHECK constraint, so a plain skip would leave 'superadmin'
+     * rejected — the column has to be recreated with the wider value set.
+     */
+    private function widenRoleColumn(array $values): void
+    {
+        if (DB::getDriverName() === 'mysql') {
+            $list = "'" . implode("', '", $values) . "'";
+            DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM({$list}) NOT NULL DEFAULT 'student'");
+
+            return;
+        }
+
+        Schema::table('users', function (Blueprint $table) use ($values) {
+            $table->enum('role', $values)->default('student')->change();
+        });
     }
 };
