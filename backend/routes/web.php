@@ -63,6 +63,9 @@ Route::middleware('auth')->group(function () {
 
     Route::prefix('superadmin')->name('superadmin.')->middleware(['auth', 'superadmin'])->group(function () {
         Route::get('/institutions', [SuperAdminInstitutionController::class, 'index'])->name('institutions.index');
+        Route::post('/institutions', [SuperAdminInstitutionController::class, 'store'])->name('institutions.store');
+        Route::put('/institutions/{institution}', [SuperAdminInstitutionController::class, 'update'])->name('institutions.update');
+        Route::delete('/institutions/{institution}', [SuperAdminInstitutionController::class, 'destroy'])->name('institutions.destroy');
         Route::post('/institutions/{institution}/toggle-status', [SuperAdminInstitutionController::class, 'toggleStatus'])->name('institutions.toggle-status');
         Route::post('/institutions/{institution}/plan', [SuperAdminInstitutionController::class, 'updatePlan'])->name('institutions.update-plan');
         Route::get('/settings', [\App\Http\Controllers\SuperAdmin\SettingsController::class, 'index'])->name('settings');
@@ -116,6 +119,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
         Route::post('/settings/update', [SettingsController::class, 'update'])->name('settings.update');
+        Route::put('/settings/institution', [SettingsController::class, 'updateInstitution'])->name('settings.institution');
         Route::get('/upgrade', [\App\Http\Controllers\Admin\UpgradeController::class, 'index'])->name('upgrade');
         
         // User management

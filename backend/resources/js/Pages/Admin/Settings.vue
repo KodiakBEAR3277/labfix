@@ -16,17 +16,30 @@ import { Link, useForm } from '@inertiajs/vue3'
 import Icon from '../../Components/Icon.vue'
 
 const props = defineProps({
-  values:   Object,   // flat map: { ticket_number_format: 'format_1', ... }
-  plan:     String,   // plan label, e.g. "Free"
-  features: Object,   // { auto_rules: bool }
+  values:      Object,   // flat map: { ticket_number_format: 'format_1', ... }
+  plan:        String,   // plan label, e.g. "Free"
+  features:    Object,   // { auto_rules: bool }
+  institution: Object,   // { name, slug, contact_email, address }
 })
 
 const form = useForm({
   settings: { ...props.values },
 })
 
+// Institution profile is a separate form/endpoint: it edits the tenant record
+// itself, not the ticket settings above.
+const instForm = useForm({
+  name:          props.institution?.name ?? '',
+  contact_email: props.institution?.contact_email ?? '',
+  address:       props.institution?.address ?? '',
+})
+
 function submit() {
   form.post('/admin/settings/update')
+}
+
+function submitInstitution() {
+  instForm.put('/admin/settings/institution', { preserveScroll: true })
 }
 
 // Inertia flattens nested validation errors to "settings.<key>"
@@ -56,9 +69,49 @@ const ticketFormatOptions = [
       <div class="page-header">
         <div>
           <h1>System Settings</h1>
-          <p style="color:#9ca3af;">How tickets behave for your institution</p>
+          <p style="color:#9ca3af;">Your institution profile and how tickets behave</p>
         </div>
       </div>
+
+      <!-- ── Institution Profile ─────────────────────────────────────────── -->
+      <form @submit.prevent="submitInstitution">
+        <div class="settings-grid">
+          <div class="settings-card" style="grid-column:1/-1;">
+            <div class="card-header">
+              <div class="card-icon"><Icon name="school" /></div>
+              <div>
+                <h2 class="card-title" style="margin-bottom:0.25rem;">Institution Profile</h2>
+                <p style="color:#9ca3af;font-size:0.9rem;">How your institution is named and contacted across LabFix</p>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Institution Name *</label>
+                <input v-model="instForm.name" type="text" maxlength="255" required>
+                <span v-if="instForm.errors.name" class="text-danger">{{ instForm.errors.name }}</span>
+              </div>
+              <div class="form-group">
+                <label>Contact Email</label>
+                <input v-model="instForm.contact_email" type="email" maxlength="255" placeholder="e.g., it@university.edu">
+                <span v-if="instForm.errors.contact_email" class="text-danger">{{ instForm.errors.contact_email }}</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Address</label>
+              <input v-model="instForm.address" type="text" maxlength="255" placeholder="e.g., Main Campus, Building A">
+              <span v-if="instForm.errors.address" class="text-danger">{{ instForm.errors.address }}</span>
+            </div>
+
+            <div style="display:flex;justify-content:flex-end;">
+              <button type="submit" class="btn btn-save" :disabled="instForm.processing">
+                {{ instForm.processing ? 'Saving…' : 'Save Institution' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
 
       <form @submit.prevent="submit">
 

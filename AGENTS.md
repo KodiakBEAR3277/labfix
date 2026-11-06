@@ -24,6 +24,13 @@ LabFix is a lab equipment issue-reporting system: a Laravel + Vue (Inertia) web 
 - **Backend dev server:** always run
   `php -d variables_order=GCPS artisan serve --host=0.0.0.0 --port=8000` from `backend/`.
   A plain `php artisan serve` fails to bind on this machine.
+- **Institution profile:** admins rename/edit their own institution (name, contact email,
+  address) on `/admin/settings` via `PUT /admin/settings/institution`. The route has no
+  institution id — it always edits the acting admin's tenant.
+- **Superadmin institution CRUD:** `/superadmin/institutions` supports create/edit/delete.
+  Create also makes the institution's first admin and seeds default settings (mirrors
+  `InstitutionRequest::approve()`). Delete is blocked while the institution has users, labs
+  or equipment — deactivate instead.
 
 ## Equipment / QR (built)
 

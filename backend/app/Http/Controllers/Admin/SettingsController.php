@@ -27,10 +27,35 @@ class SettingsController extends Controller
         }
 
         return Inertia::render('Admin/Settings', [
-            'values'   => $values,
-            'plan'     => $institution->planLabel(),
-            'features' => ['auto_rules' => $institution->hasAutoRules()],
+            'values'      => $values,
+            'plan'        => $institution->planLabel(),
+            'features'    => ['auto_rules' => $institution->hasAutoRules()],
+            'institution' => [
+                'name'          => $institution->name,
+                'slug'          => $institution->slug,
+                'contact_email' => $institution->contact_email,
+                'address'       => $institution->address,
+            ],
         ]);
+    }
+
+    // Update the tenant's own profile. Only the acting admin's institution
+    // is touched — there is no id in the request, by design.
+    public function updateInstitution(Request $request)
+    {
+        $institution = Auth::user()->institution;
+
+        $validated = $request->validate([
+            'name'          => ['required', 'string', 'max:255'],
+            'contact_email' => ['nullable', 'string', 'email', 'max:255'],
+            'address'       => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $institution->update($validated);
+
+        return redirect()
+            ->route('admin.settings')
+            ->with('success', 'Institution details updated successfully!');
     }
 
     public function update(Request $request)
