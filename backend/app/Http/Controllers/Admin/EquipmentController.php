@@ -57,6 +57,109 @@ class EquipmentController extends Controller
         return response()->json($equipment);
     }
 
+    // Bulk-create equipment for one lab. Codes arrive as a newline/comma
+    // separated string; duplicates already in the lab are skipped.
+    public function bulkStore(Request $request, $labId)
+    {
+        $lab = Lab::findOrFail($labId);
+        $institution = $request->user()->institution;
+
+        $validated = $request->validate([
+            'codes'  => ['required', 'string', 'max:20000'],
+            'type'   => ['required', 'in:computer,printer,projector,other'],
+            'status' => ['required', 'in:operational,has-issue,maintenance,retired'],
+        ]);
+
+        $codes = collect(preg_split('/[\r\n,]+/', $validated['codes']))
+            ->map(fn ($code) => trim($code))
+            ->filter()
+            ->unique(fn ($code) => mb_strtolower($code))
+            ->values();
+
+        if ($codes->isEmpty()) {
+            return redirect()
+                ->route('admin.labs.index')
+                ->with('error', 'Enter at least one equipment code.');
+        }
+
+        if ($codes->contains(fn ($code) => mb_strlen($code) > 50)) {
+            return redirect()
+                ->route('admin.labs.index')
+                ->with('error', 'Equipment codes must be 50 characters or fewer.');
+        }
+
+        $existing = Equipment::where('lab_id', $lab->id)
+            ->whereIn('equipment_code', $codes->all())
+            ->pluck('equipment_code')
+            ->map(fn ($code) => mb_strtolower($code))
+            ->all();
+
+        $newCodes = $codes
+            ->reject(fn ($code) => in_array(mb_strtolower($code), $existing, true))
+            ->values();
+
+        if ($newCodes->isEmpty()) {
+            return redirect()
+                ->route('admin.labs.index')
+                ->with('error', 'All of those equipment codes already exist in this lab.');
+        }
+
+        // Enforce the plan limit against what will actually be created.
+        $limit = $institution->equipmentLimit();
+
+        if ($limit !== null) {
+            $current = $institution->equipment()->count();
+
+            if ($current + $newCodes->count() > $limit) {
+                $remaining = max(0, $limit - $current);
+
+                return redirect()
+                    ->route('admin.labs.index')
+                    ->with(
+                        'error',
+                        "This would exceed your plan's equipment limit. You can add {$remaining} more."
+                    );
+            }
+        }
+
+        foreach ($newCodes as $code) {
+            Equipment::create([
+                'lab_id'         => $lab->id,
+                'equipment_code' => $code,
+                'type'           => $validated['type'],
+                'status'         => $validated['status'],
+            ]);
+        }
+
+        $skipped = $codes->count() - $newCodes->count();
+        $message = $newCodes->count() . ' equipment added';
+
+        if ($skipped > 0) {
+            $message .= ', ' . $skipped . ' duplicate' . ($skipped === 1 ? '' : 's') . ' skipped';
+        }
+
+        return redirect()->route('admin.labs.index')->with('success', $message . '.');
+    }
+
+    // Past tickets for one device — consumed by the admin lab page history panel.
+    public function history($id)
+    {
+        $equipment = Equipment::with('lab')->findOrFail($id);
+
+        return response()->json([
+            'equipment' => $equipment,
+            'lab'       => $equipment->lab,
+            'reports'   => $equipment->reports()
+                ->latest()
+                ->take(50)
+                ->get(['id', 'ticket_number', 'title', 'status', 'priority', 'created_at', 'updated_at']),
+            'counts' => [
+                'open'  => $equipment->reports()->open()->count(),
+                'total' => $equipment->reports()->count(),
+            ],
+        ]);
+    }
+
     // Update equipment
     public function update(Request $request, $id)
     {

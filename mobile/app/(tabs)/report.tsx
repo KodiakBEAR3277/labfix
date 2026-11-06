@@ -53,6 +53,7 @@ import { loadAuth } from '@/utils/auth';
 import { apiUrl } from '@/constants/api';
 import VoiceRecorder, { Recording } from '@/components/ui/VoiceRecorder';
 import VoiceMessage from '@/components/ui/VoiceMessage';
+import EquipmentScanner, { ScanResult } from '@/components/scan/EquipmentScanner';
 import Icon, { IconName } from '@/components/ui/Icon';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -298,6 +299,11 @@ export default function ReportScreen() {
   // Voice notes recorded on this report, held as local files until submit.
   const [recordings, setRecordings] = useState<Recording[]>([]);
 
+  // QR scanning. The scanner resolves the code server-side and hands back the
+  // device + lab, which we seed into the form and jump from.
+  const [scannerOpen, setScannerOpen] = useState(false);
+  const [scanWarning, setScanWarning] = useState<string | null>(null);
+
   // Display names for the review step
   const [selectedLabName,   setSelectedLabName]   = useState('');
   const [selectedEquipName, setSelectedEquipName] = useState("General lab issue / Don't know");
@@ -334,6 +340,10 @@ export default function ReportScreen() {
 
       // 5. Drop any voice notes recorded for the previous report
       setRecordings([]);
+
+      // 6. Clear any warning left over from a scanned QR code
+      setScanWarning(null);
+      setScannerOpen(false);
     }, [])
   );
 
@@ -448,6 +458,29 @@ export default function ReportScreen() {
       setForm((f) => ({ ...f, equipment_id: eq.id }));
       setSelectedEquipName(`${eq.equipment_code}${equipmentStatusLabel(eq.status)}`);
     }
+  }
+
+  // A scan is authoritative for lab + equipment. Retired devices are still
+  // accepted (with a warning) — a device can be physically in use after it was
+  // scheduled for retirement.
+  function handleScanResolved({ equipment: eq, lab }: ScanResult) {
+    setScannerOpen(false);
+    setScanWarning(
+      eq.status === 'retired'
+        ? `${eq.equipment_code} is marked retired — submit anyway if it is still in use.`
+        : null,
+    );
+
+    setForm((f) => ({ ...f, lab_id: lab.id, equipment_id: eq.id }));
+    setSelectedLabName(lab.name);
+    setSelectedEquipName(`${eq.equipment_code}${equipmentStatusLabel(eq.status)}`);
+
+    // Keep the step-2 list in sync if the scanned device is in a different lab.
+    // This only replaces the list; form.equipment_id above is left intact.
+    if (token) void fetchEquipment(lab.id, token);
+
+    animateStep();
+    setStep(3);
   }
 
   function selectCategory(cat: Category['value']) {
@@ -589,6 +622,14 @@ export default function ReportScreen() {
             </View>
           )}
 
+          {/* ── Scanned-equipment warning (e.g. retired device) ── */}
+          {scanWarning && (
+            <View style={s.scanWarning}>
+              <Icon name="alert" size={15} color={colors.warningLight} />
+              <Text style={s.scanWarningText}>{scanWarning}</Text>
+            </View>
+          )}
+
           {/* ── Step Content ── */}
           <Animated.View
             style={[{ flex: 1 }, { transform: [{ translateY: slideAnim }] }]}
@@ -605,6 +646,16 @@ export default function ReportScreen() {
               >
                 <Text style={s.stepHeading}>Select Lab Location</Text>
                 <Text style={s.stepSub}>Which lab is the problem in?</Text>
+
+                <TouchableOpacity
+                  style={s.scanBtn}
+                  onPress={() => setScannerOpen(true)}
+                  activeOpacity={0.8}
+                >
+                  <Icon name="qr" size={18} color={colors.primary} />
+                  <Text style={s.scanBtnText}>Scan equipment QR</Text>
+                  <Icon name="chevron-right" size={16} color={colors.primary} />
+                </TouchableOpacity>
 
                 {labsLoading ? (
                   <View style={s.centered}>
@@ -675,6 +726,16 @@ export default function ReportScreen() {
               >
                 <Text style={s.stepHeading}>Select Equipment</Text>
                 <Text style={s.stepSub}>Which device or equipment has the issue?</Text>
+
+                <TouchableOpacity
+                  style={s.scanBtn}
+                  onPress={() => setScannerOpen(true)}
+                  activeOpacity={0.8}
+                >
+                  <Icon name="qr" size={18} color={colors.primary} />
+                  <Text style={s.scanBtnText}>Scan equipment QR</Text>
+                  <Icon name="chevron-right" size={16} color={colors.primary} />
+                </TouchableOpacity>
 
                 {/* General / don't know option */}
                 <TouchableOpacity
@@ -1025,6 +1086,12 @@ export default function ReportScreen() {
         </KeyboardAvoidingView>
       )}
 
+      <EquipmentScanner
+        visible={scannerOpen}
+        onClose={() => setScannerOpen(false)}
+        onResolved={handleScanResolved}
+      />
+
     </SafeAreaView>
   );
 }
@@ -1137,6 +1204,44 @@ const s = StyleSheet.create({
     fontSize: font.sm,
     color: colors.textMuted,
     marginBottom: spacing.lg,
+    lineHeight: 19,
+  },
+
+  // ── QR scanning ───────────────────────────────────────────────────────────
+  scanBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: colors.primaryLight,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.full,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm + 2,
+    marginBottom: spacing.lg,
+  },
+  scanBtnText: {
+    flex: 1,
+    fontSize: font.sm,
+    fontWeight: font.semibold,
+    color: colors.primaryDark,
+  },
+  scanWarning: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    marginHorizontal: spacing.lg,
+    marginBottom: spacing.sm,
+    backgroundColor: colors.warningBg,
+    borderWidth: 1,
+    borderColor: colors.warningBorder,
+    borderRadius: radius.md,
+    padding: spacing.sm + 2,
+  },
+  scanWarningText: {
+    flex: 1,
+    color: colors.warningLight,
+    fontSize: font.sm,
     lineHeight: 19,
   },
 

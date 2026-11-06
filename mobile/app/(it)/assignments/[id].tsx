@@ -57,6 +57,7 @@ type Ticket = {
   status:        string;
   priority:      string;
   assigned_to:   number | null;
+  equipment_id?: number | null;
   created_at:    string;
   updated_at:    string;
   assigned_at:   string | null;
@@ -67,6 +68,7 @@ type Ticket = {
     email: string | null; phone: string | null; role: string;
   };
   equipment?: {
+    id?: number;
     equipment_code: string; type: string; status: string;
     lab?: { name: string; location: string | null };
   };
@@ -479,6 +481,19 @@ export default function ITAssignmentShowScreen() {
           {ticket.equipment?.lab?.location && (
             <InfoRow label="Building/Floor" value={ticket.equipment.lab.location} />
           )}
+          {(ticket.equipment_id || ticket.equipment?.id) && (
+            <TouchableOpacity
+              style={s.historyLink}
+              onPress={() =>
+                router.push(`/(it)/equipment/${ticket.equipment_id ?? ticket.equipment?.id}` as any)
+              }
+              activeOpacity={0.75}
+            >
+              <Icon name="clock" size={13} color={colors.primary} />
+              <Text style={s.historyLinkText}>View equipment history</Text>
+              <Icon name="chevron-right" size={14} color={colors.primary} />
+            </TouchableOpacity>
+          )}
         </SectionCard>
 
         {/* ── Reporter Contact ── */}
@@ -713,6 +728,14 @@ const s = StyleSheet.create({
 
   // Voice notes
   voiceList: { gap: spacing.sm },
+
+  // Equipment history link
+  historyLink: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    marginTop: spacing.md, paddingTop: spacing.sm,
+    borderTopWidth: 1, borderTopColor: colors.borderLight,
+  },
+  historyLinkText: { flex: 1, fontSize: font.sm, fontWeight: font.semibold, color: colors.primary },
 
   // Reporter
   reporterCard: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md },

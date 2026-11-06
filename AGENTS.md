@@ -21,17 +21,31 @@ LabFix is a lab equipment issue-reporting system: a Laravel + Vue (Inertia) web 
 - **Equipment status is auto-derived** from open tickets
   (`Equipment::updateStatusFromReports()`), not set manually.
 - **EAS builds** require a clean git tree (`eas.json` sets `requireCommit: true`).
+- **Backend dev server:** always run
+  `php -d variables_order=GCPS artisan serve --host=0.0.0.0 --port=8000` from `backend/`.
+  A plain `php artisan serve` fails to bind on this machine.
 
-## Equipment / QR direction (decided, not yet built)
+## Equipment / QR (built)
 
 - Equipment **provisioning stays web-only** (the admin lab modal); no mobile admin zone.
-- **QR is our own generated format**, one code per equipment. The mobile app scans it at
-  report time to select the right device and jump straight to step 3 of the report form.
-  This needs a scanner dependency (e.g. `expo-camera`) + camera permission + a native
-  rebuild.
-- Nice-to-have: a **printable QR sheet per lab**, and **bulk equipment creation**.
-- **Equipment history** = that device's past tickets plus their resolution status, with
-  links to open them (no separate service-log table, for now).
+- **QR is our own generated format**, one code per equipment. Payload is
+  `LABFIX-EQ:<uuid>` — an opaque, non-URL string backed by `equipment.qr_token`
+  (auto-generated on create, backfilled for existing rows; the `GENERAL` placeholder never
+  gets one). QR codes are shown/printed per device in the admin lab modal via the
+  `qrcode` npm package.
+- **Mobile scanning:** `expo-camera`-based scanner lives in
+  `mobile/components/scan/EquipmentScanner.tsx` and is opened from the report form. It
+  resolves the payload with `POST /api/equipment/resolve` (institution-scoped, untrusted
+  input), then preselects lab + equipment and jumps to step 3. Requires `expo-camera` and
+  a native prebuild.
+- **Equipment history** is available on the web admin lab modal and in the mobile IT zone
+  (`app/(it)/equipment/[id].tsx`), both backed by `GET .../equipment/{id}/history`. No
+  separate service-log table.
+- **Printable QR sheet per lab:** the admin lab page has a `QR Sheet` button that renders
+  every device's QR into a print window (client-side, 3-column grid).
+- **Bulk equipment creation:** the admin lab page has a `+ Bulk Add` modal accepting
+  newline/comma-separated codes. Duplicates already in the lab are skipped, and the plan's
+  equipment limit is enforced for the whole batch.
 - **Mobile photo attachments are deferred**; web stays attachments-only, mobile adds QR
   scanning. A real `attachments` table (with metadata) is a possible later step.
 - **Scanned QR payloads are untrusted:** resolve them server-side, never auto-open scanned

@@ -126,6 +126,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/labs/{id}/toggle-status', [LabController::class, 'toggleStatus'])->name('labs.toggle-status');
         
         // Equipment management
+        Route::get('/equipment/{id}/history', [EquipmentController::class, 'history'])->name('equipment.history');
+        Route::post('/labs/{lab}/equipment/bulk', [EquipmentController::class, 'bulkStore'])->name('labs.equipment.bulk');
         Route::resource('equipment', EquipmentController::class)->except(['index', 'show']);
         
         // In routes/web.php - Admin section

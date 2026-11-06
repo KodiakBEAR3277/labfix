@@ -103,6 +103,43 @@ Route::middleware(['auth:sanctum', 'institution.active'])->group(function () {
         $equipment = \App\Models\Equipment::where('lab_id', $labId)->get();
         return response()->json($equipment);
     });
+
+    // Resolve a scanned QR payload to one of this institution's devices.
+    // The payload is untrusted; parsing and tenant scoping happen here.
+    Route::post('/equipment/resolve', function (Request $request) {
+        $data = $request->validate(['qr' => ['required', 'string', 'max:255']]);
+
+        $equipment = \App\Models\Equipment::findByQrPayload($data['qr']);
+
+        if (!$equipment) {
+            return response()->json([
+                'message' => 'That code is not a LabFix equipment code for your institution.',
+            ], 404);
+        }
+
+        return response()->json([
+            'equipment' => $equipment,
+            'lab'       => $equipment->lab,
+        ]);
+    })->middleware('throttle:60,1');
+
+    // Equipment history for the mobile IT screen (past tickets + counts).
+    Route::get('/equipment/{id}/history', function ($id) {
+        $equipment = \App\Models\Equipment::with('lab')->findOrFail($id);
+
+        return response()->json([
+            'equipment' => $equipment,
+            'lab'       => $equipment->lab,
+            'reports'   => $equipment->reports()
+                ->latest()
+                ->take(50)
+                ->get(['id', 'ticket_number', 'title', 'status', 'priority', 'created_at', 'updated_at']),
+            'counts' => [
+                'open'  => $equipment->reports()->open()->count(),
+                'total' => $equipment->reports()->count(),
+            ],
+        ]);
+    });
     
     // Ticket endpoints
     Route::get('/tickets', function (Request $request) use ($shapeTicket) {

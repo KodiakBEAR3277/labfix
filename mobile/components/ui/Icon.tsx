@@ -72,6 +72,8 @@ const MAP = {
   'close-circle': 'close-circle',
   fire: 'flame',
   camera: 'camera',
+  scan: 'scan',
+  qr: 'qr-code',
   laptop: 'laptop',
   printer: 'print',
   videocam: 'videocam',

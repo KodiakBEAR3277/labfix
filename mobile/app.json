@@ -11,7 +11,8 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSMicrophoneUsageDescription": "Allow LabFix to use the microphone to record voice messages for your ticket reports."
+        "NSMicrophoneUsageDescription": "Allow LabFix to use the microphone to record voice messages for your ticket reports.",
+        "NSCameraUsageDescription": "Allow LabFix to scan equipment QR codes when reporting an issue."
       }
     },
     "android": {
@@ -23,7 +24,8 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "permissions": [
-        "android.permission.RECORD_AUDIO"
+        "android.permission.RECORD_AUDIO",
+        "android.permission.CAMERA"
       ],
       "package": "com.kodiakbear3277.mobile"
     },
@@ -51,6 +53,12 @@
       "expo-secure-store",
       "expo-font",
       "expo-web-browser",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow LabFix to scan equipment QR codes when reporting an issue."
+        }
+      ],
       [
         "expo-audio",
         {
