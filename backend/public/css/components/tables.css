@@ -10,7 +10,10 @@
 .table-container {
     background: linear-gradient(145deg, var(--color-bg-card) 0%, var(--color-bg-card-alt) 100%);
     border-radius: var(--border-radius-xl);
-    overflow: hidden;
+    /* Wide ticket tables must stay reachable instead of being clipped by the
+       rounded card. The x-axis scrolls; y stays hidden so the corners clip. */
+    overflow-x: auto;
+    overflow-y: hidden;
     border: var(--border-width) solid var(--color-border);
 }
 
@@ -109,6 +112,7 @@ td {
 .action-menu {
     display: flex;
     gap: var(--spacing-sm);
+    flex-wrap: wrap;
 }
 
 .action-buttons {
