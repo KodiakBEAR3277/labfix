@@ -167,10 +167,10 @@ function cancelReport() {
                     <p class="timeline-text">{{ tx.description }}</p>
                     <div v-if="tx.old_value || tx.new_value" style="margin-top:0.5rem;padding:0.5rem;background:rgba(45,212,191,0.1);border-radius:4px;font-size:0.85rem;">
                       <span v-if="tx.old_value" style="color:#ef4444;">{{ tx.old_value }}</span>
-                      <span v-if="tx.old_value && tx.new_value" style="color:#9ca3af;"> <Icon name="arrow-right" /> </span>
+                      <span v-if="tx.old_value && tx.new_value" style="color:var(--color-text-muted);"> <Icon name="arrow-right" /> </span>
                       <span v-if="tx.new_value" style="color:#10b981;">{{ tx.new_value }}</span>
                     </div>
-                    <div style="margin-top:0.25rem;font-size:0.85rem;color:#9ca3af;">by {{ tx.user?.full_name }}</div>
+                    <div style="margin-top:0.25rem;font-size:0.85rem;color:var(--color-text-muted);">by {{ tx.user?.full_name }}</div>
                   </div>
                 </div>
               </template>
@@ -209,11 +209,11 @@ function cancelReport() {
               <Link :href="`/user/reports/${report.id}/edit`" class="btn btn-primary">Edit Report</Link>
               <button type="button" class="btn btn-danger" @click="cancelReport">Cancel Ticket</button>
             </div>
-            <p style="color:#9ca3af;font-size:0.85rem;margin-top:1rem;text-align:center;">Available until ticket is assigned</p>
+            <p style="color:var(--color-text-muted);font-size:0.85rem;margin-top:1rem;text-align:center;">Available until ticket is assigned</p>
           </div>
           <div v-else class="card" style="background:rgba(45,212,191,0.1);border-color:rgba(45,212,191,0.3);">
             <h2 class="card-title" style="color:#2dd4bf;"><Icon name="check" /> Ticket Assigned</h2>
-            <p style="color:#d1d5db;font-size:0.9rem;line-height:1.6;">This ticket has been assigned and can no longer be edited.</p>
+            <p style="color:var(--color-text-secondary);font-size:0.9rem;line-height:1.6;">This ticket has been assigned and can no longer be edited.</p>
           </div>
 
           <!-- Assigned technician -->
@@ -223,13 +223,13 @@ function cancelReport() {
               <div style="width:60px;height:60px;background:linear-gradient(135deg,#2dd4bf,#14b8a6);border-radius:50%;margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:bold;">
                 {{ report.assigned_to_user?.initials }}
               </div>
-              <div style="color:#fff;font-weight:600;margin-bottom:0.25rem;">{{ report.assigned_to_user?.full_name }}</div>
-              <div style="color:#9ca3af;font-size:0.9rem;">{{ report.assigned_to_user?.role?.replace('-', ' ') }}</div>
+              <div style="color:var(--color-text-primary);font-weight:600;margin-bottom:0.25rem;">{{ report.assigned_to_user?.full_name }}</div>
+              <div style="color:var(--color-text-muted);font-size:0.9rem;">{{ report.assigned_to_user?.role?.replace('-', ' ') }}</div>
             </div>
           </div>
           <div v-else class="info-card">
             <h2 class="card-title">Status</h2>
-            <div style="text-align:center;padding:1rem 0;color:#9ca3af;">
+            <div style="text-align:center;padding:1rem 0;color:var(--color-text-muted);">
               <div style="font-size:2rem;margin-bottom:0.5rem;"><Icon name="hourglass" /></div>
               <p>Awaiting assignment to a technician</p>
             </div>

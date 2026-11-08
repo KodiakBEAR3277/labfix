@@ -18,6 +18,13 @@
     margin-bottom: var(--spacing-md);
 }
 
+/* Required-field marker. Wrap the asterisk so it can be colored separately
+   from the label text: <label>Name <span class="required">*</span></label> */
+.required {
+    color: var(--color-danger);
+    font-weight: var(--font-weight-bold);
+}
+
 /* ============================================
    FORM SECTIONS
    Used in: Admin user detail, system settings, User reports

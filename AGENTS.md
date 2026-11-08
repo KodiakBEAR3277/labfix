@@ -58,3 +58,13 @@ LabFix is a lab equipment issue-reporting system: a Laravel + Vue (Inertia) web 
 - **Scanned QR payloads are untrusted:** resolve them server-side, never auto-open scanned
   URLs, and support external/foreign codes only via a configured mapping — never by blind
   parsing.
+
+## UI conventions
+
+- **Required-field asterisks are red.** Web: wrap the asterisk as
+  `<span class="required">*</span>` (`.required` lives in
+  `public/css/components/forms.css`). Mobile: `<Text style={s.required}>*</Text>` with
+  `required: { color: colors.danger }` in the screen's stylesheet.
+- **Don't hardcode dark-theme text colors on the light web theme.** Use the
+  `--color-text-*` variables; leftovers like `#ffffff`, `#d1d5db` or `#9ca3af` become
+  unreadable on the light background.

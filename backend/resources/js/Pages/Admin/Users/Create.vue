@@ -43,19 +43,19 @@ function submit() {
 
             <div class="form-row">
               <div class="form-group">
-                <label>First Name *</label>
+                <label>First Name <span class="required">*</span></label>
                 <input v-model="form.first_name" type="text" required autocomplete="given-name">
                 <span v-if="form.errors.first_name" class="text-danger">{{ form.errors.first_name }}</span>
               </div>
               <div class="form-group">
-                <label>Last Name *</label>
+                <label>Last Name <span class="required">*</span></label>
                 <input v-model="form.last_name" type="text" required autocomplete="family-name">
                 <span v-if="form.errors.last_name" class="text-danger">{{ form.errors.last_name }}</span>
               </div>
             </div>
 
             <div class="form-group">
-              <label>Email Address *</label>
+              <label>Email Address <span class="required">*</span></label>
               <input v-model="form.email" type="email" required autocomplete="email">
               <span v-if="form.errors.email" class="text-danger">{{ form.errors.email }}</span>
             </div>
@@ -78,7 +78,7 @@ function submit() {
             <h3 class="section-title">Account Settings</h3>
 
             <div class="form-group">
-              <label>Role *</label>
+              <label>Role <span class="required">*</span></label>
               <select v-model="form.role" required>
                 <option value="student">Student</option>
                 <option value="staff">Staff</option>
@@ -89,7 +89,7 @@ function submit() {
             </div>
 
             <div class="form-group">
-              <label>Password *</label>
+              <label>Password <span class="required">*</span></label>
               <input v-model="form.password" type="password" required autocomplete="new-password">
               <p class="help-text">Minimum 8 characters</p>
               <span v-if="form.errors.password" class="text-danger">{{ form.errors.password }}</span>

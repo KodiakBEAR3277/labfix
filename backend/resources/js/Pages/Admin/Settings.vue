@@ -87,7 +87,7 @@ const ticketFormatOptions = [
 
             <div class="form-row">
               <div class="form-group">
-                <label>Institution Name *</label>
+                <label>Institution Name <span class="required">*</span></label>
                 <input v-model="instForm.name" type="text" maxlength="255" required>
                 <span v-if="instForm.errors.name" class="text-danger">{{ instForm.errors.name }}</span>
               </div>

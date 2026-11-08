@@ -150,7 +150,7 @@ const categories = [
                 >
                   <div class="lab-icon"><Icon name="laptop" /></div>
                   <div class="lab-name">{{ lab.name }}</div>
-                  <div style="font-size:0.8rem;color:#9ca3af;margin-top:0.25rem;">
+                  <div style="font-size:0.8rem;color:var(--color-text-muted);margin-top:0.25rem;">
                     {{ lab.operational_count ?? 0 }}/{{ lab.capacity }} operational
                   </div>
                 </div>
@@ -258,7 +258,7 @@ const categories = [
                     @change="handleFiles"
                   >
                   <div class="upload-icon"><Icon name="camera" /></div>
-                  <p style="color:#9ca3af;">Click to upload screenshots or documents</p>
+                  <p style="color:var(--color-text-muted);">Click to upload screenshots or documents</p>
                   <p style="color:#6b7280;font-size:0.85rem;">PNG, JPG, PDF up to 5MB each</p>
                 </div>
                 <ul v-if="files.length" style="margin-top:1rem;list-style:none;padding:0;">

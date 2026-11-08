@@ -168,18 +168,18 @@ const dashboardHref = computed(() => {
             <form @submit.prevent="submitProfile">
               <div class="form-row">
                 <div class="form-group">
-                  <label>First Name</label>
+                  <label>First Name <span class="required">*</span></label>
                   <input v-model="profileForm.first_name" type="text" required>
                   <span v-if="profileForm.errors.first_name" class="text-danger">{{ profileForm.errors.first_name }}</span>
                 </div>
                 <div class="form-group">
-                  <label>Last Name</label>
+                  <label>Last Name <span class="required">*</span></label>
                   <input v-model="profileForm.last_name" type="text" required>
                   <span v-if="profileForm.errors.last_name" class="text-danger">{{ profileForm.errors.last_name }}</span>
                 </div>
               </div>
               <div class="form-group">
-                <label>Email Address</label>
+                <label>Email Address <span class="required">*</span></label>
                 <input v-model="profileForm.email" type="email" required>
                 <span v-if="profileForm.errors.email" class="text-danger">{{ profileForm.errors.email }}</span>
               </div>
@@ -210,17 +210,17 @@ const dashboardHref = computed(() => {
             <h2 class="card-title">Change Password</h2>
             <form @submit.prevent="submitPassword">
               <div class="form-group">
-                <label>Current Password</label>
+                <label>Current Password <span class="required">*</span></label>
                 <input v-model="passwordForm.current_password" type="password" required autocomplete="current-password">
                 <span v-if="passwordForm.errors.current_password" class="text-danger">{{ passwordForm.errors.current_password }}</span>
               </div>
               <div class="form-group">
-                <label>New Password</label>
+                <label>New Password <span class="required">*</span></label>
                 <input v-model="passwordForm.password" type="password" required autocomplete="new-password">
                 <span v-if="passwordForm.errors.password" class="text-danger">{{ passwordForm.errors.password }}</span>
               </div>
               <div class="form-group">
-                <label>Confirm New Password</label>
+                <label>Confirm New Password <span class="required">*</span></label>
                 <input v-model="passwordForm.password_confirmation" type="password" required autocomplete="new-password">
               </div>
               <div class="action-buttons">

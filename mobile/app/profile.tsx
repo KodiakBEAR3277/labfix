@@ -466,7 +466,7 @@ export default function ProfileScreen() {
           {/* Name row */}
           <View style={s.fieldRow}>
             <View style={[s.fieldGroup, { flex: 1 }]}>
-              <Text style={s.label}>First Name</Text>
+              <Text style={s.label}>First Name <Text style={s.required}>*</Text></Text>
               <TextInput
                 style={[s.input, !!profErrors.first_name && s.inputError]}
                 value={firstName}
@@ -478,7 +478,7 @@ export default function ProfileScreen() {
               <FieldError message={profErrors.first_name} />
             </View>
             <View style={[s.fieldGroup, { flex: 1 }]}>
-              <Text style={s.label}>Last Name</Text>
+              <Text style={s.label}>Last Name <Text style={s.required}>*</Text></Text>
               <TextInput
                 style={[s.input, !!profErrors.last_name && s.inputError]}
                 value={lastName}
@@ -493,7 +493,7 @@ export default function ProfileScreen() {
 
           {/* Email */}
           <View style={s.fieldGroup}>
-            <Text style={s.label}>Email Address</Text>
+            <Text style={s.label}>Email Address <Text style={s.required}>*</Text></Text>
             <TextInput
               style={[s.input, !!profErrors.email && s.inputError]}
               value={email}
@@ -560,7 +560,7 @@ export default function ProfileScreen() {
           )}
 
           <View style={s.fieldGroup}>
-            <Text style={s.label}>Current Password</Text>
+            <Text style={s.label}>Current Password <Text style={s.required}>*</Text></Text>
             <TextInput
               style={[s.input, !!pwErrors.current_password && s.inputError]}
               value={currentPw}
@@ -574,7 +574,7 @@ export default function ProfileScreen() {
           </View>
 
           <View style={s.fieldGroup}>
-            <Text style={s.label}>New Password</Text>
+            <Text style={s.label}>New Password <Text style={s.required}>*</Text></Text>
             <TextInput
               style={[s.input, !!pwErrors.password && s.inputError]}
               value={newPw}
@@ -588,7 +588,7 @@ export default function ProfileScreen() {
           </View>
 
           <View style={s.fieldGroup}>
-            <Text style={s.label}>Confirm New Password</Text>
+            <Text style={s.label}>Confirm New Password <Text style={s.required}>*</Text></Text>
             <TextInput
               style={s.input}
               value={confirmPw}
@@ -747,6 +747,7 @@ const s = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   optional: { fontWeight: font.normal, color: colors.textMuted },
+  required: { color: colors.danger, fontWeight: font.bold },
   input: {
     backgroundColor: 'rgba(0,0,0,0.03)',
     borderWidth: 1,

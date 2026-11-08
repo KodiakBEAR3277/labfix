@@ -67,7 +67,7 @@ function equipmentIcon(type) {
     <div class="container">
       <div class="page-header">
         <h1>Lab Status</h1>
-        <p style="color:#9ca3af;">Real-time equipment availability across all labs</p>
+        <p style="color:var(--color-text-muted);">Real-time equipment availability across all labs</p>
       </div>
 
       <!-- Lab selector tabs -->
@@ -101,7 +101,7 @@ function equipmentIcon(type) {
               <div class="lab-icon"><Icon name="laptop" /></div>
               <div>
                 <h2 class="lab-title">{{ selectedLab.name }}</h2>
-                <p style="color:#9ca3af;font-size:0.85rem;">{{ selectedLab.location ?? 'Location not specified' }}</p>
+                <p style="color:var(--color-text-muted);font-size:0.85rem;">{{ selectedLab.location ?? 'Location not specified' }}</p>
               </div>
             </div>
             <span class="status-badge" :class="labStatusClass(selectedLab)">
@@ -170,7 +170,7 @@ function equipmentIcon(type) {
         </div>
       </template>
 
-      <div v-else style="text-align:center;padding:3rem;color:#9ca3af;">
+      <div v-else style="text-align:center;padding:3rem;color:var(--color-text-muted);">
         <p>No labs available.</p>
       </div>
 

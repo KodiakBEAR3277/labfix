@@ -84,7 +84,7 @@ function priorityColor(priority) {
         </div>
         <div class="stat-card">
           <div class="stat-label">Avg. Resolution Time</div>
-          <div class="stat-value">{{ stats.avg_resolution_time }}<span style="font-size:1rem;color:#9ca3af;"> hrs</span></div>
+          <div class="stat-value">{{ stats.avg_resolution_time }}<span style="font-size:1rem;color:var(--color-text-muted);"> hrs</span></div>
         </div>
       </div>
 
@@ -205,11 +205,11 @@ function priorityColor(priority) {
       </div>
 
       <!-- Info banner -->
-      <div style="background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);padding:1rem;border-radius:8px;margin-top:1.5rem;">
-        <div style="display:flex;align-items:center;gap:0.75rem;color:#60a5fa;">
-          <span style="font-size:1.5rem;"><Icon name="info" /></span>
+      <div style="background:var(--color-info-bg);border:1px solid var(--color-info-border);padding:1rem;border-radius:8px;margin-top:1.5rem;">
+        <div style="display:flex;align-items:center;gap:0.75rem;color:var(--color-text-secondary);">
+          <span style="font-size:1.5rem;color:var(--color-info);"><Icon name="info" /></span>
           <div>
-            <strong>Note:</strong> You can edit or cancel tickets before they're assigned to a technician.
+            <strong style="color:var(--color-info);">Note:</strong> You can edit or cancel tickets before they're assigned to a technician.
             Once assigned, contact the technician to make changes.
           </div>
         </div>

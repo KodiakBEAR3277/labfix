@@ -60,7 +60,7 @@ function statusLabel(status) {
           <div class="stat-label">Avg. Resolution Time</div>
           <div class="stat-value">
             {{ stats.avg_resolution_time }}
-            <span style="font-size:1rem;color:#9ca3af;">hrs</span>
+            <span style="font-size:1rem;color:var(--color-text-muted);">hrs</span>
           </div>
         </div>
       </div>
@@ -128,7 +128,7 @@ function statusLabel(status) {
             </Link>
           </template>
 
-          <div v-else style="text-align:center;padding:3rem;color:#9ca3af;">
+          <div v-else style="text-align:center;padding:3rem;color:var(--color-text-muted);">
             <div style="font-size:2rem;margin-bottom:1rem;"><Icon name="clipboard" /></div>
             <p>
               No reports yet.

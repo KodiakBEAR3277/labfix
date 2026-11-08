@@ -64,7 +64,7 @@ function formatDate(dateStr) {
         <h1>Knowledge Base</h1>
         <p>Find answers to common lab equipment issues before submitting a ticket</p>
         <div class="search-container">
-          <span class="search-icon" style="position:absolute;left:1.2rem;top:50%;transform:translateY(-50%);color:#9ca3af;"><Icon name="search" /></span>
+          <span class="search-icon" style="position:absolute;left:1.2rem;top:50%;transform:translateY(-50%);color:var(--color-text-muted);"><Icon name="search" /></span>
           <input
             v-model="search"
             type="text"
@@ -135,7 +135,7 @@ function formatDate(dateStr) {
                     <span><Icon name="user" /> {{ article.author?.full_name }}</span>
                     <span><Icon name="calendar" /> {{ formatDate(article.published_at) }}</span>
                   </div>
-                  <p v-if="article.excerpt" style="color:#9ca3af;font-size:0.9rem;margin-top:0.5rem;line-height:1.5;">
+                  <p v-if="article.excerpt" style="color:var(--color-text-muted);font-size:0.9rem;margin-top:0.5rem;line-height:1.5;">
                     {{ article.excerpt.substring(0, 120) }}{{ article.excerpt.length > 120 ? '…' : '' }}
                   </p>
                 </div>
@@ -143,9 +143,9 @@ function formatDate(dateStr) {
               </Link>
             </template>
 
-            <div v-else style="text-align:center;padding:3rem;color:#9ca3af;">
+            <div v-else style="text-align:center;padding:3rem;color:var(--color-text-muted);">
               <div style="font-size:2rem;margin-bottom:1rem;"><Icon name="search" /></div>
-              <h3 style="color:#d1d5db;">No articles found</h3>
+              <h3 style="color:var(--color-text-primary);">No articles found</h3>
               <p>Try a different search term or category</p>
             </div>
           </div>

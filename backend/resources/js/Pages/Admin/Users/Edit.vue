@@ -157,19 +157,19 @@ function diffForHumans(d) {
 
                 <div class="form-row">
                   <div class="form-group">
-                    <label>First Name *</label>
+                    <label>First Name <span class="required">*</span></label>
                     <input v-model="form.first_name" type="text" required>
                     <span v-if="form.errors.first_name" class="text-danger">{{ form.errors.first_name }}</span>
                   </div>
                   <div class="form-group">
-                    <label>Last Name *</label>
+                    <label>Last Name <span class="required">*</span></label>
                     <input v-model="form.last_name" type="text" required>
                     <span v-if="form.errors.last_name" class="text-danger">{{ form.errors.last_name }}</span>
                   </div>
                 </div>
 
                 <div class="form-group">
-                  <label>Email Address *</label>
+                  <label>Email Address <span class="required">*</span></label>
                   <input v-model="form.email" type="email" required>
                   <span v-if="form.errors.email" class="text-danger">{{ form.errors.email }}</span>
                 </div>
@@ -193,7 +193,7 @@ function diffForHumans(d) {
                 <h3 class="section-title">Role & Permissions</h3>
 
                 <div class="form-group">
-                  <label>User Role *</label>
+                  <label>User Role <span class="required">*</span></label>
                   <select v-model="form.role" required>
                     <option value="student">Student</option>
                     <option value="staff">Staff</option>

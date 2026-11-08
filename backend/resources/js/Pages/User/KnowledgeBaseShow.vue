@@ -49,21 +49,21 @@ const categoryIcons = {
                   <Icon :name="categoryIcons[article.category] ?? 'file'" />
                   {{ article.category.charAt(0).toUpperCase() + article.category.slice(1) }}
                 </span>
-                <span style="color:#9ca3af;font-size:0.9rem;">{{ article.views }} views</span>
+                <span style="color:var(--color-text-muted);font-size:0.9rem;">{{ article.views }} views</span>
               </div>
-              <h1 style="font-size:2rem;color:#ffffff;margin-bottom:1rem;">{{ article.title }}</h1>
-              <div style="display:flex;gap:1.5rem;color:#9ca3af;font-size:0.9rem;">
+              <h1 style="font-size:2rem;color:var(--color-text-primary);margin-bottom:1rem;">{{ article.title }}</h1>
+              <div style="display:flex;gap:1.5rem;color:var(--color-text-muted);font-size:0.9rem;">
                 <span><Icon name="user" /> {{ article.author?.full_name }}</span>
                 <span><Icon name="calendar" /> {{ formatDate(article.published_at) }}</span>
               </div>
             </div>
 
             <!-- Article body -->
-            <div style="color:#d1d5db;line-height:1.8;white-space:pre-wrap;">{{ article.content }}</div>
+            <div style="color:var(--color-text-secondary);line-height:1.8;white-space:pre-wrap;">{{ article.content }}</div>
 
             <!-- Helpfulness rating — Inertia POST, back() redirect from controller -->
             <div style="margin-top:2rem;padding-top:2rem;border-top:1px solid rgba(45,212,191,0.2);">
-              <p style="color:#9ca3af;margin-bottom:1rem;">Was this article helpful?</p>
+              <p style="color:var(--color-text-muted);margin-bottom:1rem;">Was this article helpful?</p>
               <div style="display:flex;gap:1rem;">
                 <button type="button" class="btn btn-secondary" @click="vote('helpful')">
                   <Icon name="check-circle" /> Yes ({{ article.helpful_count }})
@@ -72,7 +72,7 @@ const categoryIcons = {
                   <Icon name="close-circle" /> No ({{ article.not_helpful_count }})
                 </button>
               </div>
-              <div v-if="article.helpful_count + article.not_helpful_count > 0" style="margin-top:1rem;color:#9ca3af;font-size:0.9rem;">
+              <div v-if="article.helpful_count + article.not_helpful_count > 0" style="margin-top:1rem;color:var(--color-text-muted);font-size:0.9rem;">
                 {{ article.helpfulness_percentage }}% of readers found this helpful
               </div>
             </div>

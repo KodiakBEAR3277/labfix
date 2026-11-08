@@ -99,7 +99,7 @@ function submit() {
                   <Icon name="paperclip" /> {{ att.split('/').pop() }}
                 </div>
               </div>
-              <p v-else style="color:#9ca3af;font-size:0.9rem;">No attachments</p>
+              <p v-else style="color:var(--color-text-muted);font-size:0.9rem;">No attachments</p>
             </div>
 
             <div class="form-group">
@@ -132,7 +132,7 @@ function submit() {
 
       <div class="card" style="max-width:800px;margin:1.5rem auto;background:rgba(59,130,246,0.1);border-color:rgba(59,130,246,0.3);">
         <h3 style="color:#3b82f6;margin-bottom:0.5rem;"><Icon name="info" /> Note</h3>
-        <p style="color:#d1d5db;font-size:0.9rem;line-height:1.6;margin:0;">
+        <p style="color:var(--color-text-secondary);font-size:0.9rem;line-height:1.6;margin:0;">
           You can only edit this report before it's assigned to a technician.
           Once assigned, please contact the assigned technician if you need to make changes.
         </p>
