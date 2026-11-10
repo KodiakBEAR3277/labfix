@@ -3,7 +3,8 @@
 // Path: resources/js/Pages/SuperAdmin/Users/Index.vue
 //
 // Platform-wide list of every user across every institution — the superadmin's
-// oversight view. Read-only here; editing happens on SuperAdmin/Users/Edit.
+// oversight view. Editing happens on SuperAdmin/Users/Edit; the list also has
+// an inline activate/deactivate shortcut.
 
 import AppLayout from '../../../Layouts/AppLayout.vue'
 import NavSuperAdmin from '../../../Components/Nav/NavSuperAdmin.vue'
@@ -52,6 +53,14 @@ function roleLabel(r) {
 
 function formatDate(d) {
   return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+// ── Inline actions ────────────────────────────────────────────────────────────
+function toggleStatus(user) {
+  const verb = user.is_active ? 'deactivate' : 'activate'
+  if (confirm(`Are you sure you want to ${verb} ${user.first_name} ${user.last_name}?`)) {
+    router.post(`/superadmin/users/${user.id}/toggle-status`, {}, { preserveScroll: true })
+  }
 }
 </script>
 
@@ -153,6 +162,14 @@ function formatDate(d) {
                 <td>
                   <div class="action-menu">
                     <Link :href="`/superadmin/users/${user.id}/edit`" class="action-btn">Edit</Link>
+                    <button
+                      v-if="user.role !== 'superadmin'"
+                      type="button"
+                      class="action-btn"
+                      @click="toggleStatus(user)"
+                    >
+                      {{ user.is_active ? 'Deactivate' : 'Activate' }}
+                    </button>
                   </div>
                 </td>
               </tr>

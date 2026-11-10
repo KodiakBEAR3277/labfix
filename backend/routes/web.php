@@ -79,6 +79,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/users', [SuperAdminUserController::class, 'index'])->name('users.index');
         Route::get('/users/{user}/edit', [SuperAdminUserController::class, 'edit'])->name('users.edit');
         Route::put('/users/{user}', [SuperAdminUserController::class, 'update'])->name('users.update');
+        Route::post('/users/{user}/toggle-status', [SuperAdminUserController::class, 'toggleStatus'])->name('users.toggle-status');
     });
 
     // User routes

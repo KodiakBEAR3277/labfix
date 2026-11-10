@@ -3,8 +3,8 @@
 // Path: resources/js/Components/Nav/NavSuperAdmin.vue
 //
 // Platform-oversight nav for the superadmin, mirroring the NavAdmin / NavIT /
-// NavUser components. The "Account" link points at /profile so the superadmin
-// can reach the existing password-change page.
+// NavUser components. The avatar/name button points at /profile, like the
+// other navs, so there is no separate "Account" link.
 
 import { computed } from 'vue'
 import { Link, router, usePage } from '@inertiajs/vue3'
@@ -65,8 +65,6 @@ function logout() {
       >
         Settings
       </Link>
-
-      <Link href="/profile" class="nav-link" :class="{ active: isActivePrefix('/profile') }">Account</Link>
 
       <Link href="/profile" class="user-profile">
         <div class="user-avatar">{{ user?.initials ?? 'SA' }}</div>

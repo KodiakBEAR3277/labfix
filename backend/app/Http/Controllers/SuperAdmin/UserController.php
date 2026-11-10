@@ -127,4 +127,26 @@ class UserController extends Controller
             ->route('superadmin.users.index')
             ->with('success', "{$user->full_name} updated successfully.");
     }
+
+    // Activate or deactivate any non-superadmin account. Superadmins are never
+    // deactivated, and nobody can deactivate themselves — same guard rails as
+    // update(), applied to the list's inline shortcut.
+    public function toggleStatus($id)
+    {
+        $user = User::withoutGlobalScope('institution')->findOrFail($id);
+
+        if ($user->id === auth()->id()) {
+            return back()->with('error', 'You cannot deactivate your own account.');
+        }
+
+        if ($user->role === 'superadmin') {
+            return back()->with('error', 'Superadmin accounts cannot be deactivated.');
+        }
+
+        $user->update(['is_active' => ! $user->is_active]);
+
+        $status = $user->is_active ? 'activated' : 'deactivated';
+
+        return back()->with('success', "{$user->full_name} has been {$status}.");
+    }
 }
